@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BarChart3, Download, Users, BookOpen, CreditCard, TrendingUp, Award, MessageSquare, CheckCircle } from 'lucide-react';
+import { Download, Users, BookOpen, CreditCard, TrendingUp, Award, MessageSquare, CheckCircle, FileText } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useMockStore } from '@/hooks/useMockStore';
 import { Card } from '@/components/ui/Card';
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Select, Input } from '@/components/ui/FormField';
 import { downloadCSV, formatCurrency, formatDate } from '@/utils';
+import { exportStudentRosterPDF, exportFinancialReportPDF } from '@/utils/pdfExport';
 import { dashboardEnrolmentChart } from '@/mock-data';
 
 export function ReportsPage() {
@@ -14,6 +15,9 @@ export function ReportsPage() {
   const [reportType, setReportType] = useState('student_registrations');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const dateRange = fromDate ? { from: fromDate, to: toDate || new Date().toISOString().slice(0, 10) } : undefined;
 
   const reports = [
     { value: 'student_registrations', label: 'Student Registrations', icon: Users },
@@ -26,7 +30,9 @@ export function ReportsPage() {
     { value: 'course_completion', label: 'Course Completion', icon: BookOpen },
   ];
 
-  function handleExport() {
+  const pdfSupportedReports = ['student_registrations', 'payment_summaries'];
+
+  function handleExportCSV() {
     switch (reportType) {
       case 'student_registrations':
         downloadCSV('student-registrations.csv', store.students.map((s) => ({ StudentID: s.studentId, Name: s.fullName, Email: s.email, Plan: s.subscriptionPlan, Status: s.accountStatus, Date: formatDate(s.createdAt) })));
@@ -55,13 +61,55 @@ export function ReportsPage() {
     }
   }
 
+  function handleExportPDF() {
+    setPdfLoading(true);
+    try {
+      if (reportType === 'student_registrations') {
+        exportStudentRosterPDF(
+          store.students.map((s) => ({
+            studentId: s.studentId, fullName: s.fullName, email: s.email, phone: s.phone,
+            subscriptionPlan: s.subscriptionPlan, subscriptionStatus: s.subscriptionStatus,
+            accountStatus: s.accountStatus, preferredCategory: s.preferredCategory, createdAt: s.createdAt,
+          })),
+          dateRange,
+        );
+      } else if (reportType === 'payment_summaries') {
+        exportFinancialReportPDF(
+          store.payments.map((p) => ({
+            transactionRef: p.transactionRef, studentName: p.studentName, courseName: p.courseName,
+            amount: p.amount, paymentMethod: p.paymentMethod, status: p.status, paymentDate: p.paymentDate,
+            subscriptionPlan: p.subscriptionPlan,
+          })),
+          dateRange,
+        );
+      }
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
+  const activeReport = reports.find((r) => r.value === reportType);
+
   return (
     <div>
       <PageHeader
         title="Reports"
         subtitle="Export and analyze institutional data"
         breadcrumbs={[{ label: 'Dashboard', to: '/dashboard' }, { label: 'Reports' }]}
-        actions={<button className="btn-primary" onClick={handleExport}><Download size={16} /> Export CSV</button>}
+        actions={
+          <div className="flex items-center gap-2">
+            <button className="btn-secondary" onClick={handleExportCSV}><Download size={16} /> Export CSV</button>
+            {pdfSupportedReports.includes(reportType) && (
+              <button className="btn-primary" onClick={handleExportPDF} disabled={pdfLoading}>
+                {pdfLoading ? (
+                  <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" /> Generating...</>
+                ) : (
+                  <><FileText size={16} /> Export PDF</>
+                )}
+              </button>
+            )}
+          </div>
+        }
       />
 
       <Card className="p-4 mb-4">
@@ -71,6 +119,14 @@ export function ReportsPage() {
           <Input label="From Date" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
           <Input label="To Date" type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
         </div>
+        {pdfSupportedReports.includes(reportType) && (
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-indigo-50 border border-indigo-100 px-3 py-2">
+            <FileText size={14} className="text-indigo-600" />
+            <p className="text-xs text-indigo-700">
+              PDF export is available for this report. The PDF includes a formatted header, summary cards, and a styled data table.
+            </p>
+          </div>
+        )}
       </Card>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
@@ -79,9 +135,102 @@ export function ReportsPage() {
             className={`card p-4 flex flex-col items-center gap-2 text-center transition-all ${reportType === r.value ? 'border-indigo-400 bg-indigo-50/50 ring-2 ring-indigo-500/20' : 'card-hover'}`}>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-navy-100 text-navy-700"><r.icon size={20} /></div>
             <span className="text-xs font-medium text-navy-800">{r.label}</span>
+            {pdfSupportedReports.includes(r.value) && (
+              <Badge variant="info" size="sm">PDF</Badge>
+            )}
           </button>
         ))}
       </div>
+
+      {/* PDF Preview Card */}
+      {pdfSupportedReports.includes(reportType) && (
+        <Card className="mb-4 p-5" title="PDF Export Preview" subtitle={`What will be included in the ${activeReport?.label} PDF`}>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 rounded-lg bg-navy-900 px-4 py-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold">IIECM</div>
+              <div className="text-white">
+                <p className="text-sm font-semibold">{activeReport?.label} Report</p>
+                <p className="text-xs text-navy-300">International Institute of E-commerce and Management</p>
+              </div>
+              <div className="ml-auto text-right text-navy-300">
+                <p className="text-xs">{dateRange ? `${formatDate(dateRange.from)} — ${formatDate(dateRange.to)}` : 'All time'}</p>
+                <p className="text-[10px]">Generated: {formatDate(new Date().toISOString())}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {reportType === 'student_registrations' && (
+                <>
+                  <PreviewStat label="Total Students" value={dateRange ? store.students.filter((s) => new Date(s.createdAt) >= new Date(dateRange.from) && new Date(s.createdAt) <= new Date(dateRange.to)).length : store.students.length} />
+                  <PreviewStat label="Active" value={store.students.filter((s) => s.accountStatus === 'active').length} />
+                  <PreviewStat label="Premium" value={store.students.filter((s) => s.subscriptionPlan === 'premium').length} />
+                  <PreviewStat label="Enterprise" value={store.students.filter((s) => s.subscriptionPlan === 'enterprise').length} />
+                </>
+              )}
+              {reportType === 'payment_summaries' && (
+                <>
+                  <PreviewStat label="Total Revenue" value={formatCurrency(store.payments.filter((p) => p.status === 'verified').reduce((s, p) => s + p.amount, 0))} />
+                  <PreviewStat label="Pending" value={formatCurrency(store.payments.filter((p) => p.status === 'pending').reduce((s, p) => s + p.amount, 0))} />
+                  <PreviewStat label="Refunded" value={formatCurrency(store.payments.filter((p) => p.status === 'refunded').reduce((s, p) => s + p.amount, 0))} />
+                  <PreviewStat label="Transactions" value={store.payments.length} />
+                </>
+              )}
+            </div>
+            <div className="rounded-lg border border-navy-100 overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-navy-900 text-white">
+                    {reportType === 'student_registrations' && (
+                      <>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase">Student ID</th>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase">Name</th>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase hidden sm:table-cell">Plan</th>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase">Status</th>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase hidden sm:table-cell">Joined</th>
+                      </>
+                    )}
+                    {reportType === 'payment_summaries' && (
+                      <>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase">Reference</th>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase">Student</th>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase hidden sm:table-cell">Amount</th>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase">Status</th>
+                        <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase hidden sm:table-cell">Date</th>
+                      </>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-navy-50">
+                  {(reportType === 'student_registrations' ? store.students : store.payments).slice(0, 5).map((item) => (
+                    <tr key={(item as { id: string }).id} className="text-xs">
+                      {reportType === 'student_registrations' && (
+                        <>
+                          <td className="px-3 py-2 text-navy-700">{(item as { studentId: string }).studentId}</td>
+                          <td className="px-3 py-2 font-medium text-navy-900">{(item as { fullName: string }).fullName}</td>
+                          <td className="px-3 py-2 text-navy-600 hidden sm:table-cell">{(item as { subscriptionPlan: string }).subscriptionPlan}</td>
+                          <td className="px-3 py-2"><Badge variant="neutral" size="sm">{(item as { accountStatus: string }).accountStatus}</Badge></td>
+                          <td className="px-3 py-2 text-navy-500 hidden sm:table-cell">{formatDate((item as { createdAt: string }).createdAt)}</td>
+                        </>
+                      )}
+                      {reportType === 'payment_summaries' && (
+                        <>
+                          <td className="px-3 py-2 font-mono text-navy-700">{(item as { transactionRef: string }).transactionRef}</td>
+                          <td className="px-3 py-2 font-medium text-navy-900">{(item as { studentName: string }).studentName}</td>
+                          <td className="px-3 py-2 font-semibold text-navy-900 hidden sm:table-cell">{formatCurrency((item as { amount: number }).amount)}</td>
+                          <td className="px-3 py-2"><Badge variant="neutral" size="sm">{(item as { status: string }).status}</Badge></td>
+                          <td className="px-3 py-2 text-navy-500 hidden sm:table-cell">{formatDate((item as { paymentDate: string }).paymentDate)}</td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs text-navy-400 text-center">
+              Showing preview of first 5 records · Full PDF will include all {(reportType === 'student_registrations' ? store.students.length : store.payments.length)} records
+            </p>
+          </div>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card title="Enrolment Trend" subtitle="Monthly enrolments and revenue">
@@ -127,4 +276,13 @@ export function ReportsPage() {
 
 function SummaryItem({ label, value }: { label: string; value: string | number }) {
   return <div><p className="text-xs text-navy-500 uppercase">{label}</p><p className="text-lg font-bold text-navy-900 mt-0.5">{value}</p></div>;
+}
+
+function PreviewStat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-lg bg-navy-50 border border-navy-100 px-3 py-2.5">
+      <p className="text-[10px] text-navy-500 uppercase tracking-wide">{label}</p>
+      <p className="text-base font-bold text-navy-900 mt-0.5">{value}</p>
+    </div>
+  );
 }
