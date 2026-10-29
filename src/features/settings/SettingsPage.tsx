@@ -72,7 +72,7 @@ export function SettingsPage() {
                   <div key={c.id} className="flex items-center gap-3 px-5 py-3">
                     <div className="h-8 w-8 rounded-lg" style={{ backgroundColor: c.color }} />
                     <div className="flex-1 min-w-0"><p className="text-sm font-medium text-navy-900">{c.name}</p><p className="text-xs text-navy-500">{c.description}</p></div>
-                    <Badge variant="info">{c.courseCount} courses</Badge>
+                    <Badge variant="info">{store.courses.filter((course) => course.category === c.name).length} courses</Badge>
                   </div>
                 ))}
               </div>

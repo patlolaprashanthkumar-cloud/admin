@@ -20,6 +20,7 @@ const rolePermissions: Record<UserRole, string[]> = {
     'notifications.view',
     'reports.view',
     'settings.view',
+    'categories.view',
   ],
   instructor: [
     'dashboard.view',

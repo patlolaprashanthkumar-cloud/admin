@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Download, Users, BookOpen, CreditCard, TrendingUp, Award, MessageSquare, CheckCircle, FileText } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useMockStore } from '@/hooks/useMockStore';
@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Select, Input } from '@/components/ui/FormField';
 import { downloadCSV, formatCurrency, formatDate } from '@/utils';
 import { exportStudentRosterPDF, exportFinancialReportPDF } from '@/utils/pdfExport';
-import { dashboardEnrolmentChart } from '@/mock-data';
+import { calculateMonthlyMetrics } from '@/mock-data';
 
 export function ReportsPage() {
   const store = useMockStore();
@@ -16,6 +16,7 @@ export function ReportsPage() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [pdfLoading, setPdfLoading] = useState(false);
+  const monthlyMetrics = useMemo(() => calculateMonthlyMetrics(store.students, store.payments), [store.students, store.payments]);
 
   const dateRange = fromDate ? { from: fromDate, to: toDate || new Date().toISOString().slice(0, 10) } : undefined;
 
@@ -236,7 +237,7 @@ export function ReportsPage() {
         <Card title="Enrolment Trend" subtitle="Monthly enrolments and revenue">
           <div className="p-4 h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dashboardEnrolmentChart}>
+              <BarChart data={monthlyMetrics}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} allowDecimals={false} />
@@ -250,7 +251,7 @@ export function ReportsPage() {
         <Card title="Revenue Trend" subtitle="Monthly revenue (INR)">
           <div className="p-4 h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dashboardEnrolmentChart}>
+              <LineChart data={monthlyMetrics}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} axisLine={false} tickLine={false} />

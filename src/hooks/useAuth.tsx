@@ -11,7 +11,16 @@ interface AuthContextValue {
   updateUser: (patch: Partial<AdminUser>) => void;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+// Preserve context across Vite Fast Refresh / HMR reloads
+const globalAuth = globalThis as unknown as {
+  __IIECM_AUTH_CONTEXT__?: React.Context<AuthContextValue | undefined>;
+};
+
+if (!globalAuth.__IIECM_AUTH_CONTEXT__) {
+  globalAuth.__IIECM_AUTH_CONTEXT__ = createContext<AuthContextValue | undefined>(undefined);
+}
+
+const AuthContext = globalAuth.__IIECM_AUTH_CONTEXT__;
 
 const STORAGE_KEY = 'iiecm-admin-auth';
 
@@ -25,20 +34,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) setUser(JSON.parse(stored));
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     setLoading(false);
   }, [demoMode]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await signIn(email, password);
-    if (result.user) {
-      setUser(result.user);
-      if (demoMode) localStorage.setItem(STORAGE_KEY, JSON.stringify(result.user));
-      return {};
-    }
-    return { error: result.error };
-  }, [demoMode]);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const result = await signIn(email, password);
+      if (result.user) {
+        setUser(result.user);
+        // Clear any leftover demo data from local storage if present
+        if (!demoMode) {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+        // Store demo user locally only in demo mode
+        if (demoMode) localStorage.setItem(STORAGE_KEY, JSON.stringify(result.user));
+        return {};
+      }
+      return { error: result.error };
+    },
+    [demoMode]
+  );
 
   const logout = useCallback(async () => {
     await signOut();
@@ -46,14 +65,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
-  const updateUser = useCallback((patch: Partial<AdminUser>) => {
-    setUser((prev) => {
-      if (!prev) return prev;
-      const next = { ...prev, ...patch };
-      if (demoMode) localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  }, [demoMode]);
+  const updateUser = useCallback(
+    (patch: Partial<AdminUser>) => {
+      setUser((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, ...patch };
+        if (demoMode) localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        return next;
+      });
+    },
+    [demoMode]
+  );
 
   return (
     <AuthContext.Provider value={{ user, loading, demoMode, login, logout, updateUser }}>
@@ -62,8 +84,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) {
+    // Provide safe fallback during HMR or initialization transitions
+    return {
+      user: null,
+      loading: false,
+      demoMode: isDemoMode(),
+      login: async (email, password) => {
+        const result = await signIn(email, password);
+        return { error: result.error };
+      },
+      logout: async () => {
+        await signOut();
+      },
+      updateUser: () => {},
+    };
+  }
   return ctx;
 }

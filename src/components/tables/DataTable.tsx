@@ -18,15 +18,22 @@ interface DataTableProps<T> {
 }
 
 export function DataTable<T>({ columns, data, onRowClick, emptyState, rowKey }: DataTableProps<T>) {
-  if (data.length === 0 && emptyState) return <>{emptyState}</>;
+  if (data.length === 0 && emptyState) return <div className="animate-fade-in">{emptyState}</div>;
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto scrollbar-thin">
       <table className="w-full">
         <thead>
-          <tr className="border-b border-navy-100 bg-navy-50/50">
+          <tr className="border-b border-navy-100 bg-gradient-to-r from-navy-50/70 via-navy-50/40 to-navy-50/70">
             {columns.map((col) => (
-              <th key={col.key} className={classNames('table-header whitespace-nowrap', col.hideOnMobile && 'hidden sm:table-cell', col.className)}>
+              <th
+                key={col.key}
+                className={classNames(
+                  'table-header whitespace-nowrap',
+                  col.hideOnMobile && 'hidden sm:table-cell',
+                  col.className,
+                )}
+              >
                 {col.header}
               </th>
             ))}
@@ -37,10 +44,20 @@ export function DataTable<T>({ columns, data, onRowClick, emptyState, rowKey }: 
             <tr
               key={rowKey(item)}
               onClick={() => onRowClick?.(item)}
-              className={classNames('transition-colors hover:bg-navy-50/60', onRowClick && 'cursor-pointer')}
+              className={classNames(
+                'transition-all duration-150 hover:bg-forest-50/40 group',
+                onRowClick && 'cursor-pointer',
+              )}
             >
               {columns.map((col) => (
-                <td key={col.key} className={classNames('table-cell align-middle', col.hideOnMobile && 'hidden sm:table-cell', col.className)}>
+                <td
+                  key={col.key}
+                  className={classNames(
+                    'table-cell align-middle',
+                    col.hideOnMobile && 'hidden sm:table-cell',
+                    col.className,
+                  )}
+                >
                   {col.render ? col.render(item) : String((item as Record<string, unknown>)[col.key] ?? '')}
                 </td>
               ))}

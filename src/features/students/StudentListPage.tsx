@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Plus, Eye, Pencil, Ban, CheckCircle2, FileText, Users } from 'lucide-react';
+import { Plus, Eye, Pencil, Ban, CheckCircle2, FileText, Users, Compass, MessageSquare } from 'lucide-react';
 import { useMockStore } from '@/hooks/useMockStore';
 import { DataTable } from '@/components/tables/DataTable';
 import { Badge } from '@/components/ui/Badge';
@@ -61,7 +61,27 @@ export function StudentListPage() {
         title="Students"
         subtitle={`${store.students.length} total students`}
         breadcrumbs={[{ label: 'Dashboard', to: '/dashboard' }, { label: 'Students' }]}
-        actions={<button className="btn-primary" onClick={() => navigate('/students/new')}><Plus size={16} /> Add Student</button>}
+        actions={
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => navigate('/career-guidance')}
+              className="btn-secondary hidden sm:inline-flex"
+            >
+              <Compass size={16} className="text-peach-600" />
+              <span>Career Guidance ({store.careerAppointments.length})</span>
+            </button>
+            <button
+              onClick={() => navigate('/enquiries')}
+              className="btn-secondary hidden md:inline-flex"
+            >
+              <MessageSquare size={16} className="text-forest-600" />
+              <span>Admissions CRM ({store.enquiries.length})</span>
+            </button>
+            <button className="btn-primary" onClick={() => navigate('/students/new')}>
+              <Plus size={16} /> Add Student
+            </button>
+          </div>
+        }
       />
 
       <Card className="p-4 mb-4">

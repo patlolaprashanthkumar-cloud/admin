@@ -16,12 +16,12 @@ export const demoAdmin: AdminUser = {
 };
 
 export const courseCategories: CourseCategory[] = [
-  { id: 'cat-1', name: 'E-Commerce Management', description: 'Digital commerce operations and strategy', courseCount: 4, color: '#335598' },
-  { id: 'cat-2', name: 'Digital Marketing', description: 'SEO, SEM, social media, and content marketing', courseCount: 5, color: '#0d9488' },
-  { id: 'cat-3', name: 'Supply Chain', description: 'Logistics, procurement, and inventory', courseCount: 3, color: '#f59e0b' },
-  { id: 'cat-4', name: 'Business Analytics', description: 'Data-driven decision making', courseCount: 3, color: '#6366f1' },
-  { id: 'cat-5', name: 'Entrepreneurship', description: 'Startup building and venture management', courseCount: 2, color: '#0891b2' },
-  { id: 'cat-6', name: 'Government Exam Prep', description: 'UPSC, SSC, and banking exam preparation', courseCount: 2, color: '#b45309' },
+  { id: 'cat-1', name: 'E-Commerce Management', description: 'Digital commerce operations and strategy', courseCount: 2, color: '#335598' },
+  { id: 'cat-2', name: 'Digital Marketing', description: 'SEO, SEM, social media, and content marketing', courseCount: 2, color: '#0d9488' },
+  { id: 'cat-3', name: 'Supply Chain', description: 'Logistics, procurement, and inventory', courseCount: 1, color: '#f59e0b' },
+  { id: 'cat-4', name: 'Business Analytics', description: 'Data-driven decision making', courseCount: 1, color: '#6366f1' },
+  { id: 'cat-5', name: 'Entrepreneurship', description: 'Startup building and venture management', courseCount: 1, color: '#0891b2' },
+  { id: 'cat-6', name: 'Government Exam Prep', description: 'UPSC, SSC, and banking exam preparation', courseCount: 0, color: '#b45309' },
 ];
 
 export const subscriptionPlans: SubscriptionPlanConfig[] = [
@@ -104,7 +104,7 @@ export const courses: Course[] = [
         { id: 'les-ba-2', title: 'Data Cleaning Techniques', durationMinutes: 35, type: 'video', order: 2 },
       ]},
     ],
-    format: 'live', status: 'published', enrolledStudentIds: ['stu-4', 'stu-6', 'stu-8'],
+    format: 'live', status: 'published', enrolledStudentIds: ['stu-4', 'stu-6', 'stu-8', 'stu-11'],
     createdAt: '2024-03-15T09:00:00Z', publishedAt: '2024-04-01T09:00:00Z',
   },
   {
@@ -140,24 +140,24 @@ export const courses: Course[] = [
         { id: 'les-st-1', title: 'Problem-Solution Fit', durationMinutes: 45, type: 'video', order: 1 },
       ]},
     ],
-    format: 'live', status: 'archived', enrolledStudentIds: ['stu-10'],
+    format: 'live', status: 'archived', enrolledStudentIds: ['stu-12'],
     createdAt: '2023-09-01T09:00:00Z', publishedAt: '2023-09-15T09:00:00Z',
   },
 ];
 
 export const students: Student[] = [
-  { id: 'stu-1', studentId: 'IIECM20240001', fullName: 'Aarav Patel', email: 'aarav.patel@gmail.com', phone: '+91 90000 11111', educationLevel: "Bachelor's", qualification: 'B.Com', preferredCategory: 'E-Commerce Management', assignedCourseIds: ['crs-1', 'crs-2'], subscriptionPlan: 'premium', subscriptionStatus: 'active', subscriptionStart: '2024-04-01', subscriptionExpiry: '2025-04-01', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'completed', enrolledCourseIds: ['crs-1', 'crs-2'], createdAt: '2024-04-01T10:00:00Z', city: 'Mumbai', country: 'India' },
-  { id: 'stu-2', studentId: 'IIECM20240002', fullName: 'Diya Sharma', email: 'diya.sharma@gmail.com', phone: '+91 90000 22222', educationLevel: "Master's", qualification: 'MBA', preferredCategory: 'E-Commerce Management', assignedCourseIds: ['crs-1', 'crs-3'], subscriptionPlan: 'premium', subscriptionStatus: 'active', subscriptionStart: '2024-04-05', subscriptionExpiry: '2025-04-05', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'in_progress', enrolledCourseIds: ['crs-1', 'crs-3'], createdAt: '2024-04-05T10:00:00Z', city: 'Delhi', country: 'India' },
-  { id: 'stu-3', studentId: 'IIECM20240003', fullName: 'Arjun Gupta', email: 'arjun.gupta@gmail.com', phone: '+91 90000 33333', educationLevel: "Bachelor's", qualification: 'B.Tech', preferredCategory: 'Digital Marketing', assignedCourseIds: ['crs-1', 'crs-2'], subscriptionPlan: 'basic', subscriptionStatus: 'active', subscriptionStart: '2024-05-01', subscriptionExpiry: '2024-11-01', accountStatus: 'active', resumeUploaded: false, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-1', 'crs-2'], createdAt: '2024-05-01T10:00:00Z', city: 'Bangalore', country: 'India' },
-  { id: 'stu-4', studentId: 'IIECM20240004', fullName: 'Saanvi Iyer', email: 'saanvi.iyer@gmail.com', phone: '+91 90000 44444', educationLevel: "Master's", qualification: 'MSc Statistics', preferredCategory: 'Business Analytics', assignedCourseIds: ['crs-2', 'crs-4'], subscriptionPlan: 'enterprise', subscriptionStatus: 'active', subscriptionStart: '2024-05-10', subscriptionExpiry: '2025-05-10', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'completed', enrolledCourseIds: ['crs-2', 'crs-4'], createdAt: '2024-05-10T10:00:00Z', city: 'Chennai', country: 'India' },
-  { id: 'stu-5', studentId: 'IIECM20240005', fullName: 'Vihaan Joshi', email: 'vihaan.joshi@gmail.com', phone: '+91 90000 55555', educationLevel: "Bachelor's", qualification: 'BBA', preferredCategory: 'Supply Chain', assignedCourseIds: ['crs-1', 'crs-3'], subscriptionPlan: 'basic', subscriptionStatus: 'expired', subscriptionStart: '2023-11-01', subscriptionExpiry: '2024-05-01', accountStatus: 'inactive', resumeUploaded: false, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-1', 'crs-3'], createdAt: '2024-05-15T10:00:00Z', city: 'Pune', country: 'India' },
-  { id: 'stu-6', studentId: 'IIECM20240006', fullName: 'Ananya Bose', email: 'ananya.bose@gmail.com', phone: '+91 90000 66666', educationLevel: "Master's", qualification: 'MBA Marketing', preferredCategory: 'Digital Marketing', assignedCourseIds: ['crs-2', 'crs-4'], subscriptionPlan: 'premium', subscriptionStatus: 'active', subscriptionStart: '2024-06-01', subscriptionExpiry: '2025-06-01', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'in_progress', enrolledCourseIds: ['crs-2', 'crs-4'], createdAt: '2024-06-01T10:00:00Z', city: 'Kolkata', country: 'India' },
-  { id: 'stu-7', studentId: 'IIECM20240007', fullName: 'Reyansh Nair', email: 'reyansh.nair@gmail.com', phone: '+91 90000 77777', educationLevel: "Bachelor's", qualification: 'B.A Economics', preferredCategory: 'Digital Marketing', assignedCourseIds: ['crs-2', 'crs-6'], subscriptionPlan: 'basic', subscriptionStatus: 'active', subscriptionStart: '2024-06-10', subscriptionExpiry: '2024-12-10', accountStatus: 'active', resumeUploaded: false, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-2', 'crs-6'], createdAt: '2024-06-10T10:00:00Z', city: 'Kochi', country: 'India' },
-  { id: 'stu-8', studentId: 'IIECM20240008', fullName: 'Ishita Verma', email: 'ishita.verma@gmail.com', phone: '+91 90000 88888', educationLevel: "Master's", qualification: 'M.Com', preferredCategory: 'E-Commerce Management', assignedCourseIds: ['crs-1', 'crs-4'], subscriptionPlan: 'premium', subscriptionStatus: 'pending', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'in_progress', enrolledCourseIds: ['crs-1', 'crs-4'], createdAt: '2024-09-01T10:00:00Z', city: 'Jaipur', country: 'India' },
-  { id: 'stu-9', studentId: 'IIECM20240009', fullName: 'Kabir Khanna', email: 'kabir.khanna@gmail.com', phone: '+91 90000 99999', educationLevel: "Bachelor's", qualification: 'B.Tech CSE', preferredCategory: 'Digital Marketing', assignedCourseIds: ['crs-2', 'crs-6'], subscriptionPlan: 'basic', subscriptionStatus: 'active', subscriptionStart: '2024-09-15', subscriptionExpiry: '2025-03-15', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-2', 'crs-6'], createdAt: '2024-09-15T10:00:00Z', city: 'Chandigarh', country: 'India' },
-  { id: 'stu-10', studentId: 'IIECM20240010', fullName: 'Myra Reddy', email: 'myra.reddy@gmail.com', phone: '+91 90001 00000', educationLevel: "Master's", qualification: 'MBA Operations', preferredCategory: 'Supply Chain', assignedCourseIds: ['crs-3', 'crs-7'], subscriptionPlan: 'free', subscriptionStatus: 'pending', accountStatus: 'suspended', resumeUploaded: false, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-3'], createdAt: '2024-10-01T10:00:00Z', city: 'Hyderabad', country: 'India' },
-  { id: 'stu-11', studentId: 'IIECM20240011', fullName: 'Advait Menon', email: 'advait.menon@gmail.com', phone: '+91 90001 11111', educationLevel: "Bachelor's", qualification: 'B.Sc IT', preferredCategory: 'Business Analytics', assignedCourseIds: ['crs-4'], subscriptionPlan: 'premium', subscriptionStatus: 'active', subscriptionStart: '2024-10-10', subscriptionExpiry: '2025-10-10', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'completed', enrolledCourseIds: ['crs-4'], createdAt: '2024-10-10T10:00:00Z', city: 'Thiruvananthapuram', country: 'India' },
-  { id: 'stu-12', studentId: 'IIECM20240012', fullName: 'Sara Kapoor', email: 'sara.kapoor@gmail.com', phone: '+91 90001 22222', educationLevel: "Master's", qualification: 'MA Economics', preferredCategory: 'Entrepreneurship', assignedCourseIds: ['crs-7'], subscriptionPlan: 'enterprise', subscriptionStatus: 'active', subscriptionStart: '2024-10-20', subscriptionExpiry: '2025-10-20', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'in_progress', enrolledCourseIds: ['crs-7'], createdAt: '2024-10-20T10:00:00Z', city: 'Lucknow', country: 'India' },
+  { id: 'stu-1', studentId: 'IIECM20240001', fullName: 'Aarav Patel', email: 'aarav.patel@gmail.com', phone: '+91 90000 11111', educationLevel: "Bachelor's", qualification: 'B.Com', preferredCategory: 'E-Commerce Management', subscriptionPlan: 'premium', subscriptionStatus: 'active', subscriptionStart: '2024-04-01', subscriptionExpiry: '2025-04-01', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'completed', enrolledCourseIds: ['crs-1', 'crs-2'], createdAt: '2024-04-01T10:00:00Z', city: 'Mumbai', country: 'India' },
+  { id: 'stu-2', studentId: 'IIECM20240002', fullName: 'Diya Sharma', email: 'diya.sharma@gmail.com', phone: '+91 90000 22222', educationLevel: "Master's", qualification: 'MBA', preferredCategory: 'E-Commerce Management', subscriptionPlan: 'premium', subscriptionStatus: 'active', subscriptionStart: '2024-04-05', subscriptionExpiry: '2025-04-05', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'in_progress', enrolledCourseIds: ['crs-1', 'crs-3'], createdAt: '2024-04-05T10:00:00Z', city: 'Delhi', country: 'India' },
+  { id: 'stu-3', studentId: 'IIECM20240003', fullName: 'Arjun Gupta', email: 'arjun.gupta@gmail.com', phone: '+91 90000 33333', educationLevel: "Bachelor's", qualification: 'B.Tech', preferredCategory: 'Digital Marketing', subscriptionPlan: 'basic', subscriptionStatus: 'active', subscriptionStart: '2024-05-01', subscriptionExpiry: '2024-11-01', accountStatus: 'active', resumeUploaded: false, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-1', 'crs-2'], createdAt: '2024-05-01T10:00:00Z', city: 'Bangalore', country: 'India' },
+  { id: 'stu-4', studentId: 'IIECM20240004', fullName: 'Saanvi Iyer', email: 'saanvi.iyer@gmail.com', phone: '+91 90000 44444', educationLevel: "Master's", qualification: 'MSc Statistics', preferredCategory: 'Business Analytics', subscriptionPlan: 'enterprise', subscriptionStatus: 'active', subscriptionStart: '2024-05-10', subscriptionExpiry: '2025-05-10', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'completed', enrolledCourseIds: ['crs-2', 'crs-4'], createdAt: '2024-05-10T10:00:00Z', city: 'Chennai', country: 'India' },
+  { id: 'stu-5', studentId: 'IIECM20240005', fullName: 'Vihaan Joshi', email: 'vihaan.joshi@gmail.com', phone: '+91 90000 55555', educationLevel: "Bachelor's", qualification: 'BBA', preferredCategory: 'Supply Chain', subscriptionPlan: 'basic', subscriptionStatus: 'expired', subscriptionStart: '2023-11-01', subscriptionExpiry: '2024-05-01', accountStatus: 'inactive', resumeUploaded: false, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-1', 'crs-3'], createdAt: '2024-05-15T10:00:00Z', city: 'Pune', country: 'India' },
+  { id: 'stu-6', studentId: 'IIECM20240006', fullName: 'Ananya Bose', email: 'ananya.bose@gmail.com', phone: '+91 90000 66666', educationLevel: "Master's", qualification: 'MBA Marketing', preferredCategory: 'Digital Marketing', subscriptionPlan: 'premium', subscriptionStatus: 'active', subscriptionStart: '2024-06-01', subscriptionExpiry: '2025-06-01', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'in_progress', enrolledCourseIds: ['crs-2', 'crs-4'], createdAt: '2024-06-01T10:00:00Z', city: 'Kolkata', country: 'India' },
+  { id: 'stu-7', studentId: 'IIECM20240007', fullName: 'Reyansh Nair', email: 'reyansh.nair@gmail.com', phone: '+91 90000 77777', educationLevel: "Bachelor's", qualification: 'B.A Economics', preferredCategory: 'Digital Marketing', subscriptionPlan: 'basic', subscriptionStatus: 'active', subscriptionStart: '2024-06-10', subscriptionExpiry: '2024-12-10', accountStatus: 'active', resumeUploaded: false, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-2', 'crs-6'], createdAt: '2024-06-10T10:00:00Z', city: 'Kochi', country: 'India' },
+  { id: 'stu-8', studentId: 'IIECM20240008', fullName: 'Ishita Verma', email: 'ishita.verma@gmail.com', phone: '+91 90000 88888', educationLevel: "Master's", qualification: 'M.Com', preferredCategory: 'E-Commerce Management', subscriptionPlan: 'premium', subscriptionStatus: 'pending', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'in_progress', enrolledCourseIds: ['crs-1', 'crs-4'], createdAt: '2024-09-01T10:00:00Z', city: 'Jaipur', country: 'India' },
+  { id: 'stu-9', studentId: 'IIECM20240009', fullName: 'Kabir Khanna', email: 'kabir.khanna@gmail.com', phone: '+91 90000 99999', educationLevel: "Bachelor's", qualification: 'B.Tech CSE', preferredCategory: 'Digital Marketing', subscriptionPlan: 'basic', subscriptionStatus: 'active', subscriptionStart: '2024-09-15', subscriptionExpiry: '2025-03-15', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-2', 'crs-6'], createdAt: '2024-09-15T10:00:00Z', city: 'Chandigarh', country: 'India' },
+  { id: 'stu-10', studentId: 'IIECM20240010', fullName: 'Myra Reddy', email: 'myra.reddy@gmail.com', phone: '+91 90001 00000', educationLevel: "Master's", qualification: 'MBA Operations', preferredCategory: 'Supply Chain', subscriptionPlan: 'free', subscriptionStatus: 'pending', accountStatus: 'suspended', resumeUploaded: false, careerGuidanceStatus: 'not_started', enrolledCourseIds: ['crs-3'], createdAt: '2024-10-01T10:00:00Z', city: 'Hyderabad', country: 'India' },
+  { id: 'stu-11', studentId: 'IIECM20240011', fullName: 'Advait Menon', email: 'advait.menon@gmail.com', phone: '+91 90001 11111', educationLevel: "Bachelor's", qualification: 'B.Sc IT', preferredCategory: 'Business Analytics', subscriptionPlan: 'premium', subscriptionStatus: 'active', subscriptionStart: '2024-10-10', subscriptionExpiry: '2025-10-10', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'completed', enrolledCourseIds: ['crs-4'], createdAt: '2024-10-10T10:00:00Z', city: 'Thiruvananthapuram', country: 'India' },
+  { id: 'stu-12', studentId: 'IIECM20240012', fullName: 'Sara Kapoor', email: 'sara.kapoor@gmail.com', phone: '+91 90001 22222', educationLevel: "Master's", qualification: 'MA Economics', preferredCategory: 'Entrepreneurship', subscriptionPlan: 'enterprise', subscriptionStatus: 'active', subscriptionStart: '2024-10-20', subscriptionExpiry: '2025-10-20', accountStatus: 'active', resumeUploaded: true, careerGuidanceStatus: 'in_progress', enrolledCourseIds: ['crs-7'], createdAt: '2024-10-20T10:00:00Z', city: 'Lucknow', country: 'India' },
 ];
 
 export const payments: Payment[] = [
@@ -272,10 +272,36 @@ export const dashboardEnrolmentChart = [
   { month: 'Oct', enrolments: 3, revenue: 39997 },
 ];
 
-export const dashboardPaymentChart = [
-  { name: 'Verified', value: 6, color: '#0d9488' },
-  { name: 'Pending', value: 3, color: '#f59e0b' },
-  { name: 'Rejected', value: 1, color: '#ef4444' },
-  { name: 'Failed', value: 1, color: '#f97316' },
-  { name: 'Refunded', value: 1, color: '#6366f1' },
-];
+
+export function calculateMonthlyMetrics(studentList: Student[], paymentList: Payment[]) {
+  const months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
+  const monthData: Record<string, { enrolments: number; revenue: number }> = {
+    Apr: { enrolments: 0, revenue: 0 },
+    May: { enrolments: 0, revenue: 0 },
+    Jun: { enrolments: 0, revenue: 0 },
+    Jul: { enrolments: 0, revenue: 0 },
+    Aug: { enrolments: 0, revenue: 0 },
+    Sep: { enrolments: 0, revenue: 0 },
+    Oct: { enrolments: 0, revenue: 0 },
+  };
+
+  studentList.forEach((s) => {
+    const d = new Date(s.createdAt);
+    const m = d.toLocaleString('en-US', { month: 'short' });
+    if (monthData[m]) monthData[m].enrolments += 1;
+  });
+
+  paymentList.forEach((p) => {
+    if (p.status === 'verified') {
+      const d = new Date(p.paymentDate);
+      const m = d.toLocaleString('en-US', { month: 'short' });
+      if (monthData[m]) monthData[m].revenue += p.amount;
+    }
+  });
+
+  return months.map((month) => ({
+    month,
+    enrolments: monthData[month].enrolments,
+    revenue: monthData[month].revenue,
+  }));
+}

@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Pagination } from '@/components/ui/Pagination';
 import { DataTable } from '@/components/tables/DataTable';
 import { formatDate, paginate, generateId, generateEnquiryId, downloadCSV } from '@/utils';
+import { isDuplicateEnquiryEmail } from '@/utils/dataIntegrity';
 import type { Enquiry, EnquiryStatus, EnquirySource, LearningMode, FollowUpEntry } from '@/types';
 import { Download } from 'lucide-react';
 
@@ -68,7 +69,7 @@ export function EnquiryListPage() {
       id: generateId('stu'), studentId: `IIECM${new Date().getFullYear()}${Math.floor(10000 + Math.random() * 90000)}`,
       fullName: enquiry.studentName, email: enquiry.email, phone: enquiry.phone,
       educationLevel: enquiry.educationLevel, qualification: 'From enquiry',
-      preferredCategory: enquiry.careerInterests[0] ?? 'General', assignedCourseIds: [], enrolledCourseIds: [],
+      preferredCategory: enquiry.careerInterests[0] ?? 'General', enrolledCourseIds: [],
       subscriptionPlan: 'free' as const, subscriptionStatus: 'pending' as const, accountStatus: 'active' as const,
       resumeUploaded: false, careerGuidanceStatus: 'not_started' as const, createdAt: new Date().toISOString(), country: 'India',
     };
@@ -81,6 +82,10 @@ export function EnquiryListPage() {
 
   function createEnquiry() {
     if (!enqForm.studentName.trim() || !enqForm.email.trim()) return;
+    if (isDuplicateEnquiryEmail(enqForm.email, store.enquiries)) {
+      alert('An enquiry with this email address already exists.');
+      return;
+    }
     const enquiry: Enquiry = {
       id: generateId('enq'), enquiryId: generateEnquiryId(), studentName: enqForm.studentName.trim(),
       email: enqForm.email.trim(), phone: enqForm.phone.trim(), educationLevel: 'Not specified',

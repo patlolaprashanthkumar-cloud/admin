@@ -35,8 +35,8 @@ export function ResetPasswordPage() {
             <Logo size="lg" variant="light" />
           </div>
 
-          <Card className="p-6">
-            <Link to="/login" className="flex items-center gap-1.5 text-sm text-navy-500 hover:text-navy-700 mb-4">
+          <Card className="p-6 shadow-elevated">
+            <Link to="/login" className="flex items-center gap-1.5 text-sm text-navy-500 hover:text-forest-600 transition-colors mb-4">
               <ArrowLeft size={16} /> Back to sign in
             </Link>
 
@@ -52,7 +52,7 @@ export function ResetPasswordPage() {
 
             {success ? (
               <div className="text-center py-4">
-                <CheckCircle size={48} className="mx-auto text-teal-500 mb-3" />
+                <CheckCircle size={48} className="mx-auto text-forest-600 mb-3" />
                 <p className="text-sm font-medium text-navy-900">Password updated</p>
                 <p className="text-sm text-navy-500 mt-1">Redirecting you to sign in...</p>
               </div>
@@ -69,11 +69,16 @@ export function ResetPasswordPage() {
                       placeholder="At least 8 characters"
                       className="input-base pl-10 pr-10"
                     />
-                    <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-navy-400 hover:text-navy-700">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-navy-400 hover:text-navy-700"
+                    >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>
+
                 <div>
                   <label className="label-base">Confirm Password</label>
                   <div className="relative">
@@ -82,11 +87,12 @@ export function ResetPasswordPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Re-enter new password"
+                      placeholder="Confirm your password"
                       className="input-base pl-10"
                     />
                   </div>
                 </div>
+
                 <button type="submit" disabled={loading} className="btn-primary w-full">
                   {loading ? 'Updating...' : 'Update Password'}
                 </button>

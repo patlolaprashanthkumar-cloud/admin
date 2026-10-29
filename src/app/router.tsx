@@ -22,6 +22,7 @@ import { ResourceListPage } from '@/features/resources/ResourceListPage';
 import { NotificationListPage } from '@/features/notifications/NotificationListPage';
 import { ReportsPage } from '@/features/reports/ReportsPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { CategoryListPage } from '@/features/categories/CategoryListPage';
 import { MorePage } from '@/features/more/MorePage';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: <NotificationListPage /> },
       { path: 'reports', element: <ReportsPage /> },
       { path: 'settings', element: <SettingsPage /> },
+      { path: 'categories', element: <CategoryListPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'more', element: <MorePage /> },
       { path: '*', element: <Navigate to="/dashboard" replace /> },

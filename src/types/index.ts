@@ -25,7 +25,6 @@ export interface Student {
   educationLevel: string;
   qualification: string;
   preferredCategory: string;
-  assignedCourseIds: string[];
   subscriptionPlan: SubscriptionPlan;
   subscriptionStatus: SubscriptionStatus;
   subscriptionStart?: string;
@@ -284,8 +283,9 @@ export interface CourseCategory {
   id: string;
   name: string;
   description: string;
-  courseCount: number;
+  courseCount?: number;
   color: string;
+  isActive?: boolean;
 }
 
 export interface SubscriptionPlanConfig {

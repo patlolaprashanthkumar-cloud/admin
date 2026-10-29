@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, BookOpen, Users, Clock, Pencil, Archive, Eye } from 'lucide-react';
+import { Plus, BookOpen, Users, Clock, Pencil, Archive, Eye, Award, Tag } from 'lucide-react';
 import { useMockStore } from '@/hooks/useMockStore';
 import { mockStore } from '@/mock-data/store';
 import { Card } from '@/components/ui/Card';
@@ -71,7 +71,20 @@ export function CourseListPage() {
         title="Courses"
         subtitle={`${store.courses.length} courses · ${store.courses.filter((c) => c.status === 'published').length} published`}
         breadcrumbs={[{ label: 'Dashboard', to: '/dashboard' }, { label: 'Courses' }]}
-        actions={<button className="btn-primary" onClick={() => setAddOpen(true)}><Plus size={16} /> Create Course</button>}
+        actions={
+          <div className="flex items-center gap-2.5">
+            <button
+              className="btn-secondary"
+              onClick={() => navigate('/categories')}
+            >
+              <Award size={16} className="text-saffron-600" />
+              <span>Taxonomies ({store.courseCategories.length})</span>
+            </button>
+            <button className="btn-primary" onClick={() => setAddOpen(true)}>
+              <Plus size={16} /> Create Course
+            </button>
+          </div>
+        }
       />
 
       <Card className="p-4 mb-4">

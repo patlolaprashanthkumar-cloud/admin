@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { Input, Select, Checkbox } from '@/components/ui/FormField';
 import { Button } from '@/components/ui/Button';
 import { generateId, generateStudentId } from '@/utils';
+import { isDuplicateStudentEmail } from '@/utils/dataIntegrity';
 import type { Student, AccountStatus, SubscriptionPlan, SubscriptionStatus } from '@/types';
 
 interface FormState {
@@ -17,7 +18,7 @@ interface FormState {
   educationLevel: string;
   qualification: string;
   preferredCategory: string;
-  assignedCourseIds: string[];
+  enrolledCourseIds: string[];
   subscriptionPlan: SubscriptionPlan;
   accountStatus: AccountStatus;
   city: string;
@@ -27,10 +28,11 @@ export function AddStudentPage() {
   const store = useMockStore();
   const navigate = useNavigate();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState<FormState>({
     fullName: '', email: '', phone: '', educationLevel: '', qualification: '',
-    preferredCategory: '', assignedCourseIds: [], subscriptionPlan: 'basic',
+    preferredCategory: '', enrolledCourseIds: [], subscriptionPlan: 'basic',
     accountStatus: 'active', city: '',
   });
 
@@ -41,9 +43,9 @@ export function AddStudentPage() {
   function toggleCourse(id: string) {
     setForm((f) => ({
       ...f,
-      assignedCourseIds: f.assignedCourseIds.includes(id)
-        ? f.assignedCourseIds.filter((c) => c !== id)
-        : [...f.assignedCourseIds, id],
+      enrolledCourseIds: f.enrolledCourseIds.includes(id)
+        ? f.enrolledCourseIds.filter((c) => c !== id)
+        : [...f.enrolledCourseIds, id],
     }));
   }
 
@@ -52,6 +54,7 @@ export function AddStudentPage() {
     if (!form.fullName.trim()) e.fullName = 'Full name is required';
     if (!form.email.trim()) e.email = 'Email is required';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email address';
+    else if (isDuplicateStudentEmail(form.email, store.students)) e.email = 'A student with this email address already exists';
     if (!form.phone.trim()) e.phone = 'Phone number is required';
     if (!form.educationLevel) e.educationLevel = 'Select education level';
     if (!form.qualification.trim()) e.qualification = 'Qualification is required';
@@ -62,7 +65,9 @@ export function AddStudentPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting) return;
     if (!validate()) return;
+    setSubmitting(true);
     const student: Student = {
       id: generateId('stu'),
       studentId: generateStudentId(),
@@ -72,8 +77,7 @@ export function AddStudentPage() {
       educationLevel: form.educationLevel,
       qualification: form.qualification.trim(),
       preferredCategory: form.preferredCategory,
-      assignedCourseIds: form.assignedCourseIds,
-      enrolledCourseIds: form.assignedCourseIds,
+      enrolledCourseIds: form.enrolledCourseIds,
       subscriptionPlan: form.subscriptionPlan,
       subscriptionStatus: form.subscriptionPlan === 'free' ? 'active' : 'pending',
       accountStatus: form.accountStatus,
@@ -94,7 +98,7 @@ export function AddStudentPage() {
     navigate(`/students/${student.id}`);
   }
 
-  const publishedCourses = store.courses.filter((c) => c.status === 'published');
+  const availableCourses = store.courses.filter((c) => c.status === 'published' && (!form.preferredCategory || c.category === form.preferredCategory));
 
   return (
     <div>
@@ -134,9 +138,9 @@ export function AddStudentPage() {
         <Card title="Course Assignment" className="p-5">
           <p className="text-sm text-navy-500 mb-3">Select courses to assign to this student.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {publishedCourses.map((c) => (
+            {availableCourses.map((c) => (
               <label key={c.id} className="flex items-center gap-2.5 rounded-lg border border-navy-100 p-3 cursor-pointer hover:bg-navy-50/50 transition-colors">
-                <input type="checkbox" checked={form.assignedCourseIds.includes(c.id)} onChange={() => toggleCourse(c.id)} className="h-4 w-4 rounded border-navy-300 text-indigo-600" />
+                <input type="checkbox" checked={form.enrolledCourseIds.includes(c.id)} onChange={() => toggleCourse(c.id)} className="h-4 w-4 rounded border-navy-300 text-indigo-600" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-navy-900 truncate">{c.title}</p>
                   <p className="text-xs text-navy-500">{c.category}</p>

@@ -8,34 +8,81 @@ import {
   subscriptionPlans as initialPlans, questions as initialQuestions,
   assessmentCategories as initialAssessmentCategories,
 } from '@/mock-data';
-import type {
-  Student, Instructor, Course, Payment, Enquiry, Assessment, AssessmentResult,
-  CareerAppointment, CareerActionPlan, Resource, AppNotification, ActivityLog,
-  LiveClass, CourseCategory, SubscriptionPlanConfig, Question, AssessmentCategory,
-} from '@/types';
+import type { Student, Instructor, Course, Payment, Enquiry, Assessment, AssessmentResult, CareerAppointment, CareerActionPlan, Resource, AppNotification, ActivityLog, LiveClass, CourseCategory, SubscriptionPlanConfig, Question, AssessmentCategory } from '@/types';
+import { isDemoMode } from '@/services/supabase/auth';
 
 class MockStore {
-  students: Student[] = [...initialStudents];
-  instructors: Instructor[] = [...initialInstructors];
-  courses: Course[] = [...initialCourses];
-  payments: Payment[] = [...initialPayments];
-  enquiries: Enquiry[] = [...initialEnquiries];
-  assessments: Assessment[] = [...initialAssessments];
-  assessmentResults: AssessmentResult[] = [...initialResults];
-  careerAppointments: CareerAppointment[] = [...initialAppointments];
-  careerActionPlans: CareerActionPlan[] = [...initialActionPlans];
-  resources: Resource[] = [...initialResources];
-  notifications: AppNotification[] = [...initialNotifications];
-  activityLogs: ActivityLog[] = [...initialActivity];
-  liveClasses: LiveClass[] = [...initialLiveClasses];
-  courseCategories: CourseCategory[] = [...initialCategories];
-  assessmentCategories: AssessmentCategory[] = [...initialAssessmentCategories];
-  subscriptionPlans: SubscriptionPlanConfig[] = [...initialPlans];
-  questions: Question[] = [...initialQuestions];
+  students: Student[] = [];
+  instructors: Instructor[] = [];
+  courses: Course[] = [];
+  payments: Payment[] = [];
+  enquiries: Enquiry[] = [];
+  assessments: Assessment[] = [];
+  assessmentResults: AssessmentResult[] = [];
+  careerAppointments: CareerAppointment[] = [];
+  careerActionPlans: CareerActionPlan[] = [];
+  resources: Resource[] = [];
+  notifications: AppNotification[] = [];
+  activityLogs: ActivityLog[] = [];
+  liveClasses: LiveClass[] = [];
+  courseCategories: CourseCategory[] = [];
+  assessmentCategories: AssessmentCategory[] = [];
+  subscriptionPlans: SubscriptionPlanConfig[] = [];
+  questions: Question[] = [];
+
+  constructor() {
+    if (isDemoMode()) {
+      this.students = [...initialStudents];
+      this.instructors = [...initialInstructors];
+      this.courses = [...initialCourses];
+      this.payments = [...initialPayments];
+      this.enquiries = [...initialEnquiries];
+      this.assessments = [...initialAssessments];
+      this.assessmentResults = [...initialResults];
+      this.careerAppointments = [...initialAppointments];
+      this.careerActionPlans = [...initialActionPlans];
+      this.resources = [...initialResources];
+      this.notifications = [...initialNotifications];
+      this.activityLogs = [...initialActivity];
+      this.liveClasses = [...initialLiveClasses];
+      this.courseCategories = [...initialCategories];
+      this.assessmentCategories = [...initialAssessmentCategories];
+      this.subscriptionPlans = [...initialPlans];
+      this.questions = [...initialQuestions];
+    }
+  }
 
   private listeners = new Set<() => void>();
   subscribe(cb: () => void) { this.listeners.add(cb); return () => this.listeners.delete(cb); }
   private notify() { this.listeners.forEach((cb) => cb()); }
+
+// Category management
+// Add a new category (active by default)
+addCategory(cat: CourseCategory | Omit<CourseCategory, 'id'>) {
+  const id = ('id' in cat && cat.id) ? cat.id : 'cat-' + Date.now();
+  const newCat: CourseCategory = { courseCount: 0, isActive: true, ...cat, id };
+  this.courseCategories.unshift(newCat);
+  this.notify();
+}
+
+// Update existing category fields
+updateCategory(id: string, patch: Partial<Omit<CourseCategory, 'id'>>) {
+  this.courseCategories = this.courseCategories.map((c) => c.id === id ? { ...c, ...patch } : c);
+  this.notify();
+}
+
+// Delete a category
+deleteCategory(id: string) {
+  this.courseCategories = this.courseCategories.filter((c) => c.id !== id);
+  this.notify();
+}
+
+// Toggle active status
+toggleCategoryActive(id: string, active?: boolean) {
+  this.courseCategories = this.courseCategories.map((c) => c.id === id ? { ...c, isActive: active !== undefined ? active : !c.isActive } : c);
+  this.notify();
+}
+
 
   addStudent(s: Student) { this.students.unshift(s); this.notify(); }
   updateStudent(id: string, patch: Partial<Student>) {
@@ -106,19 +153,36 @@ class MockStore {
   }
 
   reset() {
-    this.students = [...initialStudents];
-    this.instructors = [...initialInstructors];
-    this.courses = [...initialCourses];
-    this.payments = [...initialPayments];
-    this.enquiries = [...initialEnquiries];
-    this.assessments = [...initialAssessments];
-    this.assessmentResults = [...initialResults];
-    this.careerAppointments = [...initialAppointments];
-    this.careerActionPlans = [...initialActionPlans];
-    this.resources = [...initialResources];
-    this.notifications = [...initialNotifications];
-    this.activityLogs = [...initialActivity];
-    this.liveClasses = [...initialLiveClasses];
+    // Reset to demo data only when demo mode is active; otherwise clear store.
+    if (isDemoMode()) {
+      this.students = [...initialStudents];
+      this.instructors = [...initialInstructors];
+      this.courses = [...initialCourses];
+      this.payments = [...initialPayments];
+      this.enquiries = [...initialEnquiries];
+      this.assessments = [...initialAssessments];
+      this.assessmentResults = [...initialResults];
+      this.careerAppointments = [...initialAppointments];
+      this.careerActionPlans = [...initialActionPlans];
+      this.resources = [...initialResources];
+      this.notifications = [...initialNotifications];
+      this.activityLogs = [...initialActivity];
+      this.liveClasses = [...initialLiveClasses];
+    } else {
+      this.students = [];
+      this.instructors = [];
+      this.courses = [];
+      this.payments = [];
+      this.enquiries = [];
+      this.assessments = [];
+      this.assessmentResults = [];
+      this.careerAppointments = [];
+      this.careerActionPlans = [];
+      this.resources = [];
+      this.notifications = [];
+      this.activityLogs = [];
+      this.liveClasses = [];
+    }
     this.notify();
   }
 }
