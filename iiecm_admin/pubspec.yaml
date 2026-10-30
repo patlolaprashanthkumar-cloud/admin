@@ -1,0 +1,40 @@
+name: iiecm_admin
+description: "IIECM Admin - Institutional Management Native Android Application"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+
+  # Declarative Routing
+  go_router: ^14.8.1
+
+  # Backend & Real-time Integration
+  supabase_flutter: ^2.9.2
+
+  # Institutional Typography
+  google_fonts: ^6.3.3
+
+  # Charts & Metrics Visualization
+  fl_chart: ^0.70.2
+
+  # Localization, Dates, and INR Currency Formatting
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
