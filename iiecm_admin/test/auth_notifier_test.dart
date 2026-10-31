@@ -34,7 +34,11 @@ class FakeAuthRepository implements AuthRepository {
       throw const ProfileNotFoundException();
     }
     if (shouldThrowNetworkError) {
-      throw const ProfileVerificationNetworkException();
+      throw ProfileVerificationNetworkException(
+        'Network error while verifying administrator permissions. Please check connection and retry.',
+        sampleAdmin.id,
+        sampleAdmin.email,
+      );
     }
     return sampleAdmin;
   }
@@ -45,7 +49,11 @@ class FakeAuthRepository implements AuthRepository {
       throw const AccessDeniedNonAdminException('student');
     }
     if (shouldThrowNetworkError) {
-      throw const ProfileVerificationNetworkException();
+      throw ProfileVerificationNetworkException(
+        'Network error while verifying administrator permissions. Please check connection and retry.',
+        sampleAdmin.id,
+        sampleAdmin.email,
+      );
     }
     return sampleAdmin;
   }

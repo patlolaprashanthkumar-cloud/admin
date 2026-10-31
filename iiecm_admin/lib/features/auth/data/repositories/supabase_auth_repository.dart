@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/network/supabase_client.dart';
+import '../../../../core/network/supabase_client.dart';
 import '../../domain/models/admin_user.dart';
 import '../../domain/models/auth_exception.dart';
 import '../../domain/models/user_role.dart';
@@ -36,10 +36,12 @@ class SupabaseAuthRepository implements AuthRepository {
 
     AuthResponse response;
     try {
-      response = await _client.auth.signInWithPassword(
-        email: email.trim(),
-        password: password,
-      );
+      response = await _client.auth
+          .signInWithPassword(
+            email: email.trim(),
+            password: password,
+          )
+          .timeout(const Duration(seconds: 15));
     } on AuthException catch (e) {
       throw InvalidCredentialsException(e.message);
     } catch (e) {
@@ -81,9 +83,13 @@ class SupabaseAuthRepository implements AuthRepository {
       // Security measure: User exists in Auth, but has no admin profile in public.profiles
       await signOut();
       rethrow;
-    } on ProfileVerificationNetworkException {
+    } on ProfileVerificationNetworkException catch (e) {
       // Do NOT sign out on temporary network failure; allow user to retry
-      rethrow;
+      throw ProfileVerificationNetworkException(
+        e.message,
+        e.userId ?? authUser.id,
+        e.email ?? authUser.email,
+      );
     }
   }
 
@@ -102,7 +108,8 @@ class SupabaseAuthRepository implements AuthRepository {
           .from('profiles')
           .select('id, email, full_name, role, phone, avatar_url, last_login_at, created_at')
           .eq('id', userId)
-          .maybeSingle();
+          .maybeSingle()
+          .timeout(const Duration(seconds: 10));
 
       if (response != null) {
         profileData = Map<String, dynamic>.from(response);

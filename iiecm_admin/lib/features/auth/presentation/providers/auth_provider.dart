@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
-import '../../../core/network/supabase_client.dart';
+import '../../../../core/network/supabase_client.dart';
 import '../../data/repositories/supabase_auth_repository.dart';
 import '../../domain/models/auth_exception.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -84,10 +84,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return true;
     } on ProfileVerificationNetworkException catch (e) {
       final session = _repository.currentSession;
+      final userId = e.userId ?? session?.user.id;
+      final pendingEmail = e.email ?? session?.user.email ?? email.trim();
       state = AuthState.profileVerificationError(
         errorMessage: e.message,
-        pendingUserId: session?.user.id,
-        pendingEmail: session?.user.email,
+        pendingUserId: userId,
+        pendingEmail: pendingEmail,
       );
       return false;
     } on AppAuthException catch (e) {

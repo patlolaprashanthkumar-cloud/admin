@@ -49,8 +49,14 @@ class AccessDeniedNonAdminException extends AppAuthException {
 
 /// Network or server error during the authoritative profile verification step
 class ProfileVerificationNetworkException extends AppAuthException {
-  const ProfileVerificationNetworkException([String? details])
-      : super(
+  final String? userId;
+  final String? email;
+
+  const ProfileVerificationNetworkException([
+    String? details,
+    this.userId,
+    this.email,
+  ]) : super(
           details ?? 'Network error while verifying administrator permissions. Please check connection and retry.',
           isRetryable: true,
         );

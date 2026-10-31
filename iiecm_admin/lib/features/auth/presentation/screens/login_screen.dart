@@ -155,11 +155,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               children: [
                                 const Icon(Icons.warning_amber_rounded, color: Color(0xFFB45309)),
                                 const SizedBox(width: 8),
-                                Text(
-                                  'Supabase Not Configured',
-                                  style: theme.textTheme.titleSmall?.copyWith(
-                                    color: const Color(0xFF92400E),
-                                    fontWeight: FontWeight.w700,
+                                Expanded(
+                                  child: Text(
+                                    'Supabase Not Configured',
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      color: const Color(0xFF92400E),
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -333,12 +335,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   )
                                 : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
-                                        'Sign In as Administrator',
-                                        style: theme.textTheme.labelLarge?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
+                                      Flexible(
+                                        child: Text(
+                                          'Sign In as Administrator',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.labelLarge?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
@@ -352,23 +358,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 24),
 
                     // Security & Privacy Notice
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.shield_outlined,
-                          size: 14,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Secured with Supabase Auth & RLS policies',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                    Center(
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          Icon(
+                            Icons.shield_outlined,
+                            size: 14,
                             color: theme.colorScheme.onSurfaceVariant,
-                            fontSize: 11,
                           ),
-                        ),
-                      ],
+                          Text(
+                            'Secured with Supabase Auth & RLS policies',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
