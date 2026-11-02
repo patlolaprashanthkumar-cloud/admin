@@ -211,8 +211,8 @@ class RecentActivitySection extends StatelessWidget {
                 ),
               ),
               TextButton.icon(
-                onPressed: () => context.go('/hubs'),
-                label: const Text('Schedule'),
+                onPressed: () => context.push('/classes'),
+                label: const Text('View All'),
                 icon: const Icon(Icons.arrow_forward_rounded, size: 14),
                 style: TextButton.styleFrom(
                   visualDensity: VisualDensity.compact,

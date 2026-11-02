@@ -24,6 +24,7 @@ class AppSupabase {
     try {
       await Supabase.initialize(
         url: AppConfig.supabaseUrl.trim(),
+        // ignore: deprecated_member_use
         anonKey: AppConfig.supabaseAnonKey.trim(),
         authOptions: const FlutterAuthClientOptions(
           autoRefreshToken: true,

@@ -13,3 +13,5 @@ class AppDateFormatter {
   static String formatMonthYear(DateTime dateTime) => _monthYear.format(dateTime);
 }
 
+typedef DateFormatter = AppDateFormatter;
+

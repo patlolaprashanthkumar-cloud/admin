@@ -42,6 +42,9 @@ class AppColors {
   static const Color secondaryTeal = forestLight;
   static const Color accentCoral = accentTerracotta;
   static const Color accentAmber = warning;
+  static const Color terracotta = accentTerracotta;
+  static const Color surface = lightSurface;
+  static const Color divider = dividerColor;
 
   static const Color lightBackground = warmCream;
   static const Color lightSurface = Colors.white;

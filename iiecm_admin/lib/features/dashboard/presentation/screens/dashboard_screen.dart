@@ -9,6 +9,8 @@ import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/stat_kpi_card.dart';
 import '../../../auth/domain/models/user_role.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../categories/presentation/providers/category_provider.dart';
+import '../../../categories/presentation/widgets/category_form_sheet.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/monthly_trends_chart.dart';
 import '../widgets/operational_hubs_section.dart';
@@ -243,7 +245,7 @@ class DashboardScreen extends ConsumerWidget {
                   dashboardAsync.when(
                     loading: () => _buildLoadingState(theme),
                     error: (err, stack) => _buildErrorState(context, ref, err),
-                    data: (stats) => _buildDashboardData(context, stats, theme),
+                    data: (stats) => _buildDashboardData(context, ref, stats, theme),
                   ),
                   const SizedBox(height: 28),
                 ],
@@ -314,7 +316,7 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDashboardData(BuildContext context, stats, ThemeData theme) {
+  Widget _buildDashboardData(BuildContext context, WidgetRef ref, stats, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -404,6 +406,109 @@ class DashboardScreen extends ConsumerWidget {
               onTap: () => context.go('/hubs'),
             ),
           ],
+        ),
+        const SizedBox(height: 16),
+
+        // Section: Course Categories Command Card
+        AppCard(
+          child: InkWell(
+            onTap: () => context.push('/categories'),
+            borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.accentTerracotta.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.category_rounded,
+                    color: AppColors.accentTerracotta,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'Course Categories',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.forestSoft,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '${stats.categoriesCount} Streams',
+                              style: const TextStyle(
+                                color: AppColors.primaryForest,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Taxonomies, courses & student learning streams',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Add Category',
+                  onPressed: () {
+                    final allCats = ref.read(categoryNotifierProvider).categories;
+                    CategoryFormSheet.show(
+                      context,
+                      existingCategories: allCats,
+                      onSave: ({
+                        required String name,
+                        required String description,
+                        required String color,
+                        String? iconName,
+                        bool isActive = true,
+                      }) async {
+                        final notifier = ref.read(categoryNotifierProvider.notifier);
+                        final ok = await notifier.createCategory(
+                          name: name,
+                          description: description,
+                          color: color,
+                          iconName: iconName,
+                          isActive: isActive,
+                        );
+                        if (!ok) {
+                          return notifier.errorMessage ?? 'Failed to save category. Ensure name is unique.';
+                        }
+                        return null;
+                      },
+                    );
+                  },
+                  icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primaryForest),
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: 22),
 

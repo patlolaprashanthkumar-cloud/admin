@@ -18,49 +18,49 @@ class OperationalHubsSection extends StatelessWidget {
 
     final hubs = [
       (
-        title: 'Assessments & Exams',
-        subtitle: '${stats.activeAssessments} Active evaluations',
-        badge: '${stats.activeAssessments} Tests',
-        icon: Icons.assignment_turned_in_rounded,
+        title: 'Faculty & Mentors',
+        subtitle: '${stats.totalInstructors} Certified instructors',
+        badge: '${stats.totalInstructors} Faculty',
+        icon: Icons.school_rounded,
         color: AppColors.primaryForest,
         bgColor: AppColors.forestSoft,
-        route: '/hubs',
+        route: '/faculty',
       ),
       (
-        title: 'Curriculum Taxonomies',
+        title: 'Class Schedules',
+        subtitle: '${stats.upcomingLiveClasses.length} Scheduled live sessions',
+        badge: '${stats.upcomingLiveClasses.length} Classes',
+        icon: Icons.calendar_month_rounded,
+        color: Colors.blueAccent,
+        bgColor: Colors.blue.withValues(alpha: 0.12),
+        route: '/classes',
+      ),
+      (
+        title: 'Assessments & Exams',
+        subtitle: '${stats.activeAssessments} Active evaluations',
+        badge: '${stats.activeAssessments} Exams',
+        icon: Icons.quiz_outlined,
+        color: Colors.purple,
+        bgColor: Colors.purple.withValues(alpha: 0.12),
+        route: '/assessments',
+      ),
+      (
+        title: 'Clinical Assignments',
+        subtitle: 'Cohort deliverables & evaluations',
+        badge: 'Tasks',
+        icon: Icons.assignment_outlined,
+        color: AppColors.accentTerracotta,
+        bgColor: AppColors.terracottaSoft,
+        route: '/assignments',
+      ),
+      (
+        title: 'Curriculum Streams',
         subtitle: '${stats.categoriesCount} Subject streams configured',
         badge: '${stats.categoriesCount} Streams',
         icon: Icons.category_rounded,
-        color: AppColors.accentTerracotta,
-        bgColor: AppColors.terracottaSoft,
-        route: '/hubs',
-      ),
-      (
-        title: 'Career & Mentorship',
-        subtitle: '${stats.careerAppointmentsCount} Active advisory sessions',
-        badge: '${stats.careerAppointmentsCount} Sessions',
-        icon: Icons.explore_rounded,
-        color: AppColors.forestLight,
+        color: AppColors.primaryForest,
         bgColor: AppColors.forestSoft,
-        route: '/hubs',
-      ),
-      (
-        title: 'Digital Resource Library',
-        subtitle: '${stats.resourcesCount} Syllabi, decks & assets',
-        badge: '${stats.resourcesCount} Assets',
-        icon: Icons.folder_special_rounded,
-        color: AppColors.forestDark,
-        bgColor: AppColors.forestSoft,
-        route: '/hubs',
-      ),
-      (
-        title: 'Admissions CRM',
-        subtitle: '${stats.admissionsLeads} Prospective leads in pipeline',
-        badge: '${stats.admissionsLeads} Leads',
-        icon: Icons.forum_rounded,
-        color: AppColors.terracottaDark,
-        bgColor: AppColors.terracottaSoft,
-        route: '/hubs',
+        route: '/categories',
       ),
       (
         title: 'Campus Broadcasts',
@@ -147,7 +147,17 @@ class OperationalHubsSection extends StatelessWidget {
       color: isDark ? theme.colorScheme.surfaceContainerLow : Colors.white,
       borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
       child: InkWell(
-        onTap: () => context.go(hub.route),
+        onTap: () {
+          if (hub.route.startsWith('/categories') ||
+              hub.route.startsWith('/faculty') ||
+              hub.route.startsWith('/classes') ||
+              hub.route.startsWith('/assignments') ||
+              hub.route.startsWith('/assessments')) {
+            context.push(hub.route);
+          } else {
+            context.go(hub.route);
+          }
+        },
         borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
         child: Container(
           padding: const EdgeInsets.all(12),
