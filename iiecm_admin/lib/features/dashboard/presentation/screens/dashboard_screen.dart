@@ -23,9 +23,13 @@ class DashboardScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Log Out'),
+        title: const Text(
+          'Sign Out',
+          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+        ),
         content: const Text(
-          'Are you sure you want to log out of the IIECM Admin portal?',
+          'Are you sure you want to sign out of the IIECM Institutional Administration portal?',
+          style: TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
@@ -34,7 +38,10 @@ class DashboardScreen extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Log Out'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.accentTerracotta,
+            ),
+            child: const Text('Sign Out'),
           ),
         ],
       ),
@@ -54,31 +61,50 @@ class DashboardScreen extends ConsumerWidget {
     final dashboardAsync = ref.watch(dashboardStatsProvider);
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.warmCream,
       appBar: AppBar(
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.warmCream,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer,
+                color: AppColors.primaryForest,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
+              child: const Text(
                 'IIECM',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.w800,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                  letterSpacing: 0.8,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Flexible(
-              child: Text(
-                'Command Hub',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Command Hub',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Text(
+                    'Administration',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.accentTerracotta,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -86,12 +112,12 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Refresh Telemetry',
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh_rounded, color: AppColors.primaryForest),
             onPressed: () => ref.invalidate(dashboardStatsProvider),
           ),
           IconButton(
-            tooltip: 'Log Out',
-            icon: const Icon(Icons.logout_rounded),
+            tooltip: 'Sign Out',
+            icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
             onPressed: () => _confirmLogout(context, ref),
           ),
           const SizedBox(width: 8),
@@ -99,6 +125,8 @@ class DashboardScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: RefreshIndicator(
+          color: AppColors.primaryForest,
+          backgroundColor: Colors.white,
           onRefresh: () async {
             ref.invalidate(dashboardStatsProvider);
             await ref.read(dashboardStatsProvider.future);
@@ -109,24 +137,24 @@ class DashboardScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. Executive Institutional Welcome Banner
+                  // 1. Executive Institutional Welcome Banner (Forest Green & Warm Accents)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(22),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: isDark
-                            ? [const Color(0xFF132A46), const Color(0xFF0F1E33)]
-                            : [const Color(0xFF0F2744), const Color(0xFF163E66)],
+                            ? [AppColors.darkSurface, const Color(0xFF161F1A)]
+                            : [AppColors.forestDark, AppColors.primaryForest],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.15),
+                          color: AppColors.forestDark.withValues(alpha: 0.25),
                           blurRadius: 14,
-                          offset: const Offset(0, 4),
+                          offset: const Offset(0, 5),
                         ),
                       ],
                     ),
@@ -137,59 +165,75 @@ class DashboardScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                                color: Colors.white.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5)),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                  width: 0.8,
+                                ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.verified_user_rounded, color: Color(0xFF10B981), size: 14),
+                                  const Icon(Icons.shield_rounded, color: AppColors.warmCream, size: 13),
                                   const SizedBox(width: 6),
                                   Text(
                                     admin?.role == UserRole.superAdmin
                                         ? 'SUPER ADMINISTRATOR'
                                         : 'VERIFIED ADMINISTRATOR',
-                                    style: theme.textTheme.labelSmall?.copyWith(
+                                    style: const TextStyle(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 10.5,
                                       letterSpacing: 0.5,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            Text(
-                              'AY 2026-2027',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontWeight: FontWeight.w600,
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                              decoration: BoxDecoration(
+                                color: AppColors.accentTerracotta.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.accentTerracotta.withValues(alpha: 0.5)),
+                              ),
+                              child: const Text(
+                                'AY 2026-2027',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 16),
                         Text(
-                          'Welcome, ${admin?.fullName ?? "Administrator"}',
-                          style: theme.textTheme.headlineSmall?.copyWith(
+                          'Welcome back, ${admin?.fullName ?? "Administrator"}',
+                          style: const TextStyle(
                             color: Colors.white,
+                            fontSize: 22,
                             fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
                           'Institutional Command Hub · Oversight of academic curricula, faculty coordination, student assessments, and revenue reconciliation.',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                            height: 1.4,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.88),
+                            fontSize: 12.5,
+                            height: 1.45,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
                   // 2. Quick Actions Bar
                   const QuickActionsBar(),
@@ -201,7 +245,7 @@ class DashboardScreen extends ConsumerWidget {
                     error: (err, stack) => _buildErrorState(context, ref, err),
                     data: (stats) => _buildDashboardData(context, stats, theme),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
                 ],
               ),
             ),
@@ -214,50 +258,54 @@ class DashboardScreen extends ConsumerWidget {
   Widget _buildLoadingState(ThemeData theme) {
     return Column(
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: 36),
         const Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: AppColors.primaryForest),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         Center(
           child: Text(
             'Synchronizing institutional telemetry from Supabase...',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
-        const SizedBox(height: 40),
+        const SizedBox(height: 36),
       ],
     );
   }
 
   Widget _buildErrorState(BuildContext context, WidgetRef ref, Object error) {
-    final theme = Theme.of(context);
     return AppCard(
-      backgroundColor: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
+      backgroundColor: const Color(0xFFFDF2F2),
+      borderSide: const BorderSide(color: Color(0xFFF8B4B4)),
       child: Column(
         children: [
-          Icon(Icons.error_outline_rounded, size: 40, color: theme.colorScheme.error),
+          const Icon(Icons.error_outline_rounded, size: 36, color: AppColors.error),
           const SizedBox(height: 10),
-          Text(
-            'Unable to Load Institutional Telemetry',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: theme.colorScheme.onErrorContainer,
+          const Text(
+            'Unable to Load Telemetry',
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
+              color: AppColors.error,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             error.toString(),
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onErrorContainer,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
             ),
           ),
           const SizedBox(height: 14),
           FilledButton.icon(
-            onPressed: () => ref.refresh(dashboardStatsProvider),
+            onPressed: () => ref.invalidate(dashboardStatsProvider),
             icon: const Icon(Icons.refresh_rounded, size: 18),
             label: const Text('Retry Connection'),
           ),
@@ -271,26 +319,47 @@ class DashboardScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section: Core Institutional KPIs (6 Stat Cards)
-        Text(
-          'Institutional Performance Telemetry',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Performance Telemetry',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.forestSoft,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text(
+                'Live Metrics',
+                style: TextStyle(
+                  color: AppColors.primaryForest,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
         GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
           childAspectRatio: 1.25,
           children: [
             StatKpiCard(
               label: 'Total Students',
               value: '${stats.totalStudents}',
               icon: Icons.people_rounded,
-              accentColor: AppColors.primaryNavy,
+              accentColor: AppColors.primaryForest,
               trendLabel: '${stats.activeStudents} active',
               isTrendPositive: true,
               onTap: () => context.go('/students'),
@@ -299,28 +368,28 @@ class DashboardScreen extends ConsumerWidget {
               label: 'Faculty Members',
               value: '${stats.totalInstructors}',
               icon: Icons.school_rounded,
-              accentColor: const Color(0xFF064B3E),
+              accentColor: AppColors.forestDark,
               onTap: () => context.go('/hubs'),
             ),
             StatKpiCard(
               label: 'Published Courses',
               value: '${stats.publishedCourses}',
               icon: Icons.menu_book_rounded,
-              accentColor: AppColors.secondaryTeal,
+              accentColor: AppColors.forestLight,
               onTap: () => context.go('/courses'),
             ),
             StatKpiCard(
               label: 'Verified Revenue',
               value: CurrencyFormatter.format(stats.verifiedRevenue),
               icon: Icons.currency_rupee_rounded,
-              accentColor: const Color(0xFF10B981),
+              accentColor: AppColors.accentTerracotta,
               onTap: () => context.go('/payments'),
             ),
             StatKpiCard(
               label: 'Pending Fees',
               value: '${stats.pendingPayments}',
               icon: Icons.credit_card_rounded,
-              accentColor: AppColors.accentAmber,
+              accentColor: AppColors.warning,
               trendLabel: 'Review required',
               isTrendPositive: false,
               onTap: () => context.go('/payments'),
@@ -329,14 +398,14 @@ class DashboardScreen extends ConsumerWidget {
               label: 'Admissions Leads',
               value: '${stats.admissionsLeads}',
               icon: Icons.mark_chat_unread_rounded,
-              accentColor: const Color(0xFFFF8E53),
+              accentColor: AppColors.accentTerracotta,
               trendLabel: 'Active pipeline',
               isTrendPositive: true,
               onTap: () => context.go('/hubs'),
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 22),
 
         // Section: Visual Analytics & Telemetry Charts
         AppCard(
@@ -346,14 +415,15 @@ class DashboardScreen extends ConsumerWidget {
               Text(
                 'Monthly Enrolment & Revenue Trends',
                 style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 'Rolling 6-month institutional telemetry',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -361,7 +431,7 @@ class DashboardScreen extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
 
         AppCard(
           child: Column(
@@ -370,14 +440,15 @@ class DashboardScreen extends ConsumerWidget {
               Text(
                 'Payment Status Breakdown',
                 style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 'Distribution across all student fee transactions',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -385,13 +456,13 @@ class DashboardScreen extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 22),
 
         // Section: Operational Management Hubs
         OperationalHubsSection(stats: stats),
-        const SizedBox(height: 24),
+        const SizedBox(height: 22),
 
-        // Section: Recent Registrations & Enrolments
+        // Section: Recent Activity & Live Classes
         RecentActivitySection(stats: stats),
       ],
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/config/app_config.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
@@ -9,7 +10,7 @@ import '../providers/auth_state.dart';
 import '../widgets/auth_text_field.dart';
 import 'forgot_password_sheet.dart';
 
-/// Professional Material 3 Login Screen strictly for IIECM Administrators
+/// Administrator Login Screen adhering to IIECM Institutional Brand System
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -31,9 +32,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submitLogin() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (!_formKey.currentState!.validate()) return;
 
-    // Dismiss keyboard
     FocusScope.of(context).unfocus();
 
     await ref.read(authNotifierProvider.notifier).login(
@@ -49,11 +49,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final authState = ref.watch(authNotifierProvider);
     final isAuthenticating = authState.status == AuthStatus.authenticating;
     final isUnconfigured = authState.status == AuthStatus.unconfigured || !AppConfig.isSupabaseConfigured;
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.warmCream,
       body: SafeArea(
         child: ResponsiveLayout(
           maxWidth: 480,
@@ -66,28 +68,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Institutional Emblem & Header
+                    // Institutional Emblem & Brand Mark
                     Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
+                          gradient: const LinearGradient(
+                            colors: [AppColors.forestDark, AppColors.primaryForest],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
                           borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
                           boxShadow: [
                             BoxShadow(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.25),
-                              blurRadius: 10,
+                              color: AppColors.primaryForest.withValues(alpha: 0.25),
+                              blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: Text(
-                          'IIECM',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 2.0,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.school_rounded, color: Colors.white, size: 22),
+                            const SizedBox(width: 8),
+                            Text(
+                              'IIECM',
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 2.2,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -97,7 +110,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       textAlign: TextAlign.center,
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: theme.colorScheme.onSurface,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
+                        letterSpacing: -0.3,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -105,7 +119,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       AppConstants.appTagline,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -115,33 +130,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.7),
+                          color: AppColors.forestSoft,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: theme.colorScheme.secondary.withValues(alpha: 0.3),
+                            color: AppColors.primaryForest.withValues(alpha: 0.25),
                           ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.admin_panel_settings_outlined,
                               size: 15,
-                              color: theme.colorScheme.onSecondaryContainer,
+                              color: AppColors.primaryForest,
                             ),
                             const SizedBox(width: 6),
                             Text(
                               'Admin & Super Admin Portal',
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onSecondaryContainer,
-                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryForest,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 26),
 
                     // Unconfigured Environment Warning
                     if (isUnconfigured) ...[
@@ -183,12 +198,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     if (authState.errorMessage != null && !isUnconfigured) ...[
                       AppCard(
                         backgroundColor: authState.isRetryable
-                            ? const Color(0xFFEFF6FF)
-                            : theme.colorScheme.errorContainer.withValues(alpha: 0.8),
+                            ? AppColors.terracottaSoft
+                            : const Color(0xFFFDF2F2),
                         borderSide: BorderSide(
                           color: authState.isRetryable
-                              ? const Color(0xFF3B82F6)
-                              : theme.colorScheme.error.withValues(alpha: 0.5),
+                              ? AppColors.accentTerracotta
+                              : const Color(0xFFF8B4B4),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,8 +215,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   authState.isRetryable ? Icons.wifi_off_rounded : Icons.error_outline,
                                   size: 20,
                                   color: authState.isRetryable
-                                      ? const Color(0xFF1D4ED8)
-                                      : theme.colorScheme.onErrorContainer,
+                                      ? AppColors.accentTerracotta
+                                      : AppColors.error,
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
@@ -209,8 +224,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     authState.errorMessage!,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: authState.isRetryable
-                                          ? const Color(0xFF1E3A8A)
-                                          : theme.colorScheme.onErrorContainer,
+                                          ? AppColors.terracottaDark
+                                          : AppColors.error,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -227,8 +242,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   label: const Text('Retry Profile Verification'),
                                   style: OutlinedButton.styleFrom(
                                     visualDensity: VisualDensity.compact,
-                                    foregroundColor: const Color(0xFF1D4ED8),
-                                    side: const BorderSide(color: Color(0xFF3B82F6)),
+                                    foregroundColor: AppColors.accentTerracotta,
+                                    side: const BorderSide(color: AppColors.accentTerracotta),
                                   ),
                                 ),
                               ),
@@ -277,7 +292,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               icon: Icon(
                                 _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                                 size: 20,
-                                color: theme.colorScheme.onSurfaceVariant,
+                                color: AppColors.textSecondary,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -305,12 +320,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               style: TextButton.styleFrom(
                                 visualDensity: VisualDensity.compact,
                                 padding: EdgeInsets.zero,
+                                foregroundColor: AppColors.accentTerracotta,
                               ),
                               child: Text(
                                 'Forgot password?',
                                 style: theme.textTheme.labelMedium?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.accentTerracotta,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),
@@ -319,6 +335,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           FilledButton(
                             onPressed: isAuthenticating || isUnconfigured ? null : _submitLogin,
                             style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.primaryForest,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
@@ -368,14 +385,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           Icon(
                             Icons.shield_outlined,
                             size: 14,
-                            color: theme.colorScheme.onSurfaceVariant,
+                            color: AppColors.textSecondary,
                           ),
                           Text(
                             'Secured with Supabase Auth & RLS policies',
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: AppColors.textSecondary,
                               fontSize: 11,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -391,4 +409,3 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
-

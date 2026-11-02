@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../domain/models/dashboard_stats.dart';
@@ -19,18 +20,18 @@ class MonthlyTrendsChart extends StatelessWidget {
 
     if (metrics.isEmpty) {
       return Container(
-        height: 240,
+        height: 220,
         alignment: Alignment.center,
         child: Text(
           'No enrolment or financial telemetry recorded yet.',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+            color: AppColors.textSecondary,
           ),
         ),
       );
     }
 
-    // Determine max values for scaling
+    // Determine max values for normalized scaling
     double maxEnrolments = 1;
     double maxRevenue = 1;
     for (final m in metrics) {
@@ -38,7 +39,6 @@ class MonthlyTrendsChart extends StatelessWidget {
       if (m.revenue > maxRevenue) maxRevenue = m.revenue;
     }
 
-    // Spot coordinates normalized to 0-100 for dual-axis rendering
     final List<FlSpot> enrolmentSpots = [];
     final List<FlSpot> revenueSpots = [];
 
@@ -51,23 +51,23 @@ class MonthlyTrendsChart extends StatelessWidget {
       revenueSpots.add(FlSpot(i.toDouble(), normRev));
     }
 
-    const tealColor = Color(0xFF028090);
-    const peachColor = Color(0xFFFF8E53);
+    final forestColor = isDark ? AppColors.forestLight : AppColors.primaryForest;
+    final terracottaColor = AppColors.accentTerracotta;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Legend Row
+        // Brand Legend Row
         Row(
           children: [
-            _buildLegendItem('New Students', tealColor),
-            const SizedBox(width: 16),
-            _buildLegendItem('Revenue (₹)', peachColor),
+            _buildLegendItem('New Students', forestColor),
+            const SizedBox(width: 18),
+            _buildLegendItem('Revenue (₹)', terracottaColor),
           ],
         ),
         const SizedBox(height: 16),
 
-        // fl_chart LineChart
+        // fl_chart LineChart with Area Gradients
         SizedBox(
           height: 220,
           child: LineChart(
@@ -77,7 +77,7 @@ class MonthlyTrendsChart extends StatelessWidget {
                 drawVerticalLine: false,
                 horizontalInterval: 25,
                 getDrawingHorizontalLine: (value) => FlLine(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
                   strokeWidth: 1,
                   dashArray: [4, 4],
                 ),
@@ -100,8 +100,8 @@ class MonthlyTrendsChart extends StatelessWidget {
                           child: Text(
                             metrics[idx].month,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         );
@@ -118,8 +118,11 @@ class MonthlyTrendsChart extends StatelessWidget {
               maxY: 110,
               lineTouchData: LineTouchData(
                 touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (_) => isDark ? const Color(0xFF1E293B) : Colors.white,
+                  getTooltipColor: (_) => isDark ? AppColors.darkSurface : Colors.white,
                   tooltipRoundedRadius: AppConstants.radiusMedium,
+                  tooltipBorder: BorderSide(
+                    color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+                  ),
                   getTooltipItems: (touchedSpots) {
                     return touchedSpots.map((spot) {
                       final idx = spot.x.toInt();
@@ -129,18 +132,18 @@ class MonthlyTrendsChart extends StatelessWidget {
                       if (spot.barIndex == 0) {
                         return LineTooltipItem(
                           '${m.month}: ${m.enrolments} Enrolments',
-                          const TextStyle(
-                            color: tealColor,
-                            fontWeight: FontWeight.w700,
+                          TextStyle(
+                            color: forestColor,
+                            fontWeight: FontWeight.w800,
                             fontSize: 12,
                           ),
                         );
                       } else {
                         return LineTooltipItem(
                           '${m.month}: ${CurrencyFormatter.format(m.revenue)}',
-                          const TextStyle(
-                            color: peachColor,
-                            fontWeight: FontWeight.w700,
+                          TextStyle(
+                            color: terracottaColor,
+                            fontWeight: FontWeight.w800,
                             fontSize: 12,
                           ),
                         );
@@ -150,12 +153,12 @@ class MonthlyTrendsChart extends StatelessWidget {
                 ),
               ),
               lineBarsData: [
-                // Enrolments Bar
+                // Enrolments Bar (Forest Green)
                 LineChartBarData(
                   spots: enrolmentSpots,
                   isCurved: true,
                   curveSmoothness: 0.35,
-                  color: tealColor,
+                  color: forestColor,
                   barWidth: 3,
                   isStrokeCapRound: true,
                   dotData: FlDotData(
@@ -163,28 +166,28 @@ class MonthlyTrendsChart extends StatelessWidget {
                     getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
                       radius: 3.5,
                       color: Colors.white,
-                      strokeWidth: 2,
-                      strokeColor: tealColor,
+                      strokeWidth: 2.2,
+                      strokeColor: forestColor,
                     ),
                   ),
                   belowBarData: BarAreaData(
                     show: true,
                     gradient: LinearGradient(
                       colors: [
-                        tealColor.withValues(alpha: 0.3),
-                        tealColor.withValues(alpha: 0.0),
+                        forestColor.withValues(alpha: 0.28),
+                        forestColor.withValues(alpha: 0.0),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
                   ),
                 ),
-                // Revenue Bar
+                // Revenue Bar (Terracotta)
                 LineChartBarData(
                   spots: revenueSpots,
                   isCurved: true,
                   curveSmoothness: 0.35,
-                  color: peachColor,
+                  color: terracottaColor,
                   barWidth: 3,
                   isStrokeCapRound: true,
                   dotData: FlDotData(
@@ -192,16 +195,16 @@ class MonthlyTrendsChart extends StatelessWidget {
                     getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
                       radius: 3.5,
                       color: Colors.white,
-                      strokeWidth: 2,
-                      strokeColor: peachColor,
+                      strokeWidth: 2.2,
+                      strokeColor: terracottaColor,
                     ),
                   ),
                   belowBarData: BarAreaData(
                     show: true,
                     gradient: LinearGradient(
                       colors: [
-                        peachColor.withValues(alpha: 0.3),
-                        peachColor.withValues(alpha: 0.0),
+                        terracottaColor.withValues(alpha: 0.25),
+                        terracottaColor.withValues(alpha: 0.0),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -221,8 +224,8 @@ class MonthlyTrendsChart extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 10,
-          height: 10,
+          width: 9,
+          height: 9,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
@@ -231,13 +234,13 @@ class MonthlyTrendsChart extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
     );
   }
 }
-

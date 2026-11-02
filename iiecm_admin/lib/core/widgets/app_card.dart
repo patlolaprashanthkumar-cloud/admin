@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../app/theme/app_colors.dart';
 import '../constants/app_constants.dart';
 
-/// Standardized card component adhering to the IIECM Design System
+/// Standardized card component adhering to the IIECM Brand Design System
 class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
   final Color? backgroundColor;
   final BorderSide? borderSide;
+  final double? elevation;
 
   const AppCard({
     super.key,
@@ -16,38 +18,52 @@ class AppCard extends StatelessWidget {
     this.onTap,
     this.backgroundColor,
     this.borderSide,
+    this.elevation,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final card = Card(
-      elevation: 0,
-      color: backgroundColor ?? theme.colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
+    final isDark = theme.brightness == Brightness.dark;
+
+    final defaultBg = isDark ? theme.colorScheme.surfaceContainerLow : Colors.white;
+    final defaultBorder = BorderSide(
+      color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+      width: 1,
+    );
+
+    final card = Container(
+      decoration: BoxDecoration(
+        color: backgroundColor ?? defaultBg,
         borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
-        side: borderSide ??
-            BorderSide(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-              width: 1,
-            ),
+        border: Border.fromBorderSide(borderSide ?? defaultBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: padding,
-        child: child,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+        child: Padding(
+          padding: padding,
+          child: child,
+        ),
       ),
     );
 
     if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
-        child: card,
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+          child: card,
+        ),
       );
     }
     return card;
   }
 }
-

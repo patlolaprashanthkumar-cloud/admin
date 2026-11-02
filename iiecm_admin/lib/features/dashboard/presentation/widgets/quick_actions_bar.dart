@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 
 class QuickActionsBar extends StatelessWidget {
@@ -11,36 +12,40 @@ class QuickActionsBar extends StatelessWidget {
       (
         label: 'Add Student',
         icon: Icons.person_add_alt_1_rounded,
-        color: const Color(0xFF0F2744),
+        color: AppColors.primaryForest,
+        bgColor: AppColors.forestSoft,
         onTap: () => context.go('/students'),
       ),
       (
         label: 'Create Course',
         icon: Icons.post_add_rounded,
-        color: const Color(0xFF064B3E),
+        color: AppColors.forestLight,
+        bgColor: AppColors.forestSoft,
         onTap: () => context.go('/courses'),
       ),
       (
         label: 'Faculty',
         icon: Icons.school_rounded,
-        color: const Color(0xFF028090),
+        color: AppColors.forestDark,
+        bgColor: AppColors.forestSoft,
         onTap: () => context.go('/hubs'),
       ),
       (
         label: 'Review Fees',
         icon: Icons.receipt_long_rounded,
-        color: const Color(0xFFFF8E53),
+        color: AppColors.accentTerracotta,
+        bgColor: AppColors.terracottaSoft,
         onTap: () => context.go('/payments'),
       ),
     ];
 
     return SizedBox(
-      height: 90,
+      height: 88,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: actions.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final item = actions[index];
           return _buildActionButton(context, item);
@@ -51,7 +56,7 @@ class QuickActionsBar extends StatelessWidget {
 
   Widget _buildActionButton(
     BuildContext context,
-    ({String label, IconData icon, Color color, VoidCallback onTap}) item,
+    ({String label, IconData icon, Color color, Color bgColor, VoidCallback onTap}) item,
   ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -63,14 +68,21 @@ class QuickActionsBar extends StatelessWidget {
         onTap: item.onTap,
         borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
         child: Container(
-          width: 110,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+          width: 108,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
             border: Border.all(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+              color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
               width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -78,12 +90,12 @@ class QuickActionsBar extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: item.color.withValues(alpha: 0.12),
+                  color: isDark ? item.color.withValues(alpha: 0.2) : item.bgColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   item.icon,
-                  size: 20,
+                  size: 19,
                   color: item.color,
                 ),
               ),
@@ -92,6 +104,8 @@ class QuickActionsBar extends StatelessWidget {
                 item.label,
                 style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
+                  fontSize: 11,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

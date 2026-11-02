@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/theme/app_colors.dart';
 
-/// Navigation scaffold housing the primary 5-tab Bottom Navigation bar
+/// Navigation scaffold housing the official 5-tab Bottom Navigation bar
 class AppBottomNavScaffold extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
@@ -23,71 +23,93 @@ class AppBottomNavScaffold extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final barBackground = isDark ? AppColors.darkSurface : Colors.white;
+    final topBorderColor = isDark ? AppColors.darkBorder : AppColors.borderNeutral;
+
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          indicatorColor: AppColors.secondaryTeal.withValues(alpha: isDark ? 0.25 : 0.15),
-          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
-            final isSelected = states.contains(WidgetState.selected);
-            return TextStyle(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              color: isSelected
-                  ? (isDark ? Colors.white : AppColors.primaryNavy)
-                  : theme.colorScheme.onSurfaceVariant,
-            );
-          }),
-          iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
-            final isSelected = states.contains(WidgetState.selected);
-            return IconThemeData(
-              size: 22,
-              color: isSelected
-                  ? (isDark ? const Color(0xFF38BDF8) : AppColors.primaryNavy)
-                  : theme.colorScheme.onSurfaceVariant,
-            );
-          }),
-        ),
-        child: NavigationBar(
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: _onDestinationSelected,
-          elevation: 4,
-          backgroundColor: isDark ? theme.colorScheme.surface : Colors.white,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard_rounded),
-              label: 'Dashboard',
-              tooltip: 'Executive Dashboard',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: barBackground,
+          border: Border(
+            top: BorderSide(
+              color: topBorderColor,
+              width: 0.8,
             ),
-            NavigationDestination(
-              icon: Icon(Icons.people_outline_rounded),
-              selectedIcon: Icon(Icons.people_rounded),
-              label: 'Students',
-              tooltip: 'Student Directory',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.menu_book_outlined),
-              selectedIcon: Icon(Icons.menu_book_rounded),
-              label: 'Courses',
-              tooltip: 'Curriculum & Courses',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.payments_outlined),
-              selectedIcon: Icon(Icons.payments_rounded),
-              label: 'Payments',
-              tooltip: 'Fee Reconciliation',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.widgets_outlined),
-              selectedIcon: Icon(Icons.widgets_rounded),
-              label: 'Hubs',
-              tooltip: 'Operational Suites',
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
             ),
           ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: NavigationBarTheme(
+            data: NavigationBarThemeData(
+              backgroundColor: barBackground,
+              indicatorColor: AppColors.forestSoft,
+              labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
+                final isSelected = states.contains(WidgetState.selected);
+                return TextStyle(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                  color: isSelected ? AppColors.primaryForest : AppColors.textMuted,
+                  letterSpacing: -0.1,
+                );
+              }),
+              iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
+                final isSelected = states.contains(WidgetState.selected);
+                return IconThemeData(
+                  size: 22,
+                  color: isSelected ? AppColors.primaryForest : AppColors.textMuted,
+                );
+              }),
+            ),
+            child: NavigationBar(
+              selectedIndex: navigationShell.currentIndex,
+              onDestinationSelected: _onDestinationSelected,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              height: 64,
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.dashboard_outlined),
+                  selectedIcon: Icon(Icons.dashboard_rounded),
+                  label: 'Dashboard',
+                  tooltip: 'Executive Dashboard',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.people_outline_rounded),
+                  selectedIcon: Icon(Icons.people_rounded),
+                  label: 'Students',
+                  tooltip: 'Student Directory',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.menu_book_outlined),
+                  selectedIcon: Icon(Icons.menu_book_rounded),
+                  label: 'Courses',
+                  tooltip: 'Curricula & Courses',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.payments_outlined),
+                  selectedIcon: Icon(Icons.payments_rounded),
+                  label: 'Payments',
+                  tooltip: 'Fee Reconciliation',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.widgets_outlined),
+                  selectedIcon: Icon(Icons.widgets_rounded),
+                  label: 'More',
+                  tooltip: 'Operational Suites',
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
-

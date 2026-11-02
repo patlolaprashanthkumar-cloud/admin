@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 
@@ -8,10 +9,13 @@ class StudentsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.warmCream,
       appBar: AppBar(
         title: const Text('Students & Admissions'),
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.warmCream,
       ),
       body: SafeArea(
         child: ResponsiveLayout(
@@ -27,14 +31,14 @@ class StudentsScreen extends StatelessWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0F2744).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
+                              color: AppColors.forestSoft,
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.people_alt_rounded, color: Color(0xFF0F2744)),
+                            child: const Icon(Icons.people_alt_rounded, color: AppColors.primaryForest, size: 24),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 14),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,13 +46,16 @@ class StudentsScreen extends StatelessWidget {
                                 Text(
                                   'Student Management Suite',
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
+                                const SizedBox(height: 2),
                                 Text(
-                                  'Directory, admissions, and academic records',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
+                                  'Directory, admissions, credentials and academic cohorts',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 12,
                                   ),
                                 ),
                               ],
@@ -56,24 +63,25 @@ class StudentsScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 18),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFF93C5FD)),
+                          color: AppColors.forestSoft,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.primaryForest.withValues(alpha: 0.2)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF1D4ED8)),
+                            const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primaryForest),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Stage 3.2: Complete Student Directory and Profile Management is scheduled next pending your approval.',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: const Color(0xFF1E3A8A),
+                                style: const TextStyle(
+                                  color: AppColors.primaryForest,
                                   fontSize: 11,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
@@ -91,4 +99,3 @@ class StudentsScreen extends StatelessWidget {
     );
   }
 }
-

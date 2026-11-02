@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../domain/models/dashboard_stats.dart';
 
@@ -17,51 +18,57 @@ class OperationalHubsSection extends StatelessWidget {
 
     final hubs = [
       (
-        title: 'Assessments & Examinations',
-        subtitle: '${stats.activeAssessments} Active / Scheduled evaluations',
+        title: 'Assessments & Exams',
+        subtitle: '${stats.activeAssessments} Active evaluations',
         badge: '${stats.activeAssessments} Tests',
         icon: Icons.assignment_turned_in_rounded,
-        color: const Color(0xFF064B3E),
+        color: AppColors.primaryForest,
+        bgColor: AppColors.forestSoft,
         route: '/hubs',
       ),
       (
         title: 'Curriculum Taxonomies',
         subtitle: '${stats.categoriesCount} Subject streams configured',
-        badge: '${stats.categoriesCount} Categories',
+        badge: '${stats.categoriesCount} Streams',
         icon: Icons.category_rounded,
-        color: const Color(0xFFF59E0B),
+        color: AppColors.accentTerracotta,
+        bgColor: AppColors.terracottaSoft,
         route: '/hubs',
       ),
       (
-        title: 'Career Guidance & Pathways',
-        subtitle: '${stats.careerAppointmentsCount} Active advisory mentorships',
+        title: 'Career & Mentorship',
+        subtitle: '${stats.careerAppointmentsCount} Active advisory sessions',
         badge: '${stats.careerAppointmentsCount} Sessions',
         icon: Icons.explore_rounded,
-        color: const Color(0xFFFF8E53),
+        color: AppColors.forestLight,
+        bgColor: AppColors.forestSoft,
         route: '/hubs',
       ),
       (
         title: 'Digital Resource Library',
-        subtitle: '${stats.resourcesCount} Syllabi, slide decks & clinical files',
+        subtitle: '${stats.resourcesCount} Syllabi, decks & assets',
         badge: '${stats.resourcesCount} Assets',
         icon: Icons.folder_special_rounded,
-        color: const Color(0xFF0F2744),
+        color: AppColors.forestDark,
+        bgColor: AppColors.forestSoft,
         route: '/hubs',
       ),
       (
-        title: 'Admissions CRM & Inquiries',
+        title: 'Admissions CRM',
         subtitle: '${stats.admissionsLeads} Prospective leads in pipeline',
-        badge: '${stats.admissionsLeads} Active Leads',
+        badge: '${stats.admissionsLeads} Leads',
         icon: Icons.forum_rounded,
-        color: const Color(0xFF028090),
+        color: AppColors.terracottaDark,
+        bgColor: AppColors.terracottaSoft,
         route: '/hubs',
       ),
       (
-        title: 'Campus Broadcasts & Alerts',
-        subtitle: '${stats.unreadNotifications} Unread administrative dispatches',
-        badge: '${stats.unreadNotifications} Unread',
+        title: 'Campus Broadcasts',
+        subtitle: '${stats.unreadNotifications} Unread dispatches',
+        badge: '${stats.unreadNotifications} Notices',
         icon: Icons.campaign_rounded,
-        color: const Color(0xFFE63946),
+        color: AppColors.warning,
+        bgColor: const Color(0xFFFEF3C7),
         route: '/hubs',
       ),
     ];
@@ -77,7 +84,7 @@ class OperationalHubsSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF064B3E),
+                    color: AppColors.primaryForest,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.layers_rounded, size: 16, color: Colors.white),
@@ -87,6 +94,7 @@ class OperationalHubsSection extends StatelessWidget {
                   'Operational Hubs',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -94,14 +102,14 @@ class OperationalHubsSection extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: const Color(0xFF064B3E).withValues(alpha: 0.1),
+                color: AppColors.forestSoft,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
                 '6 Suites',
                 style: TextStyle(
-                  color: Color(0xFF064B3E),
-                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryForest,
+                  fontWeight: FontWeight.w800,
                   fontSize: 11,
                 ),
               ),
@@ -116,7 +124,7 @@ class OperationalHubsSection extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 1.35,
+            childAspectRatio: 1.38,
           ),
           itemCount: hubs.length,
           itemBuilder: (context, index) {
@@ -130,7 +138,7 @@ class OperationalHubsSection extends StatelessWidget {
 
   Widget _buildHubTile(
     BuildContext context,
-    ({String title, String subtitle, String badge, IconData icon, Color color, String route}) hub,
+    ({String title, String subtitle, String badge, IconData icon, Color color, Color bgColor, String route}) hub,
   ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -146,9 +154,16 @@ class OperationalHubsSection extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
             border: Border.all(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+              color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
               width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,23 +175,23 @@ class OperationalHubsSection extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: hub.color.withValues(alpha: 0.12),
+                      color: isDark ? hub.color.withValues(alpha: 0.2) : hub.bgColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(hub.icon, size: 18, color: hub.color),
+                    child: Icon(hub.icon, size: 17, color: hub.color),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: hub.color.withValues(alpha: 0.1),
+                      color: isDark ? hub.color.withValues(alpha: 0.15) : hub.bgColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       hub.badge,
                       style: TextStyle(
                         color: hub.color,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 9.5,
                       ),
                     ),
                   ),
@@ -189,6 +204,7 @@ class OperationalHubsSection extends StatelessWidget {
                     hub.title,
                     style: theme.textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -197,7 +213,7 @@ class OperationalHubsSection extends StatelessWidget {
                   Text(
                     hub.subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: AppColors.textSecondary,
                       fontSize: 10,
                     ),
                     maxLines: 1,
@@ -212,4 +228,3 @@ class OperationalHubsSection extends StatelessWidget {
     );
   }
 }
-

@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_colors.dart';
 
 class PaymentBreakdownChart extends StatelessWidget {
   final Map<String, int> breakdown;
@@ -10,11 +11,11 @@ class PaymentBreakdownChart extends StatelessWidget {
   });
 
   static const Map<String, ({String label, Color color})> statusConfig = {
-    'verified': (label: 'Verified', color: Color(0xFF064B3E)),
-    'pending': (label: 'Pending', color: Color(0xFFFF8E53)),
-    'rejected': (label: 'Rejected', color: Color(0xFFDC2626)),
-    'failed': (label: 'Failed', color: Color(0xFF991B1B)),
-    'refunded': (label: 'Refunded', color: Color(0xFF829AB1)),
+    'verified': (label: 'Verified', color: AppColors.primaryForest),
+    'pending': (label: 'Pending', color: AppColors.accentTerracotta),
+    'rejected': (label: 'Rejected', color: AppColors.terracottaDark),
+    'failed': (label: 'Failed', color: AppColors.error),
+    'refunded': (label: 'Refunded', color: AppColors.textMuted),
   };
 
   @override
@@ -24,17 +25,18 @@ class PaymentBreakdownChart extends StatelessWidget {
 
     if (totalTransactions == 0) {
       return Container(
-        height: 200,
+        height: 190,
         alignment: Alignment.center,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.pie_chart_outline_rounded, size: 40, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4)),
+            Icon(Icons.pie_chart_outline_rounded, size: 36, color: AppColors.textMuted.withValues(alpha: 0.5)),
             const SizedBox(height: 8),
             Text(
               'No fee payment transactions found.',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -57,7 +59,7 @@ class PaymentBreakdownChart extends StatelessWidget {
             radius: 36,
             titleStyle: const TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               color: Colors.white,
             ),
           ),
@@ -66,12 +68,12 @@ class PaymentBreakdownChart extends StatelessWidget {
 
       legendItems.add(
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 3.0),
+          padding: const EdgeInsets.symmetric(vertical: 3.5),
           child: Row(
             children: [
               Container(
-                width: 10,
-                height: 10,
+                width: 9,
+                height: 9,
                 decoration: BoxDecoration(
                   color: config.color,
                   shape: BoxShape.circle,
@@ -83,13 +85,14 @@ class PaymentBreakdownChart extends StatelessWidget {
                   config.label,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
               Text(
                 '$count',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   color: config.color,
                 ),
               ),
@@ -101,7 +104,7 @@ class PaymentBreakdownChart extends StatelessWidget {
 
     return Row(
       children: [
-        // Donut Pie
+        // Donut Pie Chart
         Expanded(
           flex: 5,
           child: SizedBox(
@@ -117,7 +120,7 @@ class PaymentBreakdownChart extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        // Legend with exact transaction counts
+        // Legend details
         Expanded(
           flex: 6,
           child: Column(
@@ -130,4 +133,3 @@ class PaymentBreakdownChart extends StatelessWidget {
     );
   }
 }
-
