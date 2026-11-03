@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/stat_kpi_card.dart';
@@ -37,26 +37,41 @@ class _FacultyScreenState extends ConsumerState<FacultyScreen> {
           children: [
             ListTile(
               title: const Text('Active'),
-              leading: const Icon(Icons.check_circle_outline, color: AppColors.primaryForest),
+              leading: const Icon(
+                Icons.check_circle_outline,
+                color: AppColors.primaryForest,
+              ),
               onTap: () {
                 Navigator.of(ctx).pop();
-                ref.read(facultyNotifierProvider.notifier).updateStatus(faculty.id, 'active');
+                ref
+                    .read(facultyNotifierProvider.notifier)
+                    .updateStatus(faculty.id, 'active');
               },
             ),
             ListTile(
               title: const Text('Suspended'),
-              leading: const Icon(Icons.pause_circle_outline, color: Colors.orange),
+              leading: const Icon(
+                Icons.pause_circle_outline,
+                color: Colors.orange,
+              ),
               onTap: () {
                 Navigator.of(ctx).pop();
-                ref.read(facultyNotifierProvider.notifier).updateStatus(faculty.id, 'suspended');
+                ref
+                    .read(facultyNotifierProvider.notifier)
+                    .updateStatus(faculty.id, 'suspended');
               },
             ),
             ListTile(
               title: const Text('Inactive'),
-              leading: const Icon(Icons.cancel_outlined, color: AppColors.error),
+              leading: const Icon(
+                Icons.cancel_outlined,
+                color: AppColors.error,
+              ),
               onTap: () {
                 Navigator.of(ctx).pop();
-                ref.read(facultyNotifierProvider.notifier).updateStatus(faculty.id, 'inactive');
+                ref
+                    .read(facultyNotifierProvider.notifier)
+                    .updateStatus(faculty.id, 'inactive');
               },
             ),
           ],
@@ -82,7 +97,9 @@ class _FacultyScreenState extends ConsumerState<FacultyScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () {
               Navigator.of(ctx).pop();
-              ref.read(facultyNotifierProvider.notifier).deleteFaculty(faculty.id);
+              ref
+                  .read(facultyNotifierProvider.notifier)
+                  .deleteFaculty(faculty.id);
             },
             child: const Text('Remove', style: TextStyle(color: Colors.white)),
           ),
@@ -101,9 +118,13 @@ class _FacultyScreenState extends ConsumerState<FacultyScreen> {
 
     final totalCount = state.facultyList.length;
     final activeCount = state.facultyList.where((f) => f.isActive).length;
-    final totalClasses = state.facultyList.fold<int>(0, (sum, f) => sum + f.totalClasses);
+    final totalClasses = state.facultyList.fold<int>(
+      0,
+      (sum, f) => sum + f.totalClasses,
+    );
     final avgRating = totalCount > 0
-        ? state.facultyList.fold<double>(0.0, (sum, f) => sum + f.rating) / totalCount
+        ? state.facultyList.fold<double>(0.0, (sum, f) => sum + f.rating) /
+              totalCount
         : 0.0;
 
     return Scaffold(
@@ -129,381 +150,515 @@ class _FacultyScreenState extends ConsumerState<FacultyScreen> {
         child: ResponsiveLayout(
           child: RefreshIndicator(
             onRefresh: () => notifier.loadFaculty(),
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              children: [
-                // 1. KPI Telemetry Metrics
-                Row(
-                  children: [
-                    Expanded(
-                      child: StatKpiCard(
-                        label: 'Total Faculty',
-                        value: '$totalCount',
-                        icon: Icons.school_rounded,
-                        accentColor: AppColors.primaryForest,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: StatKpiCard(
-                        label: 'Active Faculty',
-                        value: '$activeCount',
-                        icon: Icons.check_circle_rounded,
-                        accentColor: AppColors.primaryForest,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: StatKpiCard(
-                        label: 'Avg Rating',
-                        value: avgRating > 0 ? avgRating.toStringAsFixed(1) : '5.0',
-                        icon: Icons.star_rounded,
-                        accentColor: Colors.amber,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: StatKpiCard(
-                        label: 'Total Classes',
-                        value: '$totalClasses',
-                        icon: Icons.video_camera_front_rounded,
-                        accentColor: AppColors.accentTerracotta,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // 2. Search Field
-                TextField(
-                  controller: _searchController,
-                  onChanged: (val) => notifier.setSearchQuery(val),
-                  decoration: InputDecoration(
-                    hintText: 'Search faculty by name, specialization, email...',
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear_rounded),
-                            onPressed: () {
-                              _searchController.clear();
-                              notifier.setSearchQuery('');
-                            },
-                          )
-                        : null,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // 3. Status Filters
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterChip('All Status', 'all', state.selectedStatus, (s) {
-                        notifier.setStatusFilter(s);
-                      }),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Active', 'active', state.selectedStatus, (s) {
-                        notifier.setStatusFilter(s);
-                      }),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Suspended', 'suspended', state.selectedStatus, (s) {
-                        notifier.setStatusFilter(s);
-                      }),
-                      const SizedBox(width: 8),
-                      _buildFilterChip('Inactive', 'inactive', state.selectedStatus, (s) {
-                        notifier.setStatusFilter(s);
-                      }),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // 4. Category Filter Chips
-                if (categoriesState.categories.isNotEmpty)
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildFilterChip('All Categories', 'all', state.selectedCategoryId, (c) {
-                          notifier.setCategoryFilter(c);
-                        }),
-                        ...categoriesState.categories.map((c) {
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: _buildFilterChip(c.name, c.id, state.selectedCategoryId, (id) {
-                              notifier.setCategoryFilter(id);
-                            }),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-
-                const SizedBox(height: 16),
-
-                // 5. Faculty Cards List
-                if (state.isLoading && state.facultyList.isEmpty)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: CircularProgressIndicator(color: AppColors.primaryForest),
-                    ),
-                  )
-                else if (state.filteredFaculty.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    alignment: Alignment.center,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.person_search_rounded,
-                          size: 56,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        // 1. KPI Telemetry Metrics
+                        Row(
+                          children: [
+                            Expanded(
+                              child: StatKpiCard(
+                                label: 'Total Faculty',
+                                value: '$totalCount',
+                                icon: Icons.school_rounded,
+                                accentColor: AppColors.primaryForest,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: StatKpiCard(
+                                label: 'Active Faculty',
+                                value: '$activeCount',
+                                icon: Icons.check_circle_rounded,
+                                accentColor: AppColors.primaryForest,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'No faculty found',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: StatKpiCard(
+                                label: 'Avg Rating',
+                                value: avgRating > 0
+                                    ? avgRating.toStringAsFixed(1)
+                                    : '5.0',
+                                icon: Icons.star_rounded,
+                                accentColor: Colors.amber,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: StatKpiCard(
+                                label: 'Total Classes',
+                                value: '$totalClasses',
+                                icon: Icons.video_camera_front_rounded,
+                                accentColor: AppColors.accentTerracotta,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // 2. Search Field
+                        TextField(
+                          controller: _searchController,
+                          onChanged: (val) => notifier.setSearchQuery(val),
+                          decoration: InputDecoration(
+                            hintText: 'Search faculty by name, specialization, email...',
+                            prefixIcon: const Icon(Icons.search_rounded),
+                            suffixIcon: _searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear_rounded),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      notifier.setSearchQuery('');
+                                    },
+                                  )
+                                : null,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Try adjusting your search query or filters',
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: state.filteredFaculty.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final faculty = state.filteredFaculty[index];
-                      final isActive = faculty.isActive;
 
-                      return AppCard(
-                        padding: const EdgeInsets.all(16),
-                        child: InkWell(
-                          onTap: () => context.push('/faculty/${faculty.id}'),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(height: 12),
+
+                        // 3. Status Filters
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
                             children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 24,
-                                    backgroundColor: AppColors.primaryForest.withValues(alpha: 0.15),
-                                    child: Text(
-                                      faculty.fullName.isNotEmpty
-                                          ? faculty.fullName.substring(0, 1).toUpperCase()
-                                          : 'F',
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w800,
-                                        color: AppColors.primaryForest,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                faculty.fullName,
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w800,
-                                                ),
-                                              ),
-                                            ),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: isActive
-                                                    ? AppColors.forestSoft
-                                                    : AppColors.error.withValues(alpha: 0.1),
-                                                borderRadius: BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                faculty.accountStatus.toUpperCase(),
-                                                style: TextStyle(
-                                                  fontSize: 9,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: isActive ? AppColors.primaryForest : AppColors.error,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          '${faculty.specialization} • ${faculty.qualifications}',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColors.accentTerracotta,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.work_history_outlined, size: 13, color: AppColors.textSecondary),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '${faculty.experienceYears} yrs exp',
-                                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
-                                            const SizedBox(width: 2),
-                                            Text(
-                                              faculty.rating.toStringAsFixed(1),
-                                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuButton<String>(
-                                    icon: const Icon(Icons.more_vert_rounded, size: 20),
-                                    onSelected: (val) {
-                                      switch (val) {
-                                        case 'profile':
-                                          context.push('/faculty/${faculty.id}');
-                                          break;
-                                        case 'edit':
-                                          AddEditFacultySheet.show(context, faculty: faculty);
-                                          break;
-                                        case 'status':
-                                          _showStatusDialog(faculty);
-                                          break;
-                                        case 'delete':
-                                          _confirmDelete(faculty);
-                                          break;
-                                      }
-                                    },
-                                    itemBuilder: (ctx) => [
-                                      const PopupMenuItem(
-                                        value: 'profile',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.person_outline_rounded, size: 18),
-                                            SizedBox(width: 8),
-                                            Text('View Profile'),
-                                          ],
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        value: 'edit',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.edit_outlined, size: 18),
-                                            SizedBox(width: 8),
-                                            Text('Edit Faculty'),
-                                          ],
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        value: 'status',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.toggle_on_outlined, size: 18),
-                                            SizedBox(width: 8),
-                                            Text('Change Status'),
-                                          ],
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        value: 'delete',
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
-                                            SizedBox(width: 8),
-                                            Text('Remove Faculty', style: TextStyle(color: AppColors.error)),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                              _buildFilterChip(
+                                'All Status',
+                                'all',
+                                state.selectedStatus,
+                                (s) {
+                                  notifier.setStatusFilter(s);
+                                },
                               ),
-
-                              const SizedBox(height: 12),
-                              const Divider(height: 1),
-                              const SizedBox(height: 10),
-
-                              // Contact & Category tags
-                              Row(
-                                children: [
-                                  const Icon(Icons.email_outlined, size: 14, color: AppColors.textSecondary),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      faculty.email,
-                                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const Icon(Icons.phone_outlined, size: 14, color: AppColors.textSecondary),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    faculty.phone,
-                                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                                  ),
-                                ],
+                              const SizedBox(width: 8),
+                              _buildFilterChip(
+                                'Active',
+                                'active',
+                                state.selectedStatus,
+                                (s) {
+                                  notifier.setStatusFilter(s);
+                                },
                               ),
-
-                              if (faculty.assignedCategories.isNotEmpty) ...[
-                                const SizedBox(height: 10),
-                                Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
-                                  children: faculty.assignedCategories.take(3).map((c) {
-                                    return Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.forestSoft,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        c.name,
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.primaryForest,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ],
+                              const SizedBox(width: 8),
+                              _buildFilterChip(
+                                'Suspended',
+                                'suspended',
+                                state.selectedStatus,
+                                (s) {
+                                  notifier.setStatusFilter(s);
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                              _buildFilterChip(
+                                'Inactive',
+                                'inactive',
+                                state.selectedStatus,
+                                (s) {
+                                  notifier.setStatusFilter(s);
+                                },
+                              ),
                             ],
                           ),
                         ),
-                      );
-                    },
-                  ),
 
-                const SizedBox(height: 80),
+                        const SizedBox(height: 8),
+
+                        // 4. Category Filter Chips
+                        if (categoriesState.categories.isNotEmpty)
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _buildFilterChip(
+                                  'All Categories',
+                                  'all',
+                                  state.selectedCategoryId,
+                                  (c) {
+                                    notifier.setCategoryFilter(c);
+                                  },
+                                ),
+                                ...categoriesState.categories.map((c) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: _buildFilterChip(
+                                      c.name,
+                                      c.id,
+                                      state.selectedCategoryId,
+                                      (id) {
+                                        notifier.setCategoryFilter(id);
+                                      },
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // 5. Faculty Cards List
+                if (state.isLoading && state.facultyList.isEmpty)
+                  const SliverFillRemaining(
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryForest,
+                        ),
+                      ),
+                    ),
+                  )
+                else if (state.filteredFaculty.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Container(
+                      padding: const EdgeInsets.all(32),
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.person_search_rounded,
+                            size: 56,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'No faculty found',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Try adjusting your search query or filters',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                    sliver: SliverList.separated(
+                      itemCount: state.filteredFaculty.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final faculty = state.filteredFaculty[index];
+                        final isActive = faculty.isActive;
+
+                        return AppCard(
+                          padding: const EdgeInsets.all(16),
+                          child: InkWell(
+                            onTap: () => context.push('/faculty/${faculty.id}'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 24,
+                                      backgroundColor: AppColors.primaryForest
+                                          .withValues(alpha: 0.15),
+                                      child: Text(
+                                        faculty.fullName.isNotEmpty
+                                            ? faculty.fullName
+                                                  .substring(0, 1)
+                                                  .toUpperCase()
+                                            : 'F',
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.primaryForest,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  faculty.fullName,
+                                                  style: const TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                              ),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 7,
+                                                      vertical: 3,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: isActive
+                                                      ? AppColors.forestSoft
+                                                      : AppColors.error
+                                                            .withValues(
+                                                              alpha: 0.1,
+                                                            ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Text(
+                                                  faculty.accountStatus
+                                                      .toUpperCase(),
+                                                  style: TextStyle(
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: isActive
+                                                        ? AppColors
+                                                              .primaryForest
+                                                        : AppColors.error,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '${faculty.specialization} • ${faculty.qualifications}',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.accentTerracotta,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.work_history_outlined,
+                                                size: 13,
+                                                color: AppColors.textSecondary,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '${faculty.experienceYears} yrs exp',
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              const Icon(
+                                                Icons.star_rounded,
+                                                size: 14,
+                                                color: Colors.amber,
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                faculty.rating.toStringAsFixed(
+                                                  1,
+                                                ),
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuButton<String>(
+                                      icon: const Icon(
+                                        Icons.more_vert_rounded,
+                                        size: 20,
+                                      ),
+                                      onSelected: (val) {
+                                        switch (val) {
+                                          case 'profile':
+                                            context.push(
+                                              '/faculty/${faculty.id}',
+                                            );
+                                            break;
+                                          case 'edit':
+                                            AddEditFacultySheet.show(
+                                              context,
+                                              faculty: faculty,
+                                            );
+                                            break;
+                                          case 'status':
+                                            _showStatusDialog(faculty);
+                                            break;
+                                          case 'delete':
+                                            _confirmDelete(faculty);
+                                            break;
+                                        }
+                                      },
+                                      itemBuilder: (ctx) => [
+                                        const PopupMenuItem(
+                                          value: 'profile',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.person_outline_rounded,
+                                                size: 18,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text('View Profile'),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'edit',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.edit_outlined,
+                                                size: 18,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text('Edit Faculty'),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'status',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.toggle_on_outlined,
+                                                size: 18,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text('Change Status'),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.delete_outline_rounded,
+                                                size: 18,
+                                                color: AppColors.error,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                'Remove Faculty',
+                                                style: TextStyle(
+                                                  color: AppColors.error,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 12),
+                                const Divider(height: 1),
+                                const SizedBox(height: 10),
+
+                                // Contact & Category tags
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.email_outlined,
+                                      size: 14,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        faculty.email,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.phone_outlined,
+                                      size: 14,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      faculty.phone,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                if (faculty.assignedCategories.isNotEmpty) ...[
+                                  const SizedBox(height: 10),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 6,
+                                    children: faculty.assignedCategories
+                                        .take(3)
+                                        .map((c) {
+                                          return Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.forestSoft,
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              c.name,
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.primaryForest,
+                                              ),
+                                            ),
+                                          );
+                                        })
+                                        .toList(),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
               ],
             ),
           ),

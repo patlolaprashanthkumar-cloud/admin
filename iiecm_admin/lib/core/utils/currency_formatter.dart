@@ -16,7 +16,8 @@ class CurrencyFormatter {
 
   /// Formats amount into Indian Rupee style, e.g. ₹25,000 or ₹25,000.50
   static String format(num amount, {bool showDecimals = false}) {
-    return showDecimals ? _inrDecimal.format(amount) : _inrStandard.format(amount);
+    return showDecimals
+        ? _inrDecimal.format(amount)
+        : _inrStandard.format(amount);
   }
 }
-

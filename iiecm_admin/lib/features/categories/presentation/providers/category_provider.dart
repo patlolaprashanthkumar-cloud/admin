@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import '../../data/repositories/supabase_category_repository.dart';
 import '../../domain/models/course_category.dart';
@@ -25,11 +26,13 @@ class CategoryState {
 
   List<CourseCategory> get filteredCategories {
     return categories.where((c) {
-      final matchesSearch = searchQuery.isEmpty ||
+      final matchesSearch =
+          searchQuery.isEmpty ||
           c.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
           c.description.toLowerCase().contains(searchQuery.toLowerCase());
 
-      final matchesStatus = statusFilter == 'all' ||
+      final matchesStatus =
+          statusFilter == 'all' ||
           (statusFilter == 'active' && c.isActive) ||
           (statusFilter == 'inactive' && !c.isActive);
 
@@ -60,7 +63,8 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
   final CategoryRepository _repository;
   final Ref? _ref;
 
-  CategoryNotifier(this._repository, [this._ref]) : super(const CategoryState()) {
+  CategoryNotifier(this._repository, [this._ref])
+    : super(const CategoryState()) {
     loadCategories();
   }
 
@@ -99,7 +103,8 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
 
   String _formatErrorMessage(dynamic e) {
     final str = e.toString();
-    if (str.contains('updated_at') || str.contains('has no field "updated_at"')) {
+    if (str.contains('updated_at') ||
+        str.contains('has no field "updated_at"')) {
       return 'Database schema missing "updated_at" on course_categories. Please execute migration 20261102000001.';
     }
     if (str.contains('23505') ||
@@ -140,7 +145,8 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
 
     if (isNameDuplicate(trimmedName)) {
       state = state.copyWith(
-        errorMessage: 'A category named "$trimmedName" already exists. Please choose a unique name.',
+        errorMessage:
+            'A category named "$trimmedName" already exists. Please choose a unique name.',
       );
       return false;
     }
@@ -155,7 +161,10 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
         isActive: isActive,
       );
       state = state.copyWith(
-        categories: [...state.categories.where((c) => c.id != created.id), created],
+        categories: [
+          ...state.categories.where((c) => c.id != created.id),
+          created,
+        ],
         isLoading: false,
         errorMessage: null,
       );
@@ -187,9 +196,11 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
     }
 
     // Do not flag the category currently being edited as a duplicate
-    if (trimmedName != null && isNameDuplicate(trimmedName, excludeCategoryId: id)) {
+    if (trimmedName != null &&
+        isNameDuplicate(trimmedName, excludeCategoryId: id)) {
       state = state.copyWith(
-        errorMessage: 'A category named "$trimmedName" already exists. Please choose a unique name.',
+        errorMessage:
+            'A category named "$trimmedName" already exists. Please choose a unique name.',
       );
       return false;
     }
@@ -206,7 +217,9 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
       );
       // Immediately reflect updated category in state
       state = state.copyWith(
-        categories: state.categories.map((c) => c.id == id ? updated : c).toList(),
+        categories: state.categories
+            .map((c) => c.id == id ? updated : c)
+            .toList(),
         isLoading: false,
         errorMessage: null,
       );
@@ -245,41 +258,45 @@ class CategoryNotifier extends StateNotifier<CategoryState> {
 
 final categoryNotifierProvider =
     StateNotifierProvider<CategoryNotifier, CategoryState>((ref) {
-  final repo = ref.watch(categoryRepositoryProvider);
-  return CategoryNotifier(repo, ref);
-});
+      final repo = ref.watch(categoryRepositoryProvider);
+      return CategoryNotifier(repo, ref);
+    });
 
-final categoryDetailFamily = FutureProvider.family<
-    ({
-      CourseCategory? category,
-      List<Map<String, dynamic>> courses,
-      List<Map<String, dynamic>> instructors,
-      List<Map<String, dynamic>> students
-    }),
-    String>((ref, categoryId) async {
-  final repo = ref.watch(categoryRepositoryProvider);
-  final cat = await repo.getCategoryById(categoryId);
-  final courses = await repo.getCoursesForCategory(categoryId);
-  final instructors = await repo.getInstructorsForCategory(categoryId);
-  final students = await repo.getStudentsForCategory(categoryId);
+final categoryDetailFamily =
+    FutureProvider.family<
+      ({
+        CourseCategory? category,
+        List<Map<String, dynamic>> courses,
+        List<Map<String, dynamic>> instructors,
+        List<Map<String, dynamic>> students,
+      }),
+      String
+    >((ref, categoryId) async {
+      final repo = ref.watch(categoryRepositoryProvider);
+      final cat = await repo.getCategoryById(categoryId);
+      final courses = await repo.getCoursesForCategory(categoryId);
+      final instructors = await repo.getInstructorsForCategory(categoryId);
+      final students = await repo.getStudentsForCategory(categoryId);
 
-  return (
-    category: cat,
-    courses: courses,
-    instructors: instructors,
-    students: students,
-  );
-});
+      return (
+        category: cat,
+        courses: courses,
+        instructors: instructors,
+        students: students,
+      );
+    });
 
 final studentCategoriesFamily =
     FutureProvider.family<List<CourseCategory>, String>((ref, studentId) async {
-  final repo = ref.watch(categoryRepositoryProvider);
-  return repo.getCategoriesForStudent(studentId);
-});
+      final repo = ref.watch(categoryRepositoryProvider);
+      return repo.getCategoriesForStudent(studentId);
+    });
 
 final instructorCategoriesFamily =
-    FutureProvider.family<List<CourseCategory>, String>((ref, instructorId) async {
-  final repo = ref.watch(categoryRepositoryProvider);
-  return repo.getCategoriesForInstructor(instructorId);
-});
-
+    FutureProvider.family<List<CourseCategory>, String>((
+      ref,
+      instructorId,
+    ) async {
+      final repo = ref.watch(categoryRepositoryProvider);
+      return repo.getCategoriesForInstructor(instructorId);
+    });

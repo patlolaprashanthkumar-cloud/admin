@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -8,10 +9,7 @@ import '../../domain/models/dashboard_stats.dart';
 class MonthlyTrendsChart extends StatelessWidget {
   final List<MonthlyMetricPoint> metrics;
 
-  const MonthlyTrendsChart({
-    super.key,
-    required this.metrics,
-  });
+  const MonthlyTrendsChart({super.key, required this.metrics});
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +49,9 @@ class MonthlyTrendsChart extends StatelessWidget {
       revenueSpots.add(FlSpot(i.toDouble(), normRev));
     }
 
-    final forestColor = isDark ? AppColors.forestLight : AppColors.primaryForest;
+    final forestColor = isDark
+        ? AppColors.forestLight
+        : AppColors.primaryForest;
     final terracottaColor = AppColors.accentTerracotta;
 
     return Column(
@@ -84,9 +84,15 @@ class MonthlyTrendsChart extends StatelessWidget {
               ),
               titlesData: FlTitlesData(
                 show: true,
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                leftTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -118,10 +124,13 @@ class MonthlyTrendsChart extends StatelessWidget {
               maxY: 110,
               lineTouchData: LineTouchData(
                 touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (_) => isDark ? AppColors.darkSurface : Colors.white,
+                  getTooltipColor: (_) =>
+                      isDark ? AppColors.darkSurface : Colors.white,
                   tooltipRoundedRadius: AppConstants.radiusMedium,
                   tooltipBorder: BorderSide(
-                    color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderNeutral,
                   ),
                   getTooltipItems: (touchedSpots) {
                     return touchedSpots.map((spot) {
@@ -163,12 +172,13 @@ class MonthlyTrendsChart extends StatelessWidget {
                   isStrokeCapRound: true,
                   dotData: FlDotData(
                     show: true,
-                    getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
-                      radius: 3.5,
-                      color: Colors.white,
-                      strokeWidth: 2.2,
-                      strokeColor: forestColor,
-                    ),
+                    getDotPainter: (spot, percent, barData, index) =>
+                        FlDotCirclePainter(
+                          radius: 3.5,
+                          color: Colors.white,
+                          strokeWidth: 2.2,
+                          strokeColor: forestColor,
+                        ),
                   ),
                   belowBarData: BarAreaData(
                     show: true,
@@ -192,12 +202,13 @@ class MonthlyTrendsChart extends StatelessWidget {
                   isStrokeCapRound: true,
                   dotData: FlDotData(
                     show: true,
-                    getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
-                      radius: 3.5,
-                      color: Colors.white,
-                      strokeWidth: 2.2,
-                      strokeColor: terracottaColor,
-                    ),
+                    getDotPainter: (spot, percent, barData, index) =>
+                        FlDotCirclePainter(
+                          radius: 3.5,
+                          color: Colors.white,
+                          strokeWidth: 2.2,
+                          strokeColor: terracottaColor,
+                        ),
                   ),
                   belowBarData: BarAreaData(
                     show: true,
@@ -226,10 +237,7 @@ class MonthlyTrendsChart extends StatelessWidget {
         Container(
           width: 9,
           height: 9,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
         Text(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../core/constants/app_constants.dart';
 
 /// Standardized input field for authentication forms
@@ -72,7 +73,10 @@ class AuthTextField extends StatelessWidget {
             suffixIcon: suffixIcon,
             filled: true,
             fillColor: theme.colorScheme.surfaceContainerLow,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
               borderSide: BorderSide.none,
@@ -92,16 +96,11 @@ class AuthTextField extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-              borderSide: BorderSide(
-                color: theme.colorScheme.error,
-              ),
+              borderSide: BorderSide(color: theme.colorScheme.error),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-              borderSide: BorderSide(
-                color: theme.colorScheme.error,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
             ),
           ),
         ),
@@ -109,4 +108,3 @@ class AuthTextField extends StatelessWidget {
     );
   }
 }
-

@@ -32,7 +32,10 @@ void main() {
     });
 
     test('Rejects invalid URLs', () {
-      expect(YouTubeHelper.isValidYouTubeUrl('https://example.com/video'), isFalse);
+      expect(
+        YouTubeHelper.isValidYouTubeUrl('https://example.com/video'),
+        isFalse,
+      );
       expect(YouTubeHelper.isValidYouTubeUrl('not a url'), isFalse);
       expect(YouTubeHelper.isValidYouTubeUrl(null), isFalse);
       expect(YouTubeHelper.isValidYouTubeUrl(''), isFalse);

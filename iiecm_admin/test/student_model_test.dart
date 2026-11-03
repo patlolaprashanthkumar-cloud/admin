@@ -12,18 +12,27 @@ class MockStudentRepository implements StudentRepository {
   }
 
   @override
-  Future<List<Student>> getStudents({String? categoryId, String? searchQuery, String? status}) async {
+  Future<List<Student>> getStudents({
+    String? categoryId,
+    String? searchQuery,
+    String? status,
+  }) async {
     var result = List<Student>.from(store);
     if (searchQuery != null && searchQuery.isNotEmpty) {
       final q = searchQuery.toLowerCase();
-      result = result.where((s) =>
-        s.fullName.toLowerCase().contains(q) ||
-        s.studentId.toLowerCase().contains(q) ||
-        s.email.toLowerCase().contains(q)
-      ).toList();
+      result = result
+          .where(
+            (s) =>
+                s.fullName.toLowerCase().contains(q) ||
+                s.studentId.toLowerCase().contains(q) ||
+                s.email.toLowerCase().contains(q),
+          )
+          .toList();
     }
     if (categoryId != null && categoryId.isNotEmpty && categoryId != 'all') {
-      result = result.where((s) => s.assignedCategories.any((c) => c.id == categoryId)).toList();
+      result = result
+          .where((s) => s.assignedCategories.any((c) => c.id == categoryId))
+          .toList();
     }
     if (status != null && status.isNotEmpty && status != 'all') {
       result = result.where((s) => s.accountStatus == status).toList();
@@ -52,15 +61,19 @@ class MockStudentRepository implements StudentRepository {
     String? city,
     String subscriptionPlan = 'basic',
   }) async {
-    final catModels = categoryIds.map((cid) => CourseCategory(
-      id: cid,
-      name: 'Category $cid',
-      description: 'Desc',
-      color: '#245B43',
-      isActive: true,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    )).toList();
+    final catModels = categoryIds
+        .map(
+          (cid) => CourseCategory(
+            id: cid,
+            name: 'Category $cid',
+            description: 'Desc',
+            color: '#245B43',
+            isActive: true,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        )
+        .toList();
 
     final newStudent = Student(
       id: 'student-${store.length + 1}',
@@ -70,7 +83,9 @@ class MockStudentRepository implements StudentRepository {
       phone: phone,
       educationLevel: educationLevel,
       qualification: qualification,
-      preferredCategory: catModels.isNotEmpty ? catModels.first.name : 'General',
+      preferredCategory: catModels.isNotEmpty
+          ? catModels.first.name
+          : 'General',
       city: city,
       country: 'India',
       subscriptionPlan: subscriptionPlan,
@@ -118,19 +133,26 @@ class MockStudentRepository implements StudentRepository {
   }
 
   @override
-  Future<void> updateStudentCategories(String studentId, List<String> categoryIds) async {
+  Future<void> updateStudentCategories(
+    String studentId,
+    List<String> categoryIds,
+  ) async {
     final idx = store.indexWhere((s) => s.id == studentId);
     if (idx != -1) {
       final current = store[idx];
-      final newCats = categoryIds.map((cid) => CourseCategory(
-        id: cid,
-        name: 'Updated $cid',
-        description: 'Desc',
-        color: '#245B43',
-        isActive: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      )).toList();
+      final newCats = categoryIds
+          .map(
+            (cid) => CourseCategory(
+              id: cid,
+              name: 'Updated $cid',
+              description: 'Desc',
+              color: '#245B43',
+              isActive: true,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+          )
+          .toList();
       store[idx] = Student(
         id: current.id,
         studentId: current.studentId,
@@ -153,23 +175,34 @@ class MockStudentRepository implements StudentRepository {
   }
 
   @override
-  Future<List<StudentCategoryLmsGroup>> getStudentCategoryLmsDetails(String studentId) async {
+  Future<List<StudentCategoryLmsGroup>> getStudentCategoryLmsDetails(
+    String studentId,
+  ) async {
     final student = await getStudentById(studentId);
     if (student == null) return [];
-    return student.assignedCategories.map((cat) => StudentCategoryLmsGroup(
-      category: cat,
-      courses: [
-        {'id': 'c1', 'title': 'Course 1', 'status': 'active', 'category_id': cat.id}
-      ],
-      instructors: [
-        {'id': 'inst1', 'name': 'Dr. Sharma', 'category_id': cat.id}
-      ],
-      liveClasses: [],
-      assessments: [
-        {'id': 'a1', 'title': 'Mid-term Quiz', 'score': 85}
-      ],
-      progressPercentage: 50.0,
-    )).toList();
+    return student.assignedCategories
+        .map(
+          (cat) => StudentCategoryLmsGroup(
+            category: cat,
+            courses: [
+              {
+                'id': 'c1',
+                'title': 'Course 1',
+                'status': 'active',
+                'category_id': cat.id,
+              },
+            ],
+            instructors: [
+              {'id': 'inst1', 'name': 'Dr. Sharma', 'category_id': cat.id},
+            ],
+            liveClasses: [],
+            assessments: [
+              {'id': 'a1', 'title': 'Mid-term Quiz', 'score': 85},
+            ],
+            progressPercentage: 50.0,
+          ),
+        )
+        .toList();
   }
 }
 
@@ -205,72 +238,81 @@ void main() {
       expect(student.enrolledCourseIds, isEmpty);
     });
 
-    test('Student.fromJson maps multi-category assignments and course enrollments', () {
-      final json = {
-        'id': 'std-102',
-        'student_id': 'IIECM-STU-002',
-        'full_name': 'Priya Nair',
-        'email': 'priya@example.com',
-        'phone': '+91 9876500000',
-        'education_level': 'Postgraduate',
-        'qualification': 'MD Emergency Care',
-        'preferred_category': 'Trauma Care',
-      };
+    test(
+      'Student.fromJson maps multi-category assignments and course enrollments',
+      () {
+        final json = {
+          'id': 'std-102',
+          'student_id': 'IIECM-STU-002',
+          'full_name': 'Priya Nair',
+          'email': 'priya@example.com',
+          'phone': '+91 9876500000',
+          'education_level': 'Postgraduate',
+          'qualification': 'MD Emergency Care',
+          'preferred_category': 'Trauma Care',
+        };
 
-      final cat1 = CourseCategory(
-        id: 'cat-em',
-        name: 'Emergency Medicine',
-        description: 'EM modules',
-        color: '#245B43',
-        isActive: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      final cat2 = CourseCategory(
-        id: 'cat-tc',
-        name: 'Trauma Care',
-        description: 'Trauma care modules',
-        color: '#C87552',
-        isActive: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+        final cat1 = CourseCategory(
+          id: 'cat-em',
+          name: 'Emergency Medicine',
+          description: 'EM modules',
+          color: '#245B43',
+          isActive: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        final cat2 = CourseCategory(
+          id: 'cat-tc',
+          name: 'Trauma Care',
+          description: 'Trauma care modules',
+          color: '#C87552',
+          isActive: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
 
-      final student = Student.fromJson(
-        json,
-        assignedCategories: [cat1, cat2],
-        enrolledCourseIds: ['course-1', 'course-2'],
-      );
+        final student = Student.fromJson(
+          json,
+          assignedCategories: [cat1, cat2],
+          enrolledCourseIds: ['course-1', 'course-2'],
+        );
 
-      expect(student.assignedCategories.length, 2);
-      expect(student.assignedCategories.first.name, 'Emergency Medicine');
-      expect(student.assignedCategories.last.name, 'Trauma Care');
-      expect(student.enrolledCourseIds, containsAll(['course-1', 'course-2']));
-    });
+        expect(student.assignedCategories.length, 2);
+        expect(student.assignedCategories.first.name, 'Emergency Medicine');
+        expect(student.assignedCategories.last.name, 'Trauma Care');
+        expect(
+          student.enrolledCourseIds,
+          containsAll(['course-1', 'course-2']),
+        );
+      },
+    );
 
-    test('Student.toJson serializes required payload for Supabase insertion', () {
-      final student = Student(
-        id: 'temp-id',
-        studentId: 'IIECM-STU-099',
-        fullName: 'Dr. John Doe',
-        email: 'john@iiecm.com',
-        phone: '+91 9123456789',
-        educationLevel: 'Postgraduate',
-        qualification: 'MBBS, DNB',
-        preferredCategory: 'Pediatric Emergency',
-        city: 'Mumbai',
-        country: 'India',
-        createdAt: DateTime(2026, 1, 1),
-      );
+    test(
+      'Student.toJson serializes required payload for Supabase insertion',
+      () {
+        final student = Student(
+          id: 'temp-id',
+          studentId: 'IIECM-STU-099',
+          fullName: 'Dr. John Doe',
+          email: 'john@iiecm.com',
+          phone: '+91 9123456789',
+          educationLevel: 'Postgraduate',
+          qualification: 'MBBS, DNB',
+          preferredCategory: 'Pediatric Emergency',
+          city: 'Mumbai',
+          country: 'India',
+          createdAt: DateTime(2026, 1, 1),
+        );
 
-      final json = student.toJson();
+        final json = student.toJson();
 
-      expect(json['student_id'], 'IIECM-STU-099');
-      expect(json['full_name'], 'Dr. John Doe');
-      expect(json['email'], 'john@iiecm.com');
-      expect(json['city'], 'Mumbai');
-      expect(json['preferred_category'], 'Pediatric Emergency');
-    });
+        expect(json['student_id'], 'IIECM-STU-099');
+        expect(json['full_name'], 'Dr. John Doe');
+        expect(json['email'], 'john@iiecm.com');
+        expect(json['city'], 'Mumbai');
+        expect(json['preferred_category'], 'Pediatric Emergency');
+      },
+    );
 
     test('StudentCategoryLmsGroup stores categorized modules and calculates progress', () {
       final cat = CourseCategory(
@@ -293,7 +335,10 @@ void main() {
           {'name': 'Dr. Ramesh Kumar'},
         ],
         liveClasses: [
-          {'topic': 'Live Simulation: STEMI', 'start_time': '2026-11-10T14:00:00Z'},
+          {
+            'topic': 'Live Simulation: STEMI',
+            'start_time': '2026-11-10T14:00:00Z',
+          },
         ],
         assessments: [
           {'title': 'Cardiac Quiz 1', 'max_score': 100, 'score': 92},
@@ -411,28 +456,32 @@ void main() {
       expect(notifier.state.filteredStudents.length, 2);
     });
 
-    test('Multi-category student registration persists and updates state', () async {
-      final notifier = StudentsNotifier(repo);
-      await notifier.loadStudents();
+    test(
+      'Multi-category student registration persists and updates state',
+      () async {
+        final notifier = StudentsNotifier(repo);
+        await notifier.loadStudents();
 
-      final created = await notifier.registerStudent(
-        fullName: 'Kavita Joshi',
-        email: 'kavita@hospital.org',
-        phone: '9999900003',
-        educationLevel: 'Resident',
-        qualification: 'MD EM',
-        categoryIds: ['cat-a', 'cat-b'],
-        courseIds: ['c-1'],
-      );
+        final created = await notifier.registerStudent(
+          fullName: 'Kavita Joshi',
+          email: 'kavita@hospital.org',
+          phone: '9999900003',
+          educationLevel: 'Resident',
+          qualification: 'MD EM',
+          categoryIds: ['cat-a', 'cat-b'],
+          courseIds: ['c-1'],
+        );
 
-      expect(created, isNotNull);
-      expect(created!.fullName, 'Kavita Joshi');
-      expect(created.assignedCategories.length, 2);
-      expect(notifier.state.students.length, 3);
-    });
+        expect(created, isNotNull);
+        expect(created!.fullName, 'Kavita Joshi');
+        expect(created.assignedCategories.length, 2);
+        expect(notifier.state.students.length, 3);
+      },
+    );
   });
 }
 
 extension on StudentsState {
-  int filteredFilteredStudentsWithCatA(StudentsNotifier n) => n.state.filteredStudents.length;
+  int filteredFilteredStudentsWithCatA(StudentsNotifier n) =>
+      n.state.filteredStudents.length;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_constants.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
@@ -101,7 +102,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        labelStyle: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+        labelStyle: TextStyle(
+          color: AppColors.textSecondary,
+          fontWeight: FontWeight.w500,
+        ),
         hintStyle: TextStyle(color: AppColors.textMuted),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
@@ -113,7 +117,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-          borderSide: const BorderSide(color: AppColors.primaryForest, width: 1.8),
+          borderSide: const BorderSide(
+            color: AppColors.primaryForest,
+            width: 1.8,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
@@ -195,10 +202,9 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 1,
         centerTitle: false,
-        titleTextStyle: AppTypography.createTextTheme(baseTheme.textTheme).titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
+        titleTextStyle: AppTypography.createTextTheme(baseTheme.textTheme)
+            .titleLarge
+            ?.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
       ),
       cardTheme: CardThemeData(
         color: AppColors.darkSurface,

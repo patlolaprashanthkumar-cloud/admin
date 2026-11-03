@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -22,100 +23,22 @@ class MoreHubsScreen extends StatelessWidget {
       body: SafeArea(
         child: ResponsiveLayout(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 1. Central Curriculum Categories Management Suite
-                AppCard(
-                  child: InkWell(
-                    onTap: () => context.push('/categories'),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryForest.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.category_rounded,
-                                color: AppColors.primaryForest,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Course Categories',
-                                        style: theme.textTheme.titleMedium?.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.forestSoft,
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: const Text(
-                                          'Active Feature',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.primaryForest,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 3),
-                                  const Text(
-                                    'Institutional taxonomy, academic subject streams & curriculum organization',
-                                    style: TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 16,
-                              color: AppColors.textSecondary,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () => context.push('/categories'),
-                                icon: const Icon(Icons.list_alt_rounded, size: 16),
-                                label: const Text('Manage Categories'),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                _buildSuiteCard(
+                  context,
+                  title: 'Course Categories',
+                  description: 'Institutional taxonomy, academic subject streams & curriculum organization',
+                  icon: Icons.category_rounded,
+                  route: '/categories',
+                  theme: theme,
+                  isDark: isDark,
+                  buttonLabel: 'Manage Categories',
+                  buttonIcon: Icons.list_alt_rounded,
                 ),
                 const SizedBox(height: 16),
 
@@ -165,7 +88,20 @@ class MoreHubsScreen extends StatelessWidget {
                   theme: theme,
                   isDark: isDark,
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+
+                // 6. Fee Reconciliation & Payments Suite
+                _buildSuiteCard(
+                  context,
+                  title: 'Fee Payments & Invoices',
+                  description: 'Financial ledger, transaction receipts, bank UTR verification, refund audits & reports',
+                  icon: Icons.payments_rounded,
+                  route: '/payments',
+                  theme: theme,
+                  isDark: isDark,
+                  buttonLabel: 'Open Financial Suite',
+                  buttonIcon: Icons.receipt_long_rounded,
+                ),
               ],
             ),
           ),
@@ -182,6 +118,8 @@ class MoreHubsScreen extends StatelessWidget {
     required String route,
     required ThemeData theme,
     required bool isDark,
+    String? buttonLabel,
+    IconData? buttonIcon,
   }) {
     return AppCard(
       child: InkWell(
@@ -205,19 +143,25 @@ class MoreHubsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                              ),
+                          Text(
+                            title,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.forestSoft,
                               borderRadius: BorderRadius.circular(6),
@@ -233,11 +177,13 @@ class MoreHubsScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 4),
                       Text(
                         description,
                         style: TextStyle(
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -257,8 +203,11 @@ class MoreHubsScreen extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => context.push(route),
-                    icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                    label: Text('Open $title'),
+                    icon: Icon(
+                      buttonIcon ?? Icons.open_in_new_rounded,
+                      size: 16,
+                    ),
+                    label: Text(buttonLabel ?? 'Open $title'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 10),
                     ),

@@ -34,8 +34,8 @@ class AppColors {
   // --- Status & Feedback Colors (Brand Harmonized) ---
   static const Color success = Color(0xFF245B43); // Forest Green
   static const Color warning = Color(0xFFD97706); // Warm Amber
-  static const Color error = Color(0xFFC53030);   // Deep Red
-  static const Color info = Color(0xFF2E6F8E);    // Slate Blue
+  static const Color error = Color(0xFFC53030); // Deep Red
+  static const Color info = Color(0xFF2E6F8E); // Slate Blue
 
   // --- Backwards Compatibility Aliases ---
   static const Color primaryNavy = primaryForest;
@@ -57,6 +57,7 @@ class AppColors {
   static const Color darkBackground = Color(0xFF191F1C);
   static const Color darkSurface = Color(0xFF232A26);
   static const Color darkSurfaceContainerLow = Color(0xFF1E2521);
+  static const Color darkSurfaceVariant = darkSurfaceContainerLow;
   static const Color darkTextPrimary = Color(0xFFF5F0E5);
   static const Color darkTextSecondary = Color(0xFFA4ADA3);
   static const Color darkBorder = Color(0xFF38423B);

@@ -29,7 +29,8 @@ class YouTubeHelper {
     final trimmed = urlOrId.trim();
 
     String videoId;
-    if (trimmed.length == 11 && RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(trimmed)) {
+    if (trimmed.length == 11 &&
+        RegExp(r'^[a-zA-Z0-9_-]{11}$').hasMatch(trimmed)) {
       videoId = trimmed;
     } else {
       final extracted = extractVideoId(trimmed);
@@ -43,7 +44,9 @@ class YouTubeHelper {
 
   /// Returns the Max Resolution (1280x720) thumbnail URL if available
   static String? getMaxResThumbnailUrl(String? urlOrId) {
-    final videoId = extractVideoId(urlOrId) ?? (urlOrId != null && urlOrId.length == 11 ? urlOrId : null);
+    final videoId =
+        extractVideoId(urlOrId) ??
+        (urlOrId != null && urlOrId.length == 11 ? urlOrId : null);
     if (videoId == null) return null;
     return 'https://img.youtube.com/vi/$videoId/maxresdefault.jpg';
   }

@@ -28,4 +28,3 @@ enum UserRole {
   /// Returns true only if the user is a Super Admin
   bool get isSuperAdmin => this == UserRole.superAdmin;
 }
-

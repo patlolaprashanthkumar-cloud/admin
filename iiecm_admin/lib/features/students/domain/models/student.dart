@@ -99,4 +99,3 @@ class StudentCategoryLmsGroup {
     this.progressPercentage = 0.0,
   });
 }
-

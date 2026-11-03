@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -10,13 +11,11 @@ import '../widgets/category_form_sheet.dart';
 class CategoryDetailScreen extends ConsumerStatefulWidget {
   final String categoryId;
 
-  const CategoryDetailScreen({
-    super.key,
-    required this.categoryId,
-  });
+  const CategoryDetailScreen({super.key, required this.categoryId});
 
   @override
-  ConsumerState<CategoryDetailScreen> createState() => _CategoryDetailScreenState();
+  ConsumerState<CategoryDetailScreen> createState() =>
+      _CategoryDetailScreenState();
 }
 
 class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
@@ -60,40 +59,47 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => ref.invalidate(categoryDetailFamily(widget.categoryId)),
+            onPressed: () =>
+                ref.invalidate(categoryDetailFamily(widget.categoryId)),
           ),
           IconButton(
             icon: const Icon(Icons.edit_rounded),
             onPressed: () {
               final cat = detailAsync.value?.category;
               if (cat == null) return;
-              final allCategories = ref.read(categoryNotifierProvider).categories;
+              final allCategories = ref
+                  .read(categoryNotifierProvider)
+                  .categories;
               CategoryFormSheet.show(
                 context,
                 initialCategory: cat,
                 existingCategories: allCategories,
-                onSave: ({
-                  required String name,
-                  required String description,
-                  required String color,
-                  String? iconName,
-                  bool isActive = true,
-                }) async {
-                  final notifier = ref.read(categoryNotifierProvider.notifier);
-                  final ok = await notifier.updateCategory(
-                    cat.id,
-                    name: name,
-                    description: description,
-                    color: color,
-                    iconName: iconName,
-                    isActive: isActive,
-                  );
-                  if (ok) {
-                    ref.invalidate(categoryDetailFamily(widget.categoryId));
-                    return null;
-                  }
-                  return notifier.errorMessage ?? 'Failed to update category.';
-                },
+                onSave:
+                    ({
+                      required String name,
+                      required String description,
+                      required String color,
+                      String? iconName,
+                      bool isActive = true,
+                    }) async {
+                      final notifier = ref.read(
+                        categoryNotifierProvider.notifier,
+                      );
+                      final ok = await notifier.updateCategory(
+                        cat.id,
+                        name: name,
+                        description: description,
+                        color: color,
+                        iconName: iconName,
+                        isActive: isActive,
+                      );
+                      if (ok) {
+                        ref.invalidate(categoryDetailFamily(widget.categoryId));
+                        return null;
+                      }
+                      return notifier.errorMessage ??
+                          'Failed to update category.';
+                    },
               );
             },
           ),
@@ -109,14 +115,28 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
+                const Icon(
+                  Icons.error_outline_rounded,
+                  size: 48,
+                  color: AppColors.error,
+                ),
                 const SizedBox(height: 12),
-                Text('Failed to load category', style: theme.textTheme.titleMedium),
+                Text(
+                  'Failed to load category',
+                  style: theme.textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
-                Text(err.toString(), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text(
+                  err.toString(),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 FilledButton(
-                  onPressed: () => ref.invalidate(categoryDetailFamily(widget.categoryId)),
+                  onPressed: () =>
+                      ref.invalidate(categoryDetailFamily(widget.categoryId)),
                   child: const Text('Retry'),
                 ),
               ],
@@ -148,7 +168,11 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                                 color: catColor.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              child: Icon(Icons.category_rounded, color: catColor, size: 28),
+                              child: Icon(
+                                Icons.category_rounded,
+                                color: catColor,
+                                size: 28,
+                              ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(
@@ -166,15 +190,24 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                                   Row(
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: cat.isActive
                                               ? AppColors.forestSoft
-                                              : Colors.grey.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(6),
+                                              : Colors.grey.withValues(
+                                                  alpha: 0.15,
+                                                ),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
                                         ),
                                         child: Text(
-                                          cat.isActive ? 'Active Stream' : 'Inactive Stream',
+                                          cat.isActive
+                                              ? 'Active Stream'
+                                              : 'Inactive Stream',
                                           style: TextStyle(
                                             color: cat.isActive
                                                 ? AppColors.primaryForest
@@ -252,11 +285,14 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                     children: [
                       // Courses List
                       data.courses.isEmpty
-                          ? const Center(child: Text('No courses mapped to this category'))
+                          ? const Center(
+                              child: Text('No courses mapped to this category'),
+                            )
                           : ListView.separated(
                               padding: const EdgeInsets.all(16),
                               itemCount: data.courses.length,
-                              separatorBuilder: (_, _) => const SizedBox(height: 10),
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 10),
                               itemBuilder: (context, index) {
                                 final course = data.courses[index];
                                 return AppCard(
@@ -268,22 +304,32 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                                         color: AppColors.forestSoft,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: const Icon(Icons.book_rounded, color: AppColors.primaryForest),
+                                      child: const Icon(
+                                        Icons.book_rounded,
+                                        color: AppColors.primaryForest,
+                                      ),
                                     ),
                                     title: Text(
                                       course['title']?.toString() ?? 'Course',
-                                      style: const TextStyle(fontWeight: FontWeight.w700),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                     subtitle: Text(
                                       '${course['duration_weeks'] ?? 8} weeks · Fee: ${CurrencyFormatter.format((course['fee'] as num?)?.toDouble() ?? 0)}',
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                     trailing: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: course['status'] == 'published'
                                             ? AppColors.forestSoft
-                                            : Colors.grey.withValues(alpha: 0.15),
+                                            : Colors.grey.withValues(
+                                                alpha: 0.15,
+                                              ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -304,11 +350,16 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
 
                       // Instructors List
                       data.instructors.isEmpty
-                          ? const Center(child: Text('No faculty instructors teaching in this category'))
+                          ? const Center(
+                              child: Text(
+                                'No faculty instructors teaching in this category',
+                              ),
+                            )
                           : ListView.separated(
                               padding: const EdgeInsets.all(16),
                               itemCount: data.instructors.length,
-                              separatorBuilder: (_, _) => const SizedBox(height: 10),
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 10),
                               itemBuilder: (context, index) {
                                 final ins = data.instructors[index];
                                 return AppCard(
@@ -317,7 +368,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                                     leading: CircleAvatar(
                                       backgroundColor: AppColors.terracottaSoft,
                                       child: Text(
-                                        (ins['full_name']?.toString() ?? 'I').substring(0, 1),
+                                        (ins['full_name']?.toString() ?? 'I')
+                                            .substring(0, 1),
                                         style: const TextStyle(
                                           color: AppColors.accentTerracotta,
                                           fontWeight: FontWeight.w800,
@@ -325,11 +377,16 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                                       ),
                                     ),
                                     title: Text(
-                                      ins['full_name']?.toString() ?? 'Faculty Member',
-                                      style: const TextStyle(fontWeight: FontWeight.w700),
+                                      ins['full_name']?.toString() ??
+                                          'Faculty Member',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                     subtitle: Text(
-                                      ins['specialization']?.toString() ?? ins['email']?.toString() ?? '',
+                                      ins['specialization']?.toString() ??
+                                          ins['email']?.toString() ??
+                                          '',
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                   ),
@@ -339,11 +396,16 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
 
                       // Students List
                       data.students.isEmpty
-                          ? const Center(child: Text('No students enrolled in this category'))
+                          ? const Center(
+                              child: Text(
+                                'No students enrolled in this category',
+                              ),
+                            )
                           : ListView.separated(
                               padding: const EdgeInsets.all(16),
                               itemCount: data.students.length,
-                              separatorBuilder: (_, _) => const SizedBox(height: 10),
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 10),
                               itemBuilder: (context, index) {
                                 final stu = data.students[index];
                                 return AppCard(
@@ -352,7 +414,8 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                                     leading: CircleAvatar(
                                       backgroundColor: AppColors.forestSoft,
                                       child: Text(
-                                        (stu['full_name']?.toString() ?? 'S').substring(0, 1),
+                                        (stu['full_name']?.toString() ?? 'S')
+                                            .substring(0, 1),
                                         style: const TextStyle(
                                           color: AppColors.primaryForest,
                                           fontWeight: FontWeight.w800,
@@ -361,26 +424,35 @@ class _CategoryDetailScreenState extends ConsumerState<CategoryDetailScreen>
                                     ),
                                     title: Text(
                                       stu['full_name']?.toString() ?? 'Student',
-                                      style: const TextStyle(fontWeight: FontWeight.w700),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
                                     ),
                                     subtitle: Text(
                                       '${stu['student_id'] ?? ''} · ${stu['email'] ?? ''}',
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                     trailing: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: stu['account_status'] == 'active'
                                             ? AppColors.forestSoft
-                                            : Colors.grey.withValues(alpha: 0.15),
+                                            : Colors.grey.withValues(
+                                                alpha: 0.15,
+                                              ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
-                                        stu['account_status']?.toString() ?? 'active',
+                                        stu['account_status']?.toString() ??
+                                            'active',
                                         style: TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
-                                          color: stu['account_status'] == 'active'
+                                          color:
+                                              stu['account_status'] == 'active'
                                               ? AppColors.primaryForest
                                               : AppColors.textSecondary,
                                         ),

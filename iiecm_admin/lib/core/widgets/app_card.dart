@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../app/theme/app_colors.dart';
 import '../constants/app_constants.dart';
 
@@ -28,7 +29,9 @@ class AppCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final defaultBg = isDark ? theme.colorScheme.surfaceContainerLow : Colors.white;
+    final defaultBg = isDark
+        ? theme.colorScheme.surfaceContainerLow
+        : Colors.white;
     final defaultBorder = BorderSide(
       color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
       width: 1,
@@ -50,10 +53,7 @@ class AppCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
-        child: Padding(
-          padding: padding,
-          child: child,
-        ),
+        child: Padding(padding: padding, child: child),
       ),
     );
 

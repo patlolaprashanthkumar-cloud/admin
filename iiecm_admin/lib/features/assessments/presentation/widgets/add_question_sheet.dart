@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../domain/models/question.dart';
+import '../../domain/models/question.dart';
 import '../providers/assessment_provider.dart';
 
 class AddQuestionSheet extends ConsumerStatefulWidget {
@@ -56,8 +57,12 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
   void initState() {
     super.initState();
     final q = widget.existingQuestion;
-    _questionTextController = TextEditingController(text: q?.questionText ?? '');
-    _marksController = TextEditingController(text: q != null ? q.marks.toString() : '1');
+    _questionTextController = TextEditingController(
+      text: q?.questionText ?? '',
+    );
+    _marksController = TextEditingController(
+      text: q != null ? q.marks.toString() : '1',
+    );
     _type = q?.type ?? 'mcq';
 
     if (q != null && q.options.isNotEmpty) {
@@ -120,15 +125,21 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
         final text = _optionControllers[i].text.trim();
         if (text.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Please fill Option ${String.fromCharCode(65 + i)}')),
+            SnackBar(
+              content: Text(
+                'Please fill Option ${String.fromCharCode(65 + i)}',
+              ),
+            ),
           );
           return;
         }
-        options.add(QuestionOption(
-          id: 'opt_${i + 1}',
-          text: text,
-          isCorrect: i == _correctOptionIndex,
-        ));
+        options.add(
+          QuestionOption(
+            id: 'opt_${i + 1}',
+            text: text,
+            isCorrect: i == _correctOptionIndex,
+          ),
+        );
       }
     }
 
@@ -144,7 +155,8 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
         options: options,
         marks: marks,
         type: _type,
-        orderIndex: widget.existingQuestion?.orderIndex ?? widget.nextOrderIndex,
+        orderIndex:
+            widget.existingQuestion?.orderIndex ?? widget.nextOrderIndex,
         createdAt: widget.existingQuestion?.createdAt ?? DateTime.now(),
       );
 
@@ -162,14 +174,19 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
       Navigator.of(context).pop(true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(isEditing ? 'Question updated' : 'Question added to assessment'),
+          content: Text(
+            isEditing ? 'Question updated' : 'Question added to assessment',
+          ),
           backgroundColor: AppColors.primaryForest,
         ),
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -184,14 +201,18 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
     final mediaQuery = MediaQuery.of(context);
     final bottomInset = mediaQuery.viewInsets.bottom;
     final availableHeight = mediaQuery.size.height - mediaQuery.padding.top;
-    final effectiveHeight = (availableHeight - bottomInset) * 0.90;
+    final maxSheetHeight = availableHeight - bottomInset;
+    final effectiveHeight = maxSheetHeight * 0.90;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        height: effectiveHeight.clamp(320.0, availableHeight),
+        height: effectiveHeight.clamp(
+          260.0,
+          maxSheetHeight > 260.0 ? maxSheetHeight : availableHeight,
+        ),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: const BorderRadius.vertical(
@@ -231,7 +252,11 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
                       color: AppColors.primaryForest.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.help_outline_rounded, color: AppColors.primaryForest, size: 22),
+                    child: const Icon(
+                      Icons.help_outline_rounded,
+                      color: AppColors.primaryForest,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -242,14 +267,18 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
                           isEditing ? 'Edit Question' : 'Add Question to Exam',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         Text(
                           'Configure question stem, options, and designated correct answer',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -270,22 +299,36 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
               child: Form(
                 key: _formKey,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   children: [
                     // Question Type & Marks
                     Row(
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _type,
+                            initialValue: _type,
                             decoration: const InputDecoration(
                               labelText: 'Question Type',
-                              prefixIcon: Icon(Icons.format_list_bulleted_rounded),
+                              prefixIcon: Icon(
+                                Icons.format_list_bulleted_rounded,
+                              ),
                             ),
                             items: const [
-                              DropdownMenuItem(value: 'mcq', child: Text('Multiple Choice (MCQ)')),
-                              DropdownMenuItem(value: 'true_false', child: Text('True / False')),
-                              DropdownMenuItem(value: 'short_answer', child: Text('Short Answer')),
+                              DropdownMenuItem(
+                                value: 'mcq',
+                                child: Text('Multiple Choice (MCQ)'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'true_false',
+                                child: Text('True / False'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'short_answer',
+                                child: Text('Short Answer'),
+                              ),
                             ],
                             onChanged: (val) {
                               if (val != null) {
@@ -293,12 +336,19 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
                                   _type = val;
                                   if (val == 'true_false') {
                                     _optionControllers.clear();
-                                    _optionControllers.add(TextEditingController(text: 'True'));
-                                    _optionControllers.add(TextEditingController(text: 'False'));
+                                    _optionControllers.add(
+                                      TextEditingController(text: 'True'),
+                                    );
+                                    _optionControllers.add(
+                                      TextEditingController(text: 'False'),
+                                    );
                                     _correctOptionIndex = 0;
-                                  } else if (val == 'mcq' && _optionControllers.length < 4) {
+                                  } else if (val == 'mcq' &&
+                                      _optionControllers.length < 4) {
                                     while (_optionControllers.length < 4) {
-                                      _optionControllers.add(TextEditingController());
+                                      _optionControllers.add(
+                                        TextEditingController(),
+                                      );
                                     }
                                   }
                                 });
@@ -316,8 +366,12 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
                               prefixIcon: Icon(Icons.grade_outlined),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (int.tryParse(v) == null) return 'Must be a number';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (int.tryParse(v) == null) {
+                                return 'Must be a number';
+                              }
                               return null;
                             },
                           ),
@@ -335,7 +389,9 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
                         hintText: 'e.g. Which of the following is the first-line vasopressor in septic shock?',
                         alignLabelWithHint: true,
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter question text' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Please enter question text'
+                          : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -348,14 +404,19 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
                             'Options & Correct Answer',
                             style: theme.textTheme.labelLarge?.copyWith(
                               fontWeight: FontWeight.w700,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           if (_type == 'mcq' && _optionControllers.length < 6)
                             TextButton.icon(
                               onPressed: _addOption,
                               icon: const Icon(Icons.add_rounded, size: 14),
-                              label: const Text('Add Option', style: TextStyle(fontSize: 11)),
+                              label: const Text(
+                                'Add Option',
+                                style: TextStyle(fontSize: 11),
+                              ),
                             ),
                         ],
                       ),
@@ -364,64 +425,89 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
                         'Select the radio button next to the correct answer choice.',
                         style: TextStyle(
                           fontSize: 11,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 12),
 
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _optionControllers.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
-                        itemBuilder: (context, i) {
-                          final label = String.fromCharCode(65 + i);
-                          final isCorrect = _correctOptionIndex == i;
+                      RadioGroup<int>(
+                        groupValue: _correctOptionIndex,
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() => _correctOptionIndex = val);
+                          }
+                        },
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _optionControllers.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 10),
+                          itemBuilder: (context, i) {
+                            final label = String.fromCharCode(65 + i);
+                            final isCorrect = _correctOptionIndex == i;
 
-                          return Row(
-                            children: [
-                              Radio<int>(
-                                value: i,
-                                groupValue: _correctOptionIndex,
-                                activeColor: AppColors.primaryForest,
-                                onChanged: (val) {
-                                  if (val != null) setState(() => _correctOptionIndex = val);
-                                },
-                              ),
-                              Expanded(
-                                child: TextFormField(
-                                  controller: _optionControllers[i],
-                                  readOnly: _type == 'true_false',
-                                  decoration: InputDecoration(
-                                    labelText: 'Option $label ${isCorrect ? '(Correct Answer)' : ''}',
-                                    suffixIcon: isCorrect
-                                        ? const Icon(Icons.check_circle_rounded, color: AppColors.primaryForest)
-                                        : null,
+                            return Row(
+                              children: [
+                                Radio<int>(
+                                  value: i,
+                                  activeColor: AppColors.primaryForest,
+                                ),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _optionControllers[i],
+                                    readOnly: _type == 'true_false',
+                                    decoration: InputDecoration(
+                                      labelText:
+                                          'Option $label ${isCorrect ? '(Correct Answer)' : ''}',
+                                      suffixIcon: isCorrect
+                                          ? const Icon(
+                                              Icons.check_circle_rounded,
+                                              color: AppColors.primaryForest,
+                                            )
+                                          : null,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              if (_type == 'mcq' && _optionControllers.length > 2) ...[
-                                const SizedBox(width: 4),
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline_rounded, color: AppColors.error, size: 20),
-                                  onPressed: () => _removeOption(i),
-                                ),
+                                if (_type == 'mcq' &&
+                                    _optionControllers.length > 2) ...[
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline_rounded,
+                                      color: AppColors.error,
+                                      size: 20,
+                                    ),
+                                    onPressed: () => _removeOption(i),
+                                  ),
+                                ],
                               ],
-                            ],
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ] else ...[
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkSurface : AppColors.warmCream,
+                          color: isDark
+                              ? AppColors.darkSurface
+                              : AppColors.warmCream,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.divider),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.divider,
+                          ),
                         ),
                         child: const Text(
                           'Candidates will type in their written response. Faculty can evaluate answers during grading.',
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
                     ],
@@ -440,14 +526,18 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface : AppColors.surface,
                   border: Border(
-                    top: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.divider),
+                    top: BorderSide(
+                      color: isDark ? AppColors.darkBorder : AppColors.divider,
+                    ),
                   ),
                 ),
                 child: Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: const Text('Cancel'),
                       ),
                     ),
@@ -465,7 +555,9 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : Text(isEditing ? 'Save Changes' : 'Add Question'),
@@ -481,4 +573,3 @@ class _AddQuestionSheetState extends ConsumerState<AddQuestionSheet> {
     );
   }
 }
-

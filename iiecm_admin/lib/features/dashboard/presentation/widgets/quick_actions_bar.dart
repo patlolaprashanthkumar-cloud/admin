@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 
@@ -84,7 +85,14 @@ class QuickActionsBar extends StatelessWidget {
 
   Widget _buildActionButton(
     BuildContext context,
-    ({String label, IconData icon, Color color, Color bgColor, VoidCallback onTap}) item,
+    ({
+      String label,
+      IconData icon,
+      Color color,
+      Color bgColor,
+      VoidCallback onTap,
+    })
+    item,
   ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -118,14 +126,12 @@ class QuickActionsBar extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: isDark ? item.color.withValues(alpha: 0.2) : item.bgColor,
+                  color: isDark
+                      ? item.color.withValues(alpha: 0.2)
+                      : item.bgColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  item.icon,
-                  size: 19,
-                  color: item.color,
-                ),
+                child: Icon(item.icon, size: 19, color: item.color),
               ),
               const SizedBox(height: 6),
               Text(

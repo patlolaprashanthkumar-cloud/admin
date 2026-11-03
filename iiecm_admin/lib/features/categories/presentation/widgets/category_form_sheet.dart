@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../domain/models/course_category.dart';
@@ -12,7 +13,8 @@ class CategoryFormSheet extends StatefulWidget {
     required String color,
     String? iconName,
     bool isActive,
-  }) onSave;
+  })
+  onSave;
 
   const CategoryFormSheet({
     super.key,
@@ -31,7 +33,8 @@ class CategoryFormSheet extends StatefulWidget {
       required String color,
       String? iconName,
       bool isActive,
-    }) onSave,
+    })
+    onSave,
   }) {
     return showModalBottomSheet<void>(
       context: context,
@@ -120,16 +123,20 @@ class _CategoryFormSheetState extends State<CategoryFormSheet> {
     final lowerName = trimmedName.toLowerCase();
 
     // Prevent duplicate names belonging to OTHER categories
-    final isDuplicate = widget.existingCategories?.any((c) {
-      if (widget.initialCategory != null && c.id == widget.initialCategory!.id) {
-        return false; // Not a duplicate if it belongs to the current category being edited
-      }
-      return c.name.trim().toLowerCase() == lowerName;
-    }) ?? false;
+    final isDuplicate =
+        widget.existingCategories?.any((c) {
+          if (widget.initialCategory != null &&
+              c.id == widget.initialCategory!.id) {
+            return false; // Not a duplicate if it belongs to the current category being edited
+          }
+          return c.name.trim().toLowerCase() == lowerName;
+        }) ??
+        false;
 
     if (isDuplicate) {
       setState(() {
-        _errorMessage = 'A category named "$trimmedName" already exists. Please choose a unique name.';
+        _errorMessage =
+            'A category named "$trimmedName" already exists. Please choose a unique name.';
       });
       return;
     }
@@ -212,13 +219,17 @@ class _CategoryFormSheetState extends State<CategoryFormSheet> {
               ),
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: _parseHex(_selectedColor).withValues(alpha: 0.15),
+                        color: _parseHex(_selectedColor)
+                            .withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
@@ -249,264 +260,294 @@ class _CategoryFormSheetState extends State<CategoryFormSheet> {
               Flexible(
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_errorMessage != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.error),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.error_outline_rounded,
-                                color: AppColors.error, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _errorMessage!,
-                                style: const TextStyle(
-                                  color: AppColors.error,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                    // Name
-                    Text(
-                      'Category Name *',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        hintText: 'e.g. Critical Care Medicine',
-                        prefixIcon: Icon(Icons.label_outline_rounded),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Please enter category name';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Description
-                    Text(
-                      'Description *',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _descController,
-                      maxLines: 3,
-                      decoration: const InputDecoration(
-                        hintText: 'Curriculum scope, focus area, and clinical learning aims...',
-                        prefixIcon: Padding(
-                          padding: EdgeInsets.only(bottom: 40),
-                          child: Icon(Icons.description_outlined),
-                        ),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Please enter category description';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Color Selection
-                    Text(
-                      'Institutional Brand Color',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: _colorPresets.map((hex) {
-                        final isSelected = _selectedColor.toLowerCase() == hex.toLowerCase();
-                        final color = _parseHex(hex);
-                        return GestureDetector(
-                          onTap: () => setState(() => _selectedColor = hex),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            width: 38,
-                            height: 38,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (_errorMessage != null)
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
-                              color: color,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isSelected ? Colors.black87 : Colors.transparent,
-                                width: 2.5,
-                              ),
-                              boxShadow: [
-                                if (isSelected)
-                                  BoxShadow(
-                                    color: color.withValues(alpha: 0.5),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                              ],
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppColors.error),
                             ),
-                            child: isSelected
-                                ? const Icon(Icons.check, color: Colors.white, size: 20)
-                                : null,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Icon Selection
-                    Text(
-                      'Curriculum Icon',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _iconPresets.map((item) {
-                        final isSelected = _selectedIcon == item.$1;
-                        final color = _parseHex(_selectedColor);
-                        return ChoiceChip(
-                          avatar: Icon(
-                            item.$2,
-                            size: 16,
-                            color: isSelected ? Colors.white : color,
-                          ),
-                          label: Text(item.$1),
-                          selected: isSelected,
-                          selectedColor: color,
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                          onSelected: (_) => setState(() => _selectedIcon = item.$1),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Active Toggle
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkBackground : AppColors.warmCream.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                        border: Border.all(
-                          color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
                               children: [
-                                Text(
-                                  'Active Status',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
-                                  ),
+                                const Icon(
+                                  Icons.error_outline_rounded,
+                                  color: AppColors.error,
+                                  size: 18,
                                 ),
-                                Text(
-                                  _isActive
-                                      ? 'Available for new courses and enrollments'
-                                      : 'Deactivated from new student admissions',
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary,
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _errorMessage!,
+                                    style: const TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Switch(
-                            value: _isActive,
-                            activeThumbColor: AppColors.primaryForest,
-                            onChanged: (val) => setState(() => _isActive = val),
+
+                        // Name
+                        Text(
+                          'Category Name *',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            hintText: 'e.g. Critical Care Medicine',
+                            prefixIcon: Icon(Icons.label_outline_rounded),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Please enter category name';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Description
+                        Text(
+                          'Description *',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _descController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            hintText: 'Curriculum scope, focus area, and clinical learning aims...',
+                            prefixIcon: Padding(
+                              padding: EdgeInsets.only(bottom: 40),
+                              child: Icon(Icons.description_outlined),
+                            ),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Please enter category description';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 18),
+
+                        // Color Selection
+                        Text(
+                          'Institutional Brand Color',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: _colorPresets.map((hex) {
+                            final isSelected =
+                                _selectedColor.toLowerCase() ==
+                                hex.toLowerCase();
+                            final color = _parseHex(hex);
+                            return GestureDetector(
+                              onTap: () => setState(() => _selectedColor = hex),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? Colors.black87
+                                        : Colors.transparent,
+                                    width: 2.5,
+                                  ),
+                                  boxShadow: [
+                                    if (isSelected)
+                                      BoxShadow(
+                                        color: color.withValues(alpha: 0.5),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                  ],
+                                ),
+                                child: isSelected
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 20,
+                                      )
+                                    : null,
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 18),
+
+                        // Icon Selection
+                        Text(
+                          'Curriculum Icon',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: _iconPresets.map((item) {
+                            final isSelected = _selectedIcon == item.$1;
+                            final color = _parseHex(_selectedColor);
+                            return ChoiceChip(
+                              avatar: Icon(
+                                item.$2,
+                                size: 16,
+                                color: isSelected ? Colors.white : color,
+                              ),
+                              label: Text(item.$1),
+                              selected: isSelected,
+                              selectedColor: color,
+                              labelStyle: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                              onSelected: (_) =>
+                                  setState(() => _selectedIcon = item.$1),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 18),
+
+                        // Active Toggle
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkBackground
+                                : AppColors.warmCream.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.radiusMedium,
+                            ),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.borderNeutral,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Active Status',
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                    ),
+                                    Text(
+                                      _isActive
+                                          ? 'Available for new courses and enrollments'
+                                          : 'Deactivated from new student admissions',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Switch(
+                                value: _isActive,
+                                activeThumbColor: AppColors.primaryForest,
+                                onChanged: (val) =>
+                                    setState(() => _isActive = val),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                     ),
-                    const SizedBox(height: 12),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          const Divider(height: 1),
-          // Sticky Bottom Action Bar
-          SafeArea(
-            top: false,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-              color: isDark ? AppColors.darkSurface : Colors.white,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: FilledButton(
-                      onPressed: _isSaving ? null : _submit,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primaryForest,
+              const Divider(height: 1),
+              // Sticky Bottom Action Bar
+              SafeArea(
+                top: false,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                  color: isDark ? AppColors.darkSurface : Colors.white,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _isSaving
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
                       ),
-                      child: _isSaving
-                          ? const SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Text(isEdit ? 'Save Changes' : 'Create Category'),
-                    ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: FilledButton(
+                          onPressed: _isSaving ? null : _submit,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primaryForest,
+                          ),
+                          child: _isSaving
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  isEdit ? 'Save Changes' : 'Create Category',
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
             ],
           ),
         ),

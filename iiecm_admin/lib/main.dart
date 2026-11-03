@@ -1,8 +1,10 @@
 import 'dart:developer' as developer;
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'app/app.dart';
 import 'core/network/supabase_client.dart';
 import 'diagnostic_render_app.dart';
@@ -11,7 +13,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Isolated diagnostic mode switch (activated via --dart-define=DIAGNOSTIC_MODE=true)
-  const bool isDiagnosticMode = bool.fromEnvironment('DIAGNOSTIC_MODE', defaultValue: false);
+  const bool isDiagnosticMode = bool.fromEnvironment(
+    'DIAGNOSTIC_MODE',
+    defaultValue: false,
+  );
   if (isDiagnosticMode) {
     runApp(const IIECMRenderDiagnosticApp());
     return;
@@ -50,7 +55,11 @@ void main() async {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 48),
+                const Icon(
+                  Icons.error_outline,
+                  color: Color(0xFFEF4444),
+                  size: 48,
+                ),
                 const SizedBox(height: 16),
                 const Text(
                   'Rendering Error',
@@ -64,7 +73,10 @@ void main() async {
                 Text(
                   details.exceptionAsString(),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
               ],
             ),
@@ -87,9 +99,5 @@ void main() async {
     ),
   );
 
-  runApp(
-    const ProviderScope(
-      child: IIECMAdminApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: IIECMAdminApp()));
 }

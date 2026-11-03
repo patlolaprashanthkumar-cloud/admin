@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../domain/models/dashboard_stats.dart';
@@ -7,10 +8,7 @@ import '../../domain/models/dashboard_stats.dart';
 class OperationalHubsSection extends StatelessWidget {
   final DashboardStats stats;
 
-  const OperationalHubsSection({
-    super.key,
-    required this.stats,
-  });
+  const OperationalHubsSection({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +85,11 @@ class OperationalHubsSection extends StatelessWidget {
                     color: AppColors.primaryForest,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.layers_rounded, size: 16, color: Colors.white),
+                  child: const Icon(
+                    Icons.layers_rounded,
+                    size: 16,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -138,7 +140,16 @@ class OperationalHubsSection extends StatelessWidget {
 
   Widget _buildHubTile(
     BuildContext context,
-    ({String title, String subtitle, String badge, IconData icon, Color color, Color bgColor, String route}) hub,
+    ({
+      String title,
+      String subtitle,
+      String badge,
+      IconData icon,
+      Color color,
+      Color bgColor,
+      String route,
+    })
+    hub,
   ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -185,15 +196,22 @@ class OperationalHubsSection extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: isDark ? hub.color.withValues(alpha: 0.2) : hub.bgColor,
+                      color: isDark
+                          ? hub.color.withValues(alpha: 0.2)
+                          : hub.bgColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(hub.icon, size: 17, color: hub.color),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? hub.color.withValues(alpha: 0.15) : hub.bgColor,
+                      color: isDark
+                          ? hub.color.withValues(alpha: 0.15)
+                          : hub.bgColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

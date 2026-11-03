@@ -1,10 +1,36 @@
 import 'package:flutter/material.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../core/widgets/app_card.dart';
-import '../../../../core/widgets/responsive_layout.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PaymentsScreen extends StatelessWidget {
+import '../../../../app/theme/app_colors.dart';
+import '../../../../core/widgets/responsive_layout.dart';
+import '../providers/payment_providers.dart';
+import '../widgets/payment_dashboard_tab.dart';
+import '../widgets/payment_reports_tab.dart';
+import '../widgets/payment_transactions_tab.dart';
+import '../widgets/record_payment_sheet.dart';
+
+class PaymentsScreen extends ConsumerStatefulWidget {
   const PaymentsScreen({super.key});
+
+  @override
+  ConsumerState<PaymentsScreen> createState() => _PaymentsScreenState();
+}
+
+class _PaymentsScreenState extends ConsumerState<PaymentsScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,83 +42,63 @@ class PaymentsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Fee Payments & Invoices'),
         backgroundColor: isDark ? AppColors.darkSurface : AppColors.warmCream,
+        actions: [
+          IconButton(
+            tooltip: 'Record Payment',
+            icon: const Icon(Icons.add_card_rounded),
+            onPressed: () => RecordPaymentSheet.show(context),
+          ),
+          IconButton(
+            tooltip: 'Refresh',
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: () {
+              ref.invalidate(paymentSummaryProvider);
+              ref.invalidate(paymentsListProvider);
+              ref.invalidate(allStudentFeeProfilesProvider);
+            },
+          ),
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: AppColors.primaryForest,
+          indicatorWeight: 3,
+          labelColor: AppColors.primaryForest,
+          unselectedLabelColor: isDark
+              ? AppColors.darkTextSecondary
+              : AppColors.textSecondary,
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 12.5,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 12.5,
+          ),
+          tabs: const [
+            Tab(
+              icon: Icon(Icons.dashboard_rounded, size: 18),
+              text: 'Dashboard',
+            ),
+            Tab(
+              icon: Icon(Icons.receipt_long_rounded, size: 18),
+              text: 'Transactions',
+            ),
+            Tab(
+              icon: Icon(Icons.assessment_outlined, size: 18),
+              text: 'Reports',
+            ),
+          ],
+        ),
       ),
       body: SafeArea(
         child: ResponsiveLayout(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: AppColors.terracottaSoft,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.receipt_long_rounded, color: AppColors.accentTerracotta, size: 24),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Financial Reconciliation Suite',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Student fees, payment gateway verification, and refunds',
-                                  style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.terracottaSoft,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.accentTerracotta.withValues(alpha: 0.2)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.accentTerracotta),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Stage 3.4: Fee Reconciliation & Gateway Auditing is scheduled pending your approval.',
-                                style: const TextStyle(
-                                  color: AppColors.accentTerracotta,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          child: TabBarView(
+            controller: _tabController,
+            children: const [
+              PaymentDashboardTab(),
+              PaymentTransactionsTab(),
+              PaymentReportsTab(),
+            ],
           ),
         ),
       ),

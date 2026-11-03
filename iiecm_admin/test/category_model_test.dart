@@ -88,13 +88,19 @@ class MockCategoryRepository implements CategoryRepository {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getCoursesForCategory(String categoryId) async => [];
+  Future<List<Map<String, dynamic>>> getCoursesForCategory(
+    String categoryId,
+  ) async => [];
 
   @override
-  Future<List<Map<String, dynamic>>> getInstructorsForCategory(String categoryId) async => [];
+  Future<List<Map<String, dynamic>>> getInstructorsForCategory(
+    String categoryId,
+  ) async => [];
 
   @override
-  Future<List<Map<String, dynamic>>> getStudentsForCategory(String categoryId) async => [];
+  Future<List<Map<String, dynamic>>> getStudentsForCategory(
+    String categoryId,
+  ) async => [];
 
   final Map<String, List<String>> _studentCats = {};
   final Map<String, List<String>> _instructorCats = {};
@@ -106,28 +112,42 @@ class MockCategoryRepository implements CategoryRepository {
   }
 
   @override
-  Future<void> assignCategoriesToStudent(String studentId, List<String> categoryIds) async {
+  Future<void> assignCategoriesToStudent(
+    String studentId,
+    List<String> categoryIds,
+  ) async {
     _studentCats.putIfAbsent(studentId, () => []).addAll(categoryIds);
   }
 
   @override
-  Future<void> removeCategoryFromStudent(String studentId, String categoryId) async {
+  Future<void> removeCategoryFromStudent(
+    String studentId,
+    String categoryId,
+  ) async {
     _studentCats[studentId]?.remove(categoryId);
   }
 
   @override
-  Future<List<CourseCategory>> getCategoriesForInstructor(String instructorId) async {
+  Future<List<CourseCategory>> getCategoriesForInstructor(
+    String instructorId,
+  ) async {
     final ids = _instructorCats[instructorId] ?? [];
     return store.where((c) => ids.contains(c.id)).toList();
   }
 
   @override
-  Future<void> assignCategoriesToInstructor(String instructorId, List<String> categoryIds) async {
+  Future<void> assignCategoriesToInstructor(
+    String instructorId,
+    List<String> categoryIds,
+  ) async {
     _instructorCats.putIfAbsent(instructorId, () => []).addAll(categoryIds);
   }
 
   @override
-  Future<void> removeCategoryFromInstructor(String instructorId, String categoryId) async {
+  Future<void> removeCategoryFromInstructor(
+    String instructorId,
+    String categoryId,
+  ) async {
     _instructorCats[instructorId]?.remove(categoryId);
   }
 }
@@ -155,7 +175,10 @@ void main() {
 
       expect(cat.id, 'cat-123');
       expect(cat.name, 'Emergency Critical Care');
-      expect(cat.description, 'Advanced life support and resuscitation algorithms');
+      expect(
+        cat.description,
+        'Advanced life support and resuscitation algorithms',
+      );
       expect(cat.color, '#245B43');
       expect(cat.isActive, true);
       expect(cat.iconName, 'emergency');
@@ -268,7 +291,10 @@ void main() {
         catId,
         name: 'Advanced Ultrasound & Diagnostics',
       );
-      expect(notifier.state.categories.first.name, 'Advanced Ultrasound & Diagnostics');
+      expect(
+        notifier.state.categories.first.name,
+        'Advanced Ultrasound & Diagnostics',
+      );
 
       // Delete
       await notifier.deleteCategory(catId);
@@ -324,8 +350,12 @@ void main() {
         description: 'Updated description for emergency care',
       );
       expect(editSameName, true);
-      expect(notifier.state.categories.firstWhere((c) => c.id == firstCatId).description,
-          'Updated description for emergency care');
+      expect(
+        notifier.state.categories
+            .firstWhere((c) => c.id == firstCatId)
+            .description,
+        'Updated description for emergency care',
+      );
 
       // 6. Edit existing category with case/trimmed variation of its own name (must SUCCEED)
       final editOwnTrimmed = await notifier.updateCategory(
@@ -348,9 +378,10 @@ void main() {
         name: 'Trauma & Emergency Medicine',
       );
       expect(editNewName, true);
-      expect(notifier.state.categories.firstWhere((c) => c.id == firstCatId).name,
-          'Trauma & Emergency Medicine');
+      expect(
+        notifier.state.categories.firstWhere((c) => c.id == firstCatId).name,
+        'Trauma & Emergency Medicine',
+      );
     });
   });
 }
-

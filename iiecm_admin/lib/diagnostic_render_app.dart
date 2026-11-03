@@ -6,7 +6,8 @@ class IIECMRenderDiagnosticApp extends StatefulWidget {
   const IIECMRenderDiagnosticApp({super.key});
 
   @override
-  State<IIECMRenderDiagnosticApp> createState() => _IIECMRenderDiagnosticAppState();
+  State<IIECMRenderDiagnosticApp> createState() =>
+      _IIECMRenderDiagnosticAppState();
 }
 
 class _IIECMRenderDiagnosticAppState extends State<IIECMRenderDiagnosticApp> {
@@ -32,7 +33,10 @@ class _IIECMRenderDiagnosticAppState extends State<IIECMRenderDiagnosticApp> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF10B981).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
@@ -63,18 +67,21 @@ class _IIECMRenderDiagnosticAppState extends State<IIECMRenderDiagnosticApp> {
                   const Text(
                     'Direct canvas rendering test (No Auth / No GoRouter / No Supabase)',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
                   ),
                   const SizedBox(height: 36),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 28,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                      border: Border.all(
+                        color: const Color(0xFFE2E8F0),
+                        width: 1.5,
+                      ),
                     ),
                     child: Column(
                       children: [
@@ -107,7 +114,10 @@ class _IIECMRenderDiagnosticAppState extends State<IIECMRenderDiagnosticApp> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0F2744),
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 28,
+                        vertical: 16,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -123,4 +133,3 @@ class _IIECMRenderDiagnosticAppState extends State<IIECMRenderDiagnosticApp> {
     );
   }
 }
-

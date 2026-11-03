@@ -3,12 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:iiecm_admin/app/app.dart';
 
 void main() {
-  testWidgets('IIECM Admin app loads and presents Login Screen smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: IIECMAdminApp(),
-      ),
-    );
+  testWidgets('IIECM Admin app loads and presents Login Screen smoke test', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const ProviderScope(child: IIECMAdminApp()));
     await tester.pumpAndSettle();
 
     // Verify presence of institutional branding on Login Screen

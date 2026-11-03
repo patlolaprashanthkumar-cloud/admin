@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+
 import '../../../../core/network/supabase_client.dart';
 import '../../domain/models/assignment.dart';
 import '../../domain/models/assignment_submission.dart';
@@ -15,10 +16,10 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
     final client = AppSupabase.client;
 
     try {
-      var query = client
-          .from('assessments')
-          .select('*')
-          .inFilter('type', ['assignment', 'project']);
+      var query = client.from('assessments').select('*').inFilter('type', [
+        'assignment',
+        'project',
+      ]);
 
       if (status != null && status.isNotEmpty && status != 'all') {
         query = query.eq('status', status);
@@ -30,7 +31,10 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
         query = query.eq('type', type);
       }
 
-      final List<dynamic> rows = await query.order('created_at', ascending: false);
+      final List<dynamic> rows = await query.order(
+        'created_at',
+        ascending: false,
+      );
 
       // Load course allocations
       final Map<String, List<AssignmentCourseRef>> courseMap = {};
@@ -41,12 +45,17 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
         for (final l in links) {
           final aId = l['assessment_id']?.toString() ?? '';
           if (l['courses'] != null) {
-            final cRef = AssignmentCourseRef.fromJson(l['courses'] as Map<String, dynamic>);
+            final cRef = AssignmentCourseRef.fromJson(
+              l['courses'] as Map<String, dynamic>,
+            );
             courseMap.putIfAbsent(aId, () => []).add(cRef);
           }
         }
       } catch (e) {
-        developer.log('Error loading assignment courses: $e', name: 'SupabaseAssignmentRepository');
+        developer.log(
+          'Error loading assignment courses: $e',
+          name: 'SupabaseAssignmentRepository',
+        );
       }
 
       // Load submission counts
@@ -65,7 +74,10 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
           }
         }
       } catch (e) {
-        developer.log('Error loading submission counts: $e', name: 'SupabaseAssignmentRepository');
+        developer.log(
+          'Error loading submission counts: $e',
+          name: 'SupabaseAssignmentRepository',
+        );
       }
 
       List<Assignment> assignments = rows.map((r) {
@@ -89,7 +101,10 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
 
       return assignments;
     } catch (e) {
-      developer.log('Error in getAssignments: $e', name: 'SupabaseAssignmentRepository');
+      developer.log(
+        'Error in getAssignments: $e',
+        name: 'SupabaseAssignmentRepository',
+      );
       rethrow;
     }
   }
@@ -119,11 +134,18 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
 
         for (final l in links) {
           if (l['courses'] != null) {
-            courses.add(AssignmentCourseRef.fromJson(l['courses'] as Map<String, dynamic>));
+            courses.add(
+              AssignmentCourseRef.fromJson(
+                l['courses'] as Map<String, dynamic>,
+              ),
+            );
           }
         }
       } catch (e) {
-        developer.log('Error loading assignment courses: $e', name: 'SupabaseAssignmentRepository');
+        developer.log(
+          'Error loading assignment courses: $e',
+          name: 'SupabaseAssignmentRepository',
+        );
       }
 
       // Load submissions count
@@ -136,7 +158,9 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
             .eq('assessment_id', id);
 
         totalSubs = results.length;
-        gradedSubs = results.where((r) => ((r['score'] as num?)?.toDouble() ?? 0.0) > 0).length;
+        gradedSubs = results
+            .where((r) => ((r['score'] as num?)?.toDouble() ?? 0.0) > 0)
+            .length;
       } catch (_) {}
 
       return Assignment.fromJson(
@@ -146,7 +170,10 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
         gradedSubmissions: gradedSubs,
       );
     } catch (e) {
-      developer.log('Error in getAssignmentById: $e', name: 'SupabaseAssignmentRepository');
+      developer.log(
+        'Error in getAssignmentById: $e',
+        name: 'SupabaseAssignmentRepository',
+      );
       rethrow;
     }
   }
@@ -182,7 +209,10 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
 
       return (await getAssignmentById(newId)) ?? Assignment.fromJson(newAss);
     } catch (e) {
-      developer.log('Error in createAssignment: $e', name: 'SupabaseAssignmentRepository');
+      developer.log(
+        'Error in createAssignment: $e',
+        name: 'SupabaseAssignmentRepository',
+      );
       rethrow;
     }
   }
@@ -208,13 +238,18 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
           final linkPayload = courseIds
               .map((cId) => {'assessment_id': assignment.id, 'course_id': cId})
               .toList();
-          await client.from('assessment_course_assignments').insert(linkPayload);
+          await client
+              .from('assessment_course_assignments')
+              .insert(linkPayload);
         }
       }
 
       return (await getAssignmentById(assignment.id)) ?? assignment;
     } catch (e) {
-      developer.log('Error in updateAssignment: $e', name: 'SupabaseAssignmentRepository');
+      developer.log(
+        'Error in updateAssignment: $e',
+        name: 'SupabaseAssignmentRepository',
+      );
       rethrow;
     }
   }
@@ -225,7 +260,10 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
     try {
       await client.from('assessments').update({'status': status}).eq('id', id);
     } catch (e) {
-      developer.log('Error in updateAssignmentStatus: $e', name: 'SupabaseAssignmentRepository');
+      developer.log(
+        'Error in updateAssignmentStatus: $e',
+        name: 'SupabaseAssignmentRepository',
+      );
       rethrow;
     }
   }
@@ -234,10 +272,16 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
   Future<void> deleteAssignment(String id) async {
     final client = AppSupabase.client;
     try {
-      await client.from('assessment_course_assignments').delete().eq('assessment_id', id);
+      await client
+          .from('assessment_course_assignments')
+          .delete()
+          .eq('assessment_id', id);
       await client.from('assessments').delete().eq('id', id);
     } catch (e) {
-      developer.log('Error in deleteAssignment: $e', name: 'SupabaseAssignmentRepository');
+      developer.log(
+        'Error in deleteAssignment: $e',
+        name: 'SupabaseAssignmentRepository',
+      );
       rethrow;
     }
   }
@@ -253,9 +297,14 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
           .eq('assessment_id', assessmentId)
           .order('completed_at', ascending: false);
 
-      return rows.map((r) => AssignmentSubmission.fromJson(r as Map<String, dynamic>)).toList();
+      return rows
+          .map((r) => AssignmentSubmission.fromJson(r as Map<String, dynamic>))
+          .toList();
     } catch (e) {
-      developer.log('Error in getSubmissions: $e', name: 'SupabaseAssignmentRepository');
+      developer.log(
+        'Error in getSubmissions: $e',
+        name: 'SupabaseAssignmentRepository',
+      );
       rethrow;
     }
   }
@@ -271,7 +320,9 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
     final client = AppSupabase.client;
 
     try {
-      final percentage = totalMarks > 0 ? ((score / totalMarks) * 100).clamp(0.0, 100.0) : 0.0;
+      final percentage = totalMarks > 0
+          ? ((score / totalMarks) * 100).clamp(0.0, 100.0)
+          : 0.0;
 
       final payload = <String, dynamic>{
         'score': score,
@@ -293,11 +344,15 @@ class SupabaseAssignmentRepository implements AssignmentRepository {
         throw Exception('Submission record not found for grading.');
       }
 
-      return AssignmentSubmission.fromJson(updated.first as Map<String, dynamic>);
+      return AssignmentSubmission.fromJson(
+        updated.first as Map<String, dynamic>,
+      );
     } catch (e) {
-      developer.log('Error in gradeSubmission: $e', name: 'SupabaseAssignmentRepository');
+      developer.log(
+        'Error in gradeSubmission: $e',
+        name: 'SupabaseAssignmentRepository',
+      );
       rethrow;
     }
   }
 }
-

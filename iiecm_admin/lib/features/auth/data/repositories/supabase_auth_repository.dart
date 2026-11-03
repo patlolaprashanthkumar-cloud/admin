@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../../core/network/supabase_client.dart';
 import '../../domain/models/admin_user.dart';
 import '../../domain/models/auth_exception.dart';
@@ -37,10 +39,7 @@ class SupabaseAuthRepository implements AuthRepository {
     AuthResponse response;
     try {
       response = await _client.auth
-          .signInWithPassword(
-            email: email.trim(),
-            password: password,
-          )
+          .signInWithPassword(email: email.trim(), password: password)
           .timeout(const Duration(seconds: 15));
     } on AuthException catch (e) {
       throw InvalidCredentialsException(e.message);
@@ -55,7 +54,9 @@ class SupabaseAuthRepository implements AuthRepository {
 
     final authUser = response.user;
     if (authUser == null) {
-      throw const InvalidCredentialsException('No user returned from authentication service.');
+      throw const InvalidCredentialsException(
+        'No user returned from authentication service.',
+      );
     }
 
     try {
@@ -67,9 +68,10 @@ class SupabaseAuthRepository implements AuthRepository {
 
       // Best-effort update of last_login_at in public.profiles
       try {
-        await _client.from('profiles').update({
-          'last_login_at': DateTime.now().toIso8601String(),
-        }).eq('id', authUser.id);
+        await _client
+            .from('profiles')
+            .update({'last_login_at': DateTime.now().toIso8601String()})
+            .eq('id', authUser.id);
       } catch (_) {
         // Non-fatal if update fails due to network or trigger
       }
@@ -106,7 +108,9 @@ class SupabaseAuthRepository implements AuthRepository {
     try {
       final response = await _client
           .from('profiles')
-          .select('id, email, full_name, role, phone, avatar_url, last_login_at, created_at')
+          .select(
+            'id, email, full_name, role, phone, avatar_url, last_login_at, created_at',
+          )
           .eq('id', userId)
           .maybeSingle()
           .timeout(const Duration(seconds: 10));
@@ -115,14 +119,18 @@ class SupabaseAuthRepository implements AuthRepository {
         profileData = Map<String, dynamic>.from(response);
       }
     } on PostgrestException catch (e) {
-      throw ProfileVerificationNetworkException('Database query failed: ${e.message}');
+      throw ProfileVerificationNetworkException(
+        'Database query failed: ${e.message}',
+      );
     } catch (e) {
       if (e is SocketException || e is TimeoutException) {
         throw const ProfileVerificationNetworkException(
           'Network timeout while verifying profile. Tap retry to check again.',
         );
       }
-      throw ProfileVerificationNetworkException('Profile verification error: $e');
+      throw ProfileVerificationNetworkException(
+        'Profile verification error: $e',
+      );
     }
 
     if (profileData == null) {
@@ -136,10 +144,7 @@ class SupabaseAuthRepository implements AuthRepository {
       throw AccessDeniedNonAdminException(roleStr ?? 'unknown');
     }
 
-    return AdminUser.fromProfileJson(
-      profileData,
-      emailFallback: emailFallback,
-    );
+    return AdminUser.fromProfileJson(profileData, emailFallback: emailFallback);
   }
 
   @override
@@ -195,4 +200,3 @@ class SupabaseAuthRepository implements AuthRepository {
     }
   }
 }
-

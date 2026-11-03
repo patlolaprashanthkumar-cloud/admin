@@ -1,7 +1,11 @@
 import '../models/student.dart';
 
 abstract class StudentRepository {
-  Future<List<Student>> getStudents({String? categoryId, String? searchQuery, String? status});
+  Future<List<Student>> getStudents({
+    String? categoryId,
+    String? searchQuery,
+    String? status,
+  });
   Future<Student?> getStudentById(String id);
   Future<Student> registerStudent({
     required String fullName,
@@ -24,7 +28,11 @@ abstract class StudentRepository {
     String? city,
     String? accountStatus,
   });
-  Future<void> updateStudentCategories(String studentId, List<String> categoryIds);
-  Future<List<StudentCategoryLmsGroup>> getStudentCategoryLmsDetails(String studentId);
+  Future<void> updateStudentCategories(
+    String studentId,
+    List<String> categoryIds,
+  );
+  Future<List<StudentCategoryLmsGroup>> getStudentCategoryLmsDetails(
+    String studentId,
+  );
 }
-

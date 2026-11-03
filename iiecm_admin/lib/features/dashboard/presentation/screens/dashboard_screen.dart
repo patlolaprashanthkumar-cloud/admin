@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -27,7 +28,10 @@ class DashboardScreen extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text(
           'Sign Out',
-          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+          ),
         ),
         content: const Text(
           'Are you sure you want to sign out of the IIECM Institutional Administration portal?',
@@ -114,12 +118,18 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Refresh Telemetry',
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.primaryForest),
+            icon: const Icon(
+              Icons.refresh_rounded,
+              color: AppColors.primaryForest,
+            ),
             onPressed: () => ref.invalidate(dashboardStatsProvider),
           ),
           IconButton(
             tooltip: 'Sign Out',
-            icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
+            icon: const Icon(
+              Icons.logout_rounded,
+              color: AppColors.textSecondary,
+            ),
             onPressed: () => _confirmLogout(context, ref),
           ),
           const SizedBox(width: 8),
@@ -135,7 +145,9 @@ class DashboardScreen extends ConsumerWidget {
           },
           child: ResponsiveLayout(
             child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -151,7 +163,9 @@ class DashboardScreen extends ConsumerWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusLarge,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: AppColors.forestDark.withValues(alpha: 0.25),
@@ -167,7 +181,10 @@ class DashboardScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4.5,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(20),
@@ -179,7 +196,11 @@ class DashboardScreen extends ConsumerWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.shield_rounded, color: AppColors.warmCream, size: 13),
+                                  const Icon(
+                                    Icons.shield_rounded,
+                                    color: AppColors.warmCream,
+                                    size: 13,
+                                  ),
                                   const SizedBox(width: 6),
                                   Text(
                                     admin?.role == UserRole.superAdmin
@@ -196,11 +217,20 @@ class DashboardScreen extends ConsumerWidget {
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3.5,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.accentTerracotta.withValues(alpha: 0.3),
+                                color: AppColors.accentTerracotta.withValues(
+                                  alpha: 0.3,
+                                ),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.accentTerracotta.withValues(alpha: 0.5)),
+                                border: Border.all(
+                                  color: AppColors.accentTerracotta.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
                               ),
                               child: const Text(
                                 'AY 2026-2027',
@@ -245,7 +275,8 @@ class DashboardScreen extends ConsumerWidget {
                   dashboardAsync.when(
                     loading: () => _buildLoadingState(theme),
                     error: (err, stack) => _buildErrorState(context, ref, err),
-                    data: (stats) => _buildDashboardData(context, ref, stats, theme),
+                    data: (stats) =>
+                        _buildDashboardData(context, ref, stats, theme),
                   ),
                   const SizedBox(height: 28),
                 ],
@@ -286,7 +317,11 @@ class DashboardScreen extends ConsumerWidget {
       borderSide: const BorderSide(color: Color(0xFFF8B4B4)),
       child: Column(
         children: [
-          const Icon(Icons.error_outline_rounded, size: 36, color: AppColors.error),
+          const Icon(
+            Icons.error_outline_rounded,
+            size: 36,
+            color: AppColors.error,
+          ),
           const SizedBox(height: 10),
           const Text(
             'Unable to Load Telemetry',
@@ -316,7 +351,12 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDashboardData(BuildContext context, WidgetRef ref, stats, ThemeData theme) {
+  Widget _buildDashboardData(
+    BuildContext context,
+    WidgetRef ref,
+    stats,
+    ThemeData theme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -447,7 +487,10 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.forestSoft,
                               borderRadius: BorderRadius.circular(6),
@@ -478,33 +521,42 @@ class DashboardScreen extends ConsumerWidget {
                 IconButton(
                   tooltip: 'Add Category',
                   onPressed: () {
-                    final allCats = ref.read(categoryNotifierProvider).categories;
+                    final allCats = ref
+                        .read(categoryNotifierProvider)
+                        .categories;
                     CategoryFormSheet.show(
                       context,
                       existingCategories: allCats,
-                      onSave: ({
-                        required String name,
-                        required String description,
-                        required String color,
-                        String? iconName,
-                        bool isActive = true,
-                      }) async {
-                        final notifier = ref.read(categoryNotifierProvider.notifier);
-                        final ok = await notifier.createCategory(
-                          name: name,
-                          description: description,
-                          color: color,
-                          iconName: iconName,
-                          isActive: isActive,
-                        );
-                        if (!ok) {
-                          return notifier.errorMessage ?? 'Failed to save category. Ensure name is unique.';
-                        }
-                        return null;
-                      },
+                      onSave:
+                          ({
+                            required String name,
+                            required String description,
+                            required String color,
+                            String? iconName,
+                            bool isActive = true,
+                          }) async {
+                            final notifier = ref.read(
+                              categoryNotifierProvider.notifier,
+                            );
+                            final ok = await notifier.createCategory(
+                              name: name,
+                              description: description,
+                              color: color,
+                              iconName: iconName,
+                              isActive: isActive,
+                            );
+                            if (!ok) {
+                              return notifier.errorMessage ??
+                                  'Failed to save category. Ensure name is unique.';
+                            }
+                            return null;
+                          },
                     );
                   },
-                  icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primaryForest),
+                  icon: const Icon(
+                    Icons.add_circle_outline_rounded,
+                    color: AppColors.primaryForest,
+                  ),
                 ),
               ],
             ),

@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+
 import '../../../../core/network/supabase_client.dart';
 import '../../../assignments/domain/models/assignment_submission.dart';
 import '../../domain/models/assessment.dart';
@@ -16,10 +17,10 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
     final client = AppSupabase.client;
 
     try {
-      var query = client
-          .from('assessments')
-          .select('*')
-          .inFilter('type', ['mcq', 'quiz']);
+      var query = client.from('assessments').select('*').inFilter('type', [
+        'mcq',
+        'quiz',
+      ]);
 
       if (status != null && status.isNotEmpty && status != 'all') {
         query = query.eq('status', status);
@@ -31,25 +32,35 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
         query = query.eq('type', type);
       }
 
-      final List<dynamic> rows = await query.order('created_at', ascending: false);
+      final List<dynamic> rows = await query.order(
+        'created_at',
+        ascending: false,
+      );
 
       // Question count map
       final Map<String, int> questionCounts = {};
       try {
-        final qLinks = await client.from('assessment_questions').select('assessment_id');
+        final qLinks = await client
+            .from('assessment_questions')
+            .select('assessment_id');
         for (final q in qLinks) {
           final aId = q['assessment_id']?.toString() ?? '';
           questionCounts[aId] = (questionCounts[aId] ?? 0) + 1;
         }
       } catch (e) {
-        developer.log('Error counting assessment questions: $e', name: 'SupabaseAssessmentRepository');
+        developer.log(
+          'Error counting assessment questions: $e',
+          name: 'SupabaseAssessmentRepository',
+        );
       }
 
       // Results / attempts map
       final Map<String, int> totalAttempts = {};
       final Map<String, int> passedAttempts = {};
       try {
-        final res = await client.from('assessment_results').select('assessment_id, passed');
+        final res = await client
+            .from('assessment_results')
+            .select('assessment_id, passed');
         for (final r in res) {
           final aId = r['assessment_id']?.toString() ?? '';
           totalAttempts[aId] = (totalAttempts[aId] ?? 0) + 1;
@@ -58,7 +69,10 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
           }
         }
       } catch (e) {
-        developer.log('Error counting results: $e', name: 'SupabaseAssessmentRepository');
+        developer.log(
+          'Error counting results: $e',
+          name: 'SupabaseAssessmentRepository',
+        );
       }
 
       List<Assessment> assessments = rows.map((r) {
@@ -74,13 +88,17 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
       if (searchQuery != null && searchQuery.trim().isNotEmpty) {
         final q = searchQuery.trim().toLowerCase();
         assessments = assessments.where((a) {
-          return a.title.toLowerCase().contains(q) || a.description.toLowerCase().contains(q);
+          return a.title.toLowerCase().contains(q) ||
+              a.description.toLowerCase().contains(q);
         }).toList();
       }
 
       return assessments;
     } catch (e) {
-      developer.log('Error in getAssessments: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in getAssessments: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }
@@ -104,7 +122,10 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
       int attempts = 0;
       int passed = 0;
       try {
-        final res = await client.from('assessment_results').select('passed').eq('assessment_id', id);
+        final res = await client
+            .from('assessment_results')
+            .select('passed')
+            .eq('assessment_id', id);
         attempts = res.length;
         passed = res.where((r) => r['passed'] == true).length;
       } catch (_) {}
@@ -117,7 +138,10 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
         passedAttempts: passed,
       );
     } catch (e) {
-      developer.log('Error in getAssessmentById: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in getAssessmentById: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }
@@ -139,7 +163,10 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
 
       return Assessment.fromJson(inserted.first as Map<String, dynamic>);
     } catch (e) {
-      developer.log('Error in createAssessment: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in createAssessment: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }
@@ -153,7 +180,10 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
       await client.from('assessments').update(payload).eq('id', assessment.id);
       return (await getAssessmentById(assessment.id)) ?? assessment;
     } catch (e) {
-      developer.log('Error in updateAssessment: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in updateAssessment: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }
@@ -164,7 +194,10 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
     try {
       await client.from('assessments').update({'status': status}).eq('id', id);
     } catch (e) {
-      developer.log('Error in updateAssessmentStatus: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in updateAssessmentStatus: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }
@@ -173,10 +206,16 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
   Future<void> deleteAssessment(String id) async {
     final client = AppSupabase.client;
     try {
-      await client.from('assessment_questions').delete().eq('assessment_id', id);
+      await client
+          .from('assessment_questions')
+          .delete()
+          .eq('assessment_id', id);
       await client.from('assessments').delete().eq('id', id);
     } catch (e) {
-      developer.log('Error in deleteAssessment: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in deleteAssessment: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }
@@ -203,13 +242,20 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
 
       return questions;
     } catch (e) {
-      developer.log('Error in getAssessmentQuestions: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in getAssessmentQuestions: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       return [];
     }
   }
 
   @override
-  Future<Question> addQuestionToAssessment(String assessmentId, Question question, int orderIndex) async {
+  Future<Question> addQuestionToAssessment(
+    String assessmentId,
+    Question question,
+    int orderIndex,
+  ) async {
     final client = AppSupabase.client;
 
     try {
@@ -223,7 +269,10 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
         throw Exception('Failed to insert question.');
       }
 
-      final createdQ = Question.fromJson(inserted.first as Map<String, dynamic>, orderIndex: orderIndex);
+      final createdQ = Question.fromJson(
+        inserted.first as Map<String, dynamic>,
+        orderIndex: orderIndex,
+      );
 
       // Link to assessment
       await client.from('assessment_questions').insert({
@@ -234,7 +283,10 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
 
       return createdQ;
     } catch (e) {
-      developer.log('Error in addQuestionToAssessment: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in addQuestionToAssessment: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }
@@ -255,15 +307,24 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
         throw Exception('Question not found to update.');
       }
 
-      return Question.fromJson(updated.first as Map<String, dynamic>, orderIndex: question.orderIndex);
+      return Question.fromJson(
+        updated.first as Map<String, dynamic>,
+        orderIndex: question.orderIndex,
+      );
     } catch (e) {
-      developer.log('Error in updateQuestion: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in updateQuestion: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }
 
   @override
-  Future<void> removeQuestionFromAssessment(String assessmentId, String questionId) async {
+  Future<void> removeQuestionFromAssessment(
+    String assessmentId,
+    String questionId,
+  ) async {
     final client = AppSupabase.client;
     try {
       await client
@@ -275,13 +336,18 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
       // Also clean up question
       await client.from('questions').delete().eq('id', questionId);
     } catch (e) {
-      developer.log('Error in removeQuestionFromAssessment: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in removeQuestionFromAssessment: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }
 
   @override
-  Future<List<AssignmentSubmission>> getAssessmentResults(String assessmentId) async {
+  Future<List<AssignmentSubmission>> getAssessmentResults(
+    String assessmentId,
+  ) async {
     final client = AppSupabase.client;
 
     try {
@@ -291,9 +357,14 @@ class SupabaseAssessmentRepository implements AssessmentRepository {
           .eq('assessment_id', assessmentId)
           .order('completed_at', ascending: false);
 
-      return rows.map((r) => AssignmentSubmission.fromJson(r as Map<String, dynamic>)).toList();
+      return rows
+          .map((r) => AssignmentSubmission.fromJson(r as Map<String, dynamic>))
+          .toList();
     } catch (e) {
-      developer.log('Error in getAssessmentResults: $e', name: 'SupabaseAssessmentRepository');
+      developer.log(
+        'Error in getAssessmentResults: $e',
+        name: 'SupabaseAssessmentRepository',
+      );
       rethrow;
     }
   }

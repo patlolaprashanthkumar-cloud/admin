@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/repositories/supabase_course_repository.dart';
 import '../../domain/models/course.dart';
 import '../../domain/models/course_module.dart';
@@ -27,9 +28,11 @@ class CoursesState {
 
   List<Course> get filteredCourses {
     return courses.where((c) {
-      final matchesCategory = selectedCategoryId == 'all' || c.categoryId == selectedCategoryId;
+      final matchesCategory =
+          selectedCategoryId == 'all' || c.categoryId == selectedCategoryId;
       final matchesStatus = statusFilter == 'all' || c.status == statusFilter;
-      final matchesSearch = searchQuery.isEmpty ||
+      final matchesSearch =
+          searchQuery.isEmpty ||
           c.title.toLowerCase().contains(searchQuery.toLowerCase()) ||
           c.description.toLowerCase().contains(searchQuery.toLowerCase()) ||
           c.categoryName.toLowerCase().contains(searchQuery.toLowerCase());
@@ -163,18 +166,23 @@ class CoursesNotifier extends StateNotifier<CoursesState> {
   }
 }
 
-final coursesNotifierProvider = StateNotifierProvider<CoursesNotifier, CoursesState>((ref) {
-  final repo = ref.watch(courseRepositoryProvider);
-  return CoursesNotifier(repo);
-});
+final coursesNotifierProvider =
+    StateNotifierProvider<CoursesNotifier, CoursesState>((ref) {
+      final repo = ref.watch(courseRepositoryProvider);
+      return CoursesNotifier(repo);
+    });
 
-final courseDetailProvider = FutureProvider.family<Course?, String>((ref, id) async {
+final courseDetailProvider = FutureProvider.family<Course?, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(courseRepositoryProvider);
   return repo.getCourseById(id);
 });
 
-final courseModulesProvider = FutureProvider.family<List<CourseModule>, String>((ref, courseId) async {
-  final repo = ref.watch(courseRepositoryProvider);
-  return repo.getModules(courseId);
-});
-
+final courseModulesProvider = FutureProvider.family<List<CourseModule>, String>(
+  (ref, courseId) async {
+    final repo = ref.watch(courseRepositoryProvider);
+    return repo.getModules(courseId);
+  },
+);

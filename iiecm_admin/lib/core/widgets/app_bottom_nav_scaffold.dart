@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../app/theme/app_colors.dart';
 
 /// Navigation scaffold housing the official 5-tab Bottom Navigation bar
 class AppBottomNavScaffold extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const AppBottomNavScaffold({
-    super.key,
-    required this.navigationShell,
-  });
+  const AppBottomNavScaffold({super.key, required this.navigationShell});
 
   void _onDestinationSelected(int index) {
     navigationShell.goBranch(
@@ -24,19 +22,16 @@ class AppBottomNavScaffold extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     final barBackground = isDark ? AppColors.darkSurface : Colors.white;
-    final topBorderColor = isDark ? AppColors.darkBorder : AppColors.borderNeutral;
+    final topBorderColor = isDark
+        ? AppColors.darkBorder
+        : AppColors.borderNeutral;
 
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: barBackground,
-          border: Border(
-            top: BorderSide(
-              color: topBorderColor,
-              width: 0.8,
-            ),
-          ),
+          border: Border(top: BorderSide(color: topBorderColor, width: 0.8)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
@@ -51,20 +46,28 @@ class AppBottomNavScaffold extends StatelessWidget {
             data: NavigationBarThemeData(
               backgroundColor: barBackground,
               indicatorColor: AppColors.forestSoft,
-              labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
+              labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
+                states,
+              ) {
                 final isSelected = states.contains(WidgetState.selected);
                 return TextStyle(
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                  color: isSelected ? AppColors.primaryForest : AppColors.textMuted,
+                  color: isSelected
+                      ? AppColors.primaryForest
+                      : AppColors.textMuted,
                   letterSpacing: -0.1,
                 );
               }),
-              iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
+              iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((
+                states,
+              ) {
                 final isSelected = states.contains(WidgetState.selected);
                 return IconThemeData(
                   size: 22,
-                  color: isSelected ? AppColors.primaryForest : AppColors.textMuted,
+                  color: isSelected
+                      ? AppColors.primaryForest
+                      : AppColors.textMuted,
                 );
               }),
             ),

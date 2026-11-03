@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/repositories/supabase_assignment_repository.dart';
 import '../../domain/models/assignment.dart';
 import '../../domain/models/assignment_submission.dart';
@@ -104,11 +105,15 @@ class AssignmentNotifier extends StateNotifier<AssignmentState> {
     var result = list;
 
     if (effectiveStatus != 'all') {
-      result = result.where((a) => a.status.toLowerCase() == effectiveStatus.toLowerCase()).toList();
+      result = result
+          .where((a) => a.status.toLowerCase() == effectiveStatus.toLowerCase())
+          .toList();
     }
 
     if (effectiveType != 'all') {
-      result = result.where((a) => a.type.toLowerCase() == effectiveType.toLowerCase()).toList();
+      result = result
+          .where((a) => a.type.toLowerCase() == effectiveType.toLowerCase())
+          .toList();
     }
 
     if (effectiveSearch.trim().isNotEmpty) {
@@ -129,7 +134,10 @@ class AssignmentNotifier extends StateNotifier<AssignmentState> {
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final created = await _repository.createAssignment(assignment, courseIds: courseIds);
+      final created = await _repository.createAssignment(
+        assignment,
+        courseIds: courseIds,
+      );
       final updatedList = [created, ...state.assignments];
       state = state.copyWith(
         assignments: updatedList,
@@ -152,8 +160,13 @@ class AssignmentNotifier extends StateNotifier<AssignmentState> {
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final updated = await _repository.updateAssignment(assignment, courseIds: courseIds);
-      final updatedList = state.assignments.map((a) => a.id == updated.id ? updated : a).toList();
+      final updated = await _repository.updateAssignment(
+        assignment,
+        courseIds: courseIds,
+      );
+      final updatedList = state.assignments
+          .map((a) => a.id == updated.id ? updated : a)
+          .toList();
       state = state.copyWith(
         assignments: updatedList,
         filteredAssignments: _applyFilters(updatedList),
@@ -206,18 +219,22 @@ final assignmentRepositoryProvider = Provider<AssignmentRepository>((ref) {
   return SupabaseAssignmentRepository();
 });
 
-final assignmentNotifierProvider = StateNotifierProvider<AssignmentNotifier, AssignmentState>((ref) {
-  final repo = ref.watch(assignmentRepositoryProvider);
-  return AssignmentNotifier(repo);
-});
+final assignmentNotifierProvider =
+    StateNotifierProvider<AssignmentNotifier, AssignmentState>((ref) {
+      final repo = ref.watch(assignmentRepositoryProvider);
+      return AssignmentNotifier(repo);
+    });
 
-final assignmentDetailProvider = FutureProvider.family<Assignment?, String>((ref, id) async {
+final assignmentDetailProvider = FutureProvider.family<Assignment?, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(assignmentRepositoryProvider);
   return repo.getAssignmentById(id);
 });
 
-final assignmentSubmissionsProvider = FutureProvider.family<List<AssignmentSubmission>, String>((ref, id) async {
-  final repo = ref.watch(assignmentRepositoryProvider);
-  return repo.getSubmissions(id);
-});
-
+final assignmentSubmissionsProvider =
+    FutureProvider.family<List<AssignmentSubmission>, String>((ref, id) async {
+      final repo = ref.watch(assignmentRepositoryProvider);
+      return repo.getSubmissions(id);
+    });

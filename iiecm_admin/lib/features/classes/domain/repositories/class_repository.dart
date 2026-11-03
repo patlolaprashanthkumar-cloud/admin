@@ -22,7 +22,10 @@ abstract class ClassRepository {
   });
 
   /// Create a new live class
-  Future<LiveClass> createClass(LiveClass liveClass, {bool notifyStudents = true});
+  Future<LiveClass> createClass(
+    LiveClass liveClass, {
+    bool notifyStudents = true,
+  });
 
   /// Update existing class
   Future<LiveClass> updateClass(LiveClass liveClass);
@@ -41,4 +44,3 @@ abstract class ClassRepository {
   /// Delete class record
   Future<void> deleteClass(String id);
 }
-

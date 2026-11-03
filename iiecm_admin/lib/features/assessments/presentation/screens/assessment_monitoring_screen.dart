@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/date_formatter.dart';
@@ -43,12 +44,13 @@ class AssessmentMonitoringScreen extends ConsumerWidget {
               ref.invalidate(assessmentDetailProvider(assessmentId));
             },
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
               children: [
                 // 1. Assessment Header
                 assessmentAsync.when(
                   loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                   data: (assessment) {
                     if (assessment == null) return const SizedBox.shrink();
 
@@ -60,9 +62,14 @@ class AssessmentMonitoringScreen extends ConsumerWidget {
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryForest.withValues(alpha: 0.12),
+                                  color: AppColors.primaryForest.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -90,7 +97,9 @@ class AssessmentMonitoringScreen extends ConsumerWidget {
                             assessment.title,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
                             ),
                           ),
                         ],
@@ -104,16 +113,25 @@ class AssessmentMonitoringScreen extends ConsumerWidget {
                   loading: () => const Center(
                     child: Padding(
                       padding: EdgeInsets.all(24),
-                      child: CircularProgressIndicator(color: AppColors.primaryForest),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryForest,
+                      ),
                     ),
                   ),
                   error: (err, _) => Center(child: Text('Error: $err')),
                   data: (results) {
                     final total = results.length;
                     final passed = results.where((r) => r.passed).length;
-                    final passRate = total > 0 ? ((passed / total) * 100).toStringAsFixed(1) : '0.0';
+                    final passRate = total > 0
+                        ? ((passed / total) * 100).toStringAsFixed(1)
+                        : '0.0';
                     final avgScore = total > 0
-                        ? (results.fold<double>(0.0, (s, r) => s + r.percentage) / total).toStringAsFixed(1)
+                        ? (results.fold<double>(
+                                    0.0,
+                                    (s, r) => s + r.percentage,
+                                  ) /
+                                  total)
+                              .toStringAsFixed(1)
                         : '0.0';
 
                     return Column(
@@ -170,7 +188,9 @@ class AssessmentMonitoringScreen extends ConsumerWidget {
                           'Candidate Results & Scores',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -180,22 +200,34 @@ class AssessmentMonitoringScreen extends ConsumerWidget {
                             width: double.infinity,
                             padding: const EdgeInsets.all(32),
                             decoration: BoxDecoration(
-                              color: isDark ? AppColors.darkSurface : AppColors.surface,
-                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              color: isDark
+                                  ? AppColors.darkSurface
+                                  : AppColors.surface,
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.radiusMedium,
+                              ),
                             ),
                             child: Column(
                               children: [
                                 Icon(
                                   Icons.assignment_late_outlined,
                                   size: 48,
-                                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.textSecondary,
                                 ),
                                 const SizedBox(height: 8),
-                                const Text('No exam attempts recorded yet', style: TextStyle(fontWeight: FontWeight.w700)),
+                                const Text(
+                                  'No exam attempts recorded yet',
+                                  style: TextStyle(fontWeight: FontWeight.w700),
+                                ),
                                 const SizedBox(height: 4),
                                 const Text(
                                   'When candidates complete the exam, scores and pass/fail analytics will appear here.',
-                                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                               ],
@@ -206,7 +238,8 @@ class AssessmentMonitoringScreen extends ConsumerWidget {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: results.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 8),
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 8),
                             itemBuilder: (context, index) {
                               final res = results[index];
                               final isPassed = res.passed;
@@ -218,47 +251,67 @@ class AssessmentMonitoringScreen extends ConsumerWidget {
                                     CircleAvatar(
                                       radius: 18,
                                       backgroundColor: isPassed
-                                          ? AppColors.primaryForest.withValues(alpha: 0.15)
-                                          : AppColors.error.withValues(alpha: 0.1),
+                                          ? AppColors.primaryForest.withValues(
+                                              alpha: 0.15,
+                                            )
+                                          : AppColors.error.withValues(
+                                              alpha: 0.1,
+                                            ),
                                       child: Icon(
-                                        isPassed ? Icons.check_circle_outline : Icons.cancel_outlined,
-                                        color: isPassed ? AppColors.primaryForest : AppColors.error,
+                                        isPassed
+                                            ? Icons.check_circle_outline
+                                            : Icons.cancel_outlined,
+                                        color: isPassed
+                                            ? AppColors.primaryForest
+                                            : AppColors.error,
                                         size: 20,
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             res.studentName,
-                                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 13,
+                                            ),
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
                                             'Completed on ${DateFormatter.formatDateTime(res.completedAt)}',
                                             style: TextStyle(
                                               fontSize: 11,
-                                              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                              color: isDark
+                                                  ? AppColors.darkTextSecondary
+                                                  : AppColors.textSecondary,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
                                     Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
                                       children: [
                                         Text(
                                           '${res.score.toStringAsFixed(1)} / ${res.totalMarks.toStringAsFixed(0)}',
-                                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 13,
+                                          ),
                                         ),
                                         Text(
                                           '${res.percentage.toStringAsFixed(1)}% • ${isPassed ? 'PASS' : 'FAIL'}',
                                           style: TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w800,
-                                            color: isPassed ? AppColors.primaryForest : AppColors.error,
+                                            color: isPassed
+                                                ? AppColors.primaryForest
+                                                : AppColors.error,
                                           ),
                                         ),
                                       ],

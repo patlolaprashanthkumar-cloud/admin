@@ -59,10 +59,12 @@ void main() {
         'role': 'admin',
       };
 
-      final user = AdminUser.fromProfileJson(json, emailFallback: 'fallback@iiecm.org');
+      final user = AdminUser.fromProfileJson(
+        json,
+        emailFallback: 'fallback@iiecm.org',
+      );
       expect(user.email, 'fallback@iiecm.org');
       expect(user.role, UserRole.admin);
     });
   });
 }
-

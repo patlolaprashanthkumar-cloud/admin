@@ -39,7 +39,11 @@ void main() {
         categoriesCount: 6,
         unreadNotifications: 2,
         monthlyMetrics: [
-          const MonthlyMetricPoint(month: 'Oct', enrolments: 25, revenue: 85000.0),
+          const MonthlyMetricPoint(
+            month: 'Oct',
+            enrolments: 25,
+            revenue: 85000.0,
+          ),
         ],
         paymentBreakdown: {'verified': 85, 'pending': 5},
         recentStudents: [
@@ -74,13 +78,18 @@ void main() {
       expect(stats.activeStudents, 142);
       expect(stats.verifiedRevenue, 450000.0);
       expect(stats.recentStudents.first.fullName, 'Rahul Sharma');
-      expect(stats.recentEnrollments.first.courseTitle, 'Critical Care Fellowship');
+      expect(
+        stats.recentEnrollments.first.courseTitle,
+        'Critical Care Fellowship',
+      );
       expect(stats.upcomingLiveClasses.first.instructorName, 'Dr. Nair');
     });
   });
 
   group('Dashboard Widget Tests', () {
-    testWidgets('StatKpiCard renders values and labels accurately', (WidgetTester tester) async {
+    testWidgets('StatKpiCard renders values and labels accurately', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -101,17 +110,17 @@ void main() {
       expect(find.text('142 active'), findsOneWidget);
     });
 
-    testWidgets('PaymentBreakdownChart displays empty state when transactions count is 0', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PaymentBreakdownChart(breakdown: {}),
+    testWidgets(
+      'PaymentBreakdownChart displays empty state when transactions count is 0',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          const MaterialApp(
+            home: Scaffold(body: PaymentBreakdownChart(breakdown: {})),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('No fee payment transactions found.'), findsOneWidget);
-    });
+        expect(find.text('No fee payment transactions found.'), findsOneWidget);
+      },
+    );
   });
 }
-

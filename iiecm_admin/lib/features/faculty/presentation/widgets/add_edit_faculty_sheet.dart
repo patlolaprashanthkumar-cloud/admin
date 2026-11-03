@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
@@ -22,7 +23,8 @@ class AddEditFacultySheet extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<AddEditFacultySheet> createState() => _AddEditFacultySheetState();
+  ConsumerState<AddEditFacultySheet> createState() =>
+      _AddEditFacultySheetState();
 }
 
 class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
@@ -51,9 +53,15 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
     _nameController = TextEditingController(text: f?.fullName ?? '');
     _emailController = TextEditingController(text: f?.email ?? '');
     _phoneController = TextEditingController(text: f?.phone ?? '');
-    _qualificationsController = TextEditingController(text: f?.qualifications ?? '');
-    _specializationController = TextEditingController(text: f?.specialization ?? '');
-    _experienceController = TextEditingController(text: f != null ? f.experienceYears.toString() : '5');
+    _qualificationsController = TextEditingController(
+      text: f?.qualifications ?? '',
+    );
+    _specializationController = TextEditingController(
+      text: f?.specialization ?? '',
+    );
+    _experienceController = TextEditingController(
+      text: f != null ? f.experienceYears.toString() : '5',
+    );
     _bioController = TextEditingController(text: f?.bio ?? '');
     _status = f?.accountStatus ?? 'active';
 
@@ -94,7 +102,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
         specialization: _specializationController.text.trim(),
         experienceYears: int.tryParse(_experienceController.text.trim()) ?? 0,
         accountStatus: _status,
-        bio: _bioController.text.trim().isNotEmpty ? _bioController.text.trim() : null,
+        bio: _bioController.text.trim().isNotEmpty
+            ? _bioController.text.trim()
+            : null,
         createdAt: widget.faculty?.createdAt ?? DateTime.now(),
       );
 
@@ -120,7 +130,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isEditing ? 'Faculty updated successfully' : 'Faculty registered successfully',
+              isEditing
+                  ? 'Faculty updated successfully'
+                  : 'Faculty registered successfully',
             ),
             backgroundColor: AppColors.primaryForest,
           ),
@@ -154,7 +166,8 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
     final mediaQuery = MediaQuery.of(context);
     final bottomInset = mediaQuery.viewInsets.bottom;
     final availableHeight = mediaQuery.size.height - mediaQuery.padding.top;
-    final effectiveHeight = (availableHeight - bottomInset) * 0.90;
+    final maxSheetHeight = availableHeight - bottomInset;
+    final effectiveHeight = maxSheetHeight * 0.90;
 
     final categoriesState = ref.watch(categoryNotifierProvider);
     final coursesState = ref.watch(coursesNotifierProvider);
@@ -164,7 +177,10 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        height: effectiveHeight.clamp(320.0, availableHeight),
+        height: effectiveHeight.clamp(
+          260.0,
+          maxSheetHeight > 260.0 ? maxSheetHeight : availableHeight,
+        ),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: const BorderRadius.vertical(
@@ -216,10 +232,14 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isEditing ? 'Edit Faculty Profile' : 'Register New Faculty',
+                          isEditing
+                              ? 'Edit Faculty Profile'
+                              : 'Register New Faculty',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         Text(
@@ -228,7 +248,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                               : 'Create institutional instructor with multi-category teaching stream',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -249,7 +271,10 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
               child: Form(
                 key: _formKey,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   children: [
                     // Full Name
                     TextFormField(
@@ -259,8 +284,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                         hintText: 'e.g. Dr. Ramesh Gupta',
                         prefixIcon: Icon(Icons.person_outline_rounded),
                       ),
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Please enter full name' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Please enter full name'
+                          : null,
                     ),
                     const SizedBox(height: 16),
 
@@ -277,8 +303,12 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                               prefixIcon: Icon(Icons.email_outlined),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (!v.contains('@') || !v.contains('.')) return 'Invalid email';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (!v.contains('@') || !v.contains('.')) {
+                                return 'Invalid email';
+                              }
                               return null;
                             },
                           ),
@@ -293,8 +323,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                               hintText: '+91 98765 43210',
                               prefixIcon: Icon(Icons.phone_outlined),
                             ),
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Required' : null,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Required'
+                                : null,
                           ),
                         ),
                       ],
@@ -323,8 +354,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                               hintText: 'Critical Care',
                               prefixIcon: Icon(Icons.medical_services_outlined),
                             ),
-                            validator: (v) =>
-                                (v == null || v.trim().isEmpty) ? 'Required' : null,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'Required'
+                                : null,
                           ),
                         ),
                       ],
@@ -344,8 +376,12 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                               prefixIcon: Icon(Icons.timeline_rounded),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (int.tryParse(v) == null) return 'Must be a number';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (int.tryParse(v) == null) {
+                                return 'Must be a number';
+                              }
                               return null;
                             },
                           ),
@@ -359,9 +395,18 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                               prefixIcon: Icon(Icons.toggle_on_outlined),
                             ),
                             items: const [
-                              DropdownMenuItem(value: 'active', child: Text('Active')),
-                              DropdownMenuItem(value: 'suspended', child: Text('Suspended')),
-                              DropdownMenuItem(value: 'inactive', child: Text('Inactive')),
+                              DropdownMenuItem(
+                                value: 'active',
+                                child: Text('Active'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'suspended',
+                                child: Text('Suspended'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'inactive',
+                                child: Text('Inactive'),
+                              ),
                             ],
                             onChanged: (val) {
                               if (val != null) setState(() => _status = val);
@@ -389,7 +434,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                       'Assigned Teaching Categories',
                       style: theme.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -397,7 +444,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                       'Select curriculum streams this faculty member is certified to teach.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -405,14 +454,19 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                     if (categoriesState.categories.isEmpty)
                       const Text(
                         'No categories found in system.',
-                        style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
                       )
                     else
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: categoriesState.categories.map((cat) {
-                          final isSelected = _selectedCategoryIds.contains(cat.id);
+                          final isSelected = _selectedCategoryIds.contains(
+                            cat.id,
+                          );
                           return FilterChip(
                             label: Text(cat.name),
                             selected: isSelected,
@@ -425,14 +479,20 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                                 }
                               });
                             },
-                            selectedColor: AppColors.primaryForest.withValues(alpha: 0.15),
+                            selectedColor: AppColors.primaryForest.withValues(
+                              alpha: 0.15,
+                            ),
                             checkmarkColor: AppColors.primaryForest,
                             labelStyle: TextStyle(
                               fontSize: 12,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
                               color: isSelected
                                   ? AppColors.primaryForest
-                                  : (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
+                                  : (isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.textPrimary),
                             ),
                           );
                         }).toList(),
@@ -445,7 +505,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                       'Assign Courses (Instructor Allocation)',
                       style: theme.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -453,7 +515,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                       'Select courses for which this faculty member is the primary instructor.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -461,35 +525,49 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                     if (coursesState.courses.isEmpty)
                       const Text(
                         'No courses found in catalog.',
-                        style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
                       )
                     else
                       Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: isDark ? AppColors.darkBorder : AppColors.divider,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.divider,
                           ),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMedium,
+                          ),
                         ),
                         child: ListView.separated(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: coursesState.courses.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          separatorBuilder: (_, _) => const Divider(height: 1),
                           itemBuilder: (context, index) {
                             final course = coursesState.courses[index];
-                            final isAssigned = _selectedCourseIds.contains(course.id);
+                            final isAssigned = _selectedCourseIds.contains(
+                              course.id,
+                            );
                             return CheckboxListTile(
                               dense: true,
                               title: Text(
                                 course.title,
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                               subtitle: Text(
                                 '${course.categoryName} • ${course.format.toUpperCase()}',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.textSecondary,
                                 ),
                               ),
                               value: isAssigned,
@@ -531,7 +609,9 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: const Text('Cancel'),
                       ),
                     ),
@@ -549,10 +629,14 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
-                            : Text(isEditing ? 'Save Changes' : 'Register Faculty'),
+                            : Text(
+                                isEditing ? 'Save Changes' : 'Register Faculty',
+                              ),
                       ),
                     ),
                   ],

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../assignments/domain/models/assignment_submission.dart';
 import '../../data/repositories/supabase_assessment_repository.dart';
 import '../../domain/models/assessment.dart';
@@ -105,17 +106,22 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
     var result = list;
 
     if (effectiveStatus != 'all') {
-      result = result.where((a) => a.status.toLowerCase() == effectiveStatus.toLowerCase()).toList();
+      result = result
+          .where((a) => a.status.toLowerCase() == effectiveStatus.toLowerCase())
+          .toList();
     }
 
     if (effectiveType != 'all') {
-      result = result.where((a) => a.type.toLowerCase() == effectiveType.toLowerCase()).toList();
+      result = result
+          .where((a) => a.type.toLowerCase() == effectiveType.toLowerCase())
+          .toList();
     }
 
     if (effectiveSearch.trim().isNotEmpty) {
       final q = effectiveSearch.trim().toLowerCase();
       result = result.where((a) {
-        return a.title.toLowerCase().contains(q) || a.description.toLowerCase().contains(q);
+        return a.title.toLowerCase().contains(q) ||
+            a.description.toLowerCase().contains(q);
       }).toList();
     }
 
@@ -146,7 +152,9 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final updated = await _repository.updateAssessment(assessment);
-      final updatedList = state.assessments.map((a) => a.id == updated.id ? updated : a).toList();
+      final updatedList = state.assessments
+          .map((a) => a.id == updated.id ? updated : a)
+          .toList();
       state = state.copyWith(
         assessments: updatedList,
         filteredAssessments: _applyFilters(updatedList),
@@ -199,22 +207,28 @@ final assessmentRepositoryProvider = Provider<AssessmentRepository>((ref) {
   return SupabaseAssessmentRepository();
 });
 
-final assessmentNotifierProvider = StateNotifierProvider<AssessmentNotifier, AssessmentState>((ref) {
-  final repo = ref.watch(assessmentRepositoryProvider);
-  return AssessmentNotifier(repo);
-});
+final assessmentNotifierProvider =
+    StateNotifierProvider<AssessmentNotifier, AssessmentState>((ref) {
+      final repo = ref.watch(assessmentRepositoryProvider);
+      return AssessmentNotifier(repo);
+    });
 
-final assessmentDetailProvider = FutureProvider.family<Assessment?, String>((ref, id) async {
+final assessmentDetailProvider = FutureProvider.family<Assessment?, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(assessmentRepositoryProvider);
   return repo.getAssessmentById(id);
 });
 
-final assessmentQuestionsProvider = FutureProvider.family<List<Question>, String>((ref, id) async {
-  final repo = ref.watch(assessmentRepositoryProvider);
-  return repo.getAssessmentQuestions(id);
-});
+final assessmentQuestionsProvider =
+    FutureProvider.family<List<Question>, String>((ref, id) async {
+      final repo = ref.watch(assessmentRepositoryProvider);
+      return repo.getAssessmentQuestions(id);
+    });
 
-final assessmentResultsProvider = FutureProvider.family<List<AssignmentSubmission>, String>((ref, id) async {
-  final repo = ref.watch(assessmentRepositoryProvider);
-  return repo.getAssessmentResults(id);
-});
+final assessmentResultsProvider =
+    FutureProvider.family<List<AssignmentSubmission>, String>((ref, id) async {
+      final repo = ref.watch(assessmentRepositoryProvider);
+      return repo.getAssessmentResults(id);
+    });

@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/admin_user.dart';
 
 /// Contract defining all authentication operations for IIECM Admin
@@ -10,10 +11,7 @@ abstract class AuthRepository {
   Session? get currentSession;
 
   /// Authenticate with email & password, fetch authoritative profile, and verify admin role
-  Future<AdminUser> signIn({
-    required String email,
-    required String password,
-  });
+  Future<AdminUser> signIn({required String email, required String password});
 
   /// Authoritatively fetches the user's role and details directly from `public.profiles`
   /// Throws [ProfileNotFoundException] if row is missing
@@ -33,4 +31,3 @@ abstract class AuthRepository {
   /// Attempts to restore an existing persisted session on app launch
   Future<AdminUser?> restoreSession();
 }
-

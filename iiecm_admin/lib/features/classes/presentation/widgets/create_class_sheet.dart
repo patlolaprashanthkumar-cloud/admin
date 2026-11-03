@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/supabase_client.dart';
@@ -46,7 +47,6 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
 
   int _enrolledStudentCount = 0;
   bool _isLoadingEnrolled = false;
-  bool _isCheckingConflict = false;
   List<LiveClass> _conflicts = [];
   bool _conflictIgnored = false;
   bool _notifyStudents = true;
@@ -60,7 +60,9 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     final c = widget.existingClass;
     _titleController = TextEditingController(text: c?.title ?? '');
     _meetingLinkController = TextEditingController(text: c?.meetingLink ?? '');
-    _durationController = TextEditingController(text: c != null ? c.durationMinutes.toString() : '60');
+    _durationController = TextEditingController(
+      text: c != null ? c.durationMinutes.toString() : '60',
+    );
 
     if (c != null) {
       _selectedCourseId = c.courseId;
@@ -68,7 +70,10 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
       _selectedInstructorId = c.instructorId;
       _selectedInstructorName = c.instructorName;
       _scheduledDate = c.scheduledAt;
-      _scheduledTime = TimeOfDay(hour: c.scheduledAt.hour, minute: c.scheduledAt.minute);
+      _scheduledTime = TimeOfDay(
+        hour: c.scheduledAt.hour,
+        minute: c.scheduledAt.minute,
+      );
       _fetchEnrolledCount(c.courseId);
     }
   }
@@ -112,9 +117,10 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
   }
 
   Future<void> _checkConflict() async {
-    if (_selectedInstructorId == null || _selectedInstructorId!.isEmpty) return;
+    if (_selectedInstructorId == null || _selectedInstructorId!.isEmpty) {
+      return;
+    }
 
-    setState(() => _isCheckingConflict = true);
     try {
       final repo = ref.read(classRepositoryProvider);
       final duration = int.tryParse(_durationController.text.trim()) ?? 60;
@@ -128,26 +134,29 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
       if (mounted) {
         setState(() {
           _conflicts = found;
-          _isCheckingConflict = false;
           _conflictIgnored = false;
         });
       }
-    } catch (_) {
-      if (mounted) setState(() => _isCheckingConflict = false);
-    }
+    } catch (_) {}
   }
 
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCourseId == null || _selectedCourseId!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a course'), backgroundColor: AppColors.error),
+        const SnackBar(
+          content: Text('Please select a course'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
     if (_selectedInstructorId == null || _selectedInstructorId!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an instructor'), backgroundColor: AppColors.error),
+        const SnackBar(
+          content: Text('Please select an instructor'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
@@ -177,7 +186,10 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
               onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text('Proceed Anyway', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'Proceed Anyway',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),
@@ -217,7 +229,10 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
           liveClass.durationMinutes,
         );
       } else {
-        success = await notifier.createClass(liveClass, notifyStudents: _notifyStudents);
+        success = await notifier.createClass(
+          liveClass,
+          notifyStudents: _notifyStudents,
+        );
       }
 
       if (!mounted) return;
@@ -227,7 +242,9 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isEditing ? 'Class updated successfully' : 'Live class scheduled successfully',
+              isEditing
+                  ? 'Class updated successfully'
+                  : 'Live class scheduled successfully',
             ),
             backgroundColor: AppColors.primaryForest,
           ),
@@ -243,7 +260,10 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -258,23 +278,30 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     final mediaQuery = MediaQuery.of(context);
     final bottomInset = mediaQuery.viewInsets.bottom;
     final availableHeight = mediaQuery.size.height - mediaQuery.padding.top;
-    final effectiveHeight = (availableHeight - bottomInset) * 0.90;
+    final maxSheetHeight = availableHeight - bottomInset;
+    final effectiveHeight = maxSheetHeight * 0.90;
 
     final categoriesState = ref.watch(categoryNotifierProvider);
     final coursesState = ref.watch(coursesNotifierProvider);
     final facultyState = ref.watch(facultyNotifierProvider);
 
     // Filter courses by selected category if selected
-    final availableCourses = _selectedCategoryId == null || _selectedCategoryId == 'all'
+    final availableCourses =
+        _selectedCategoryId == null || _selectedCategoryId == 'all'
         ? coursesState.courses
-        : coursesState.courses.where((c) => c.categoryId == _selectedCategoryId).toList();
+        : coursesState.courses
+              .where((c) => c.categoryId == _selectedCategoryId)
+              .toList();
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        height: effectiveHeight.clamp(320.0, availableHeight),
+        height: effectiveHeight.clamp(
+          260.0,
+          maxSheetHeight > 260.0 ? maxSheetHeight : availableHeight,
+        ),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: const BorderRadius.vertical(
@@ -326,10 +353,14 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isEditing ? 'Reschedule Live Class' : 'Schedule New Live Class',
+                          isEditing
+                              ? 'Reschedule Live Class'
+                              : 'Schedule New Live Class',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         Text(
@@ -338,7 +369,9 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                               : 'Admin-controlled cascading class scheduling & timetable allocation',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -359,7 +392,10 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
               child: Form(
                 key: _formKey,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   children: [
                     // Conflict Warning Banner
                     if (_conflicts.isNotEmpty) ...[
@@ -373,7 +409,11 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.warning_rounded, color: Colors.amber.shade800, size: 20),
+                            Icon(
+                              Icons.warning_rounded,
+                              color: Colors.amber.shade800,
+                              size: 20,
+                            ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
@@ -390,7 +430,10 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                                   const SizedBox(height: 2),
                                   Text(
                                     '$_selectedInstructorName already has "${_conflicts.first.title}" booked at ${DateFormatter.formatDateTime(_conflicts.first.scheduledAt)}.',
-                                    style: TextStyle(fontSize: 11, color: Colors.amber.shade900),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.amber.shade900,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -403,15 +446,21 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
 
                     // Step 1: Filter Category (Cascading)
                     DropdownButtonFormField<String>(
-                      value: _selectedCategoryId,
+                      initialValue: _selectedCategoryId,
                       decoration: const InputDecoration(
                         labelText: 'Filter by Academic Category (Optional)',
                         prefixIcon: Icon(Icons.category_outlined),
                       ),
                       items: [
-                        const DropdownMenuItem(value: null, child: Text('All Categories')),
+                        const DropdownMenuItem(
+                          value: null,
+                          child: Text('All Categories'),
+                        ),
                         ...categoriesState.categories.map((cat) {
-                          return DropdownMenuItem(value: cat.id, child: Text(cat.name));
+                          return DropdownMenuItem(
+                            value: cat.id,
+                            child: Text(cat.name),
+                          );
                         }),
                       ],
                       onChanged: (val) {
@@ -427,30 +476,32 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
 
                     // Step 2: Course Selection
                     DropdownButtonFormField<String>(
-                      value: _selectedCourseId,
+                      initialValue: _selectedCourseId,
                       decoration: const InputDecoration(
                         labelText: 'Course *',
                         prefixIcon: Icon(Icons.menu_book_outlined),
                       ),
-                      validator: (v) => (v == null || v.isEmpty) ? 'Please select course' : null,
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? 'Please select course'
+                          : null,
                       items: availableCourses.map((c) {
                         return DropdownMenuItem(
                           value: c.id,
-                          child: Text(
-                            c.title,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          child: Text(c.title, overflow: TextOverflow.ellipsis),
                         );
                       }).toList(),
                       onChanged: (val) {
                         if (val == null) return;
-                        final course = coursesState.courses.firstWhere((c) => c.id == val);
+                        final course = coursesState.courses.firstWhere(
+                          (c) => c.id == val,
+                        );
                         setState(() {
                           _selectedCourseId = val;
                           _selectedCourseName = course.title;
 
                           // Auto-select instructor if assigned
-                          if (course.instructorId != null && course.instructorId!.isNotEmpty) {
+                          if (course.instructorId != null &&
+                              course.instructorId!.isNotEmpty) {
                             _selectedInstructorId = course.instructorId;
                             _selectedInstructorName = course.instructorName;
                           }
@@ -467,7 +518,11 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: Row(
                           children: [
-                            const Icon(Icons.group_outlined, size: 14, color: AppColors.primaryForest),
+                            const Icon(
+                              Icons.group_outlined,
+                              size: 14,
+                              color: AppColors.primaryForest,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               _isLoadingEnrolled
@@ -488,12 +543,14 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
 
                     // Step 3: Instructor Selection
                     DropdownButtonFormField<String>(
-                      value: _selectedInstructorId,
+                      initialValue: _selectedInstructorId,
                       decoration: const InputDecoration(
                         labelText: 'Assigned Instructor *',
                         prefixIcon: Icon(Icons.person_outline_rounded),
                       ),
-                      validator: (v) => (v == null || v.isEmpty) ? 'Please select instructor' : null,
+                      validator: (v) => (v == null || v.isEmpty)
+                          ? 'Please select instructor'
+                          : null,
                       items: facultyState.facultyList.map((f) {
                         return DropdownMenuItem(
                           value: f.id,
@@ -505,7 +562,9 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                       }).toList(),
                       onChanged: (val) {
                         if (val == null) return;
-                        final fac = facultyState.facultyList.firstWhere((f) => f.id == val);
+                        final fac = facultyState.facultyList.firstWhere(
+                          (f) => f.id == val,
+                        );
                         setState(() {
                           _selectedInstructorId = val;
                           _selectedInstructorName = fac.fullName;
@@ -524,7 +583,9 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                         hintText: 'e.g. Masterclass: Advanced Resuscitation Protocols',
                         prefixIcon: Icon(Icons.title_rounded),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter session title' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Please enter session title'
+                          : null,
                     ),
 
                     const SizedBox(height: 16),
@@ -538,8 +599,12 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                               final picked = await showDatePicker(
                                 context: context,
                                 initialDate: _scheduledDate,
-                                firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                                lastDate: DateTime.now().add(const Duration(days: 365)),
+                                firstDate: DateTime.now().subtract(
+                                  const Duration(days: 30),
+                                ),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365),
+                                ),
                               );
                               if (picked != null) {
                                 setState(() => _scheduledDate = picked);
@@ -553,7 +618,10 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                               ),
                               child: Text(
                                 DateFormatter.formatDate(_scheduledDate),
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -578,7 +646,10 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                               ),
                               child: Text(
                                 _scheduledTime.format(context),
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -598,8 +669,12 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                         prefixIcon: Icon(Icons.timer_outlined),
                       ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        if (int.tryParse(v) == null) return 'Must be a valid integer';
+                        if (v == null || v.trim().isEmpty) {
+                          return 'Required';
+                        }
+                        if (int.tryParse(v) == null) {
+                          return 'Must be a valid integer';
+                        }
                         return null;
                       },
                       onChanged: (_) => _checkConflict(),
@@ -625,14 +700,20 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                       contentPadding: EdgeInsets.zero,
                       title: const Text(
                         'Send Notification to Students',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       subtitle: const Text(
                         'Automatically broadcast in-app notification to all enrolled candidates',
-                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       value: _notifyStudents,
-                      activeColor: AppColors.primaryForest,
+                      activeThumbColor: AppColors.primaryForest,
                       onChanged: (val) => setState(() => _notifyStudents = val),
                     ),
 
@@ -659,7 +740,9 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: const Text('Cancel'),
                       ),
                     ),
@@ -677,10 +760,14 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
-                            : Text(isEditing ? 'Save Changes' : 'Schedule Class'),
+                            : Text(
+                                isEditing ? 'Save Changes' : 'Schedule Class',
+                              ),
                       ),
                     ),
                   ],
@@ -693,4 +780,3 @@ class _CreateClassSheetState extends ConsumerState<CreateClassSheet> {
     );
   }
 }
-

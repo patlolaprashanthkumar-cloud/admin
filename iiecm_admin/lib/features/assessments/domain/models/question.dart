@@ -20,11 +20,7 @@ class QuestionOption {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'text': text,
-      'is_correct': isCorrect,
-    };
+    return {'id': id, 'text': text, 'is_correct': isCorrect};
   }
 
   QuestionOption copyWith({String? id, String? text, bool? isCorrect}) {
@@ -125,4 +121,3 @@ class Question {
     );
   }
 }
-

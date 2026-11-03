@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../app/theme/app_colors.dart';
 import '../constants/app_constants.dart';
 
@@ -75,13 +76,11 @@ class StatKpiCard extends StatelessWidget {
                       padding: const EdgeInsets.all(7.5),
                       decoration: BoxDecoration(
                         color: accentColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusMedium,
+                        ),
                       ),
-                      child: Icon(
-                        icon,
-                        size: 20,
-                        color: accentColor,
-                      ),
+                      child: Icon(icon, size: 20, color: accentColor),
                     ),
                     if (onTap != null)
                       Icon(
@@ -121,7 +120,10 @@ class StatKpiCard extends StatelessWidget {
                 if (trendLabel != null) ...[
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: isTrendPositive
                           ? AppColors.forestSoft
@@ -132,16 +134,22 @@ class StatKpiCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isTrendPositive ? Icons.trending_up_rounded : Icons.info_outline_rounded,
+                          isTrendPositive
+                              ? Icons.trending_up_rounded
+                              : Icons.info_outline_rounded,
                           size: 12,
-                          color: isTrendPositive ? AppColors.primaryForest : AppColors.accentTerracotta,
+                          color: isTrendPositive
+                              ? AppColors.primaryForest
+                              : AppColors.accentTerracotta,
                         ),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
                             trendLabel!,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: isTrendPositive ? AppColors.primaryForest : AppColors.accentTerracotta,
+                              color: isTrendPositive
+                                  ? AppColors.primaryForest
+                                  : AppColors.accentTerracotta,
                               fontWeight: FontWeight.w700,
                               fontSize: 10,
                             ),

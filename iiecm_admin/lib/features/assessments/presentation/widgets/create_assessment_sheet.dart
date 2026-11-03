@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/date_formatter.dart';
-import '../domain/models/assessment.dart';
+import '../../domain/models/assessment.dart';
 import '../providers/assessment_provider.dart';
 
 class CreateAssessmentSheet extends ConsumerStatefulWidget {
@@ -11,17 +12,22 @@ class CreateAssessmentSheet extends ConsumerStatefulWidget {
 
   const CreateAssessmentSheet({super.key, this.existingAssessment});
 
-  static Future<bool?> show(BuildContext context, {Assessment? existingAssessment}) {
+  static Future<bool?> show(
+    BuildContext context, {
+    Assessment? existingAssessment,
+  }) {
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => CreateAssessmentSheet(existingAssessment: existingAssessment),
+      builder: (ctx) =>
+          CreateAssessmentSheet(existingAssessment: existingAssessment),
     );
   }
 
   @override
-  ConsumerState<CreateAssessmentSheet> createState() => _CreateAssessmentSheetState();
+  ConsumerState<CreateAssessmentSheet> createState() =>
+      _CreateAssessmentSheetState();
 }
 
 class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
@@ -48,15 +54,24 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
     final a = widget.existingAssessment;
     _titleController = TextEditingController(text: a?.title ?? '');
     _descController = TextEditingController(text: a?.description ?? '');
-    _totalMarksController = TextEditingController(text: a != null ? a.totalMarks.toString() : '100');
-    _passingMarksController = TextEditingController(text: a != null ? a.passingMarks.toString() : '40');
-    _durationController = TextEditingController(text: a != null ? a.durationMinutes.toString() : '60');
+    _totalMarksController = TextEditingController(
+      text: a != null ? a.totalMarks.toString() : '100',
+    );
+    _passingMarksController = TextEditingController(
+      text: a != null ? a.passingMarks.toString() : '40',
+    );
+    _durationController = TextEditingController(
+      text: a != null ? a.durationMinutes.toString() : '60',
+    );
     _type = a?.type ?? 'mcq';
     _status = a?.status ?? 'active';
 
     if (a?.scheduledAt != null) {
       _scheduledDate = a!.scheduledAt!;
-      _scheduledTime = TimeOfDay(hour: a.scheduledAt!.hour, minute: a.scheduledAt!.minute);
+      _scheduledTime = TimeOfDay(
+        hour: a.scheduledAt!.hour,
+        minute: a.scheduledAt!.minute,
+      );
     }
   }
 
@@ -128,7 +143,9 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isEditing ? 'Assessment updated successfully' : 'Assessment created successfully',
+              isEditing
+                  ? 'Assessment updated successfully'
+                  : 'Assessment created successfully',
             ),
             backgroundColor: AppColors.primaryForest,
           ),
@@ -144,7 +161,10 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -159,14 +179,18 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
     final mediaQuery = MediaQuery.of(context);
     final bottomInset = mediaQuery.viewInsets.bottom;
     final availableHeight = mediaQuery.size.height - mediaQuery.padding.top;
-    final effectiveHeight = (availableHeight - bottomInset) * 0.85;
+    final maxSheetHeight = availableHeight - bottomInset;
+    final effectiveHeight = maxSheetHeight * 0.85;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        height: effectiveHeight.clamp(320.0, availableHeight),
+        height: effectiveHeight.clamp(
+          260.0,
+          maxSheetHeight > 260.0 ? maxSheetHeight : availableHeight,
+        ),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: const BorderRadius.vertical(
@@ -218,10 +242,14 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isEditing ? 'Edit Assessment / Exam' : 'Create New Assessment',
+                          isEditing
+                              ? 'Edit Assessment / Exam'
+                              : 'Create New Assessment',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         Text(
@@ -230,7 +258,9 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                               : 'Set evaluation criteria, timer, and question structure',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -251,17 +281,23 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
               child: Form(
                 key: _formKey,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   children: [
                     // Title
                     TextFormField(
                       controller: _titleController,
                       decoration: const InputDecoration(
                         labelText: 'Assessment Title *',
-                        hintText: 'e.g. Critical Care Mid-Term Certification Exam',
+                        hintText:
+                            'e.g. Critical Care Mid-Term Certification Exam',
                         prefixIcon: Icon(Icons.title_rounded),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter title' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Please enter title'
+                          : null,
                     ),
                     const SizedBox(height: 16),
 
@@ -282,36 +318,58 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _type,
+                            initialValue: _type,
                             decoration: const InputDecoration(
                               labelText: 'Type',
                               prefixIcon: Icon(Icons.category_outlined),
                             ),
                             items: const [
-                              DropdownMenuItem(value: 'mcq', child: Text('MCQ Exam')),
-                              DropdownMenuItem(value: 'quiz', child: Text('Modular Quiz')),
+                              DropdownMenuItem(
+                                value: 'mcq',
+                                child: Text('MCQ Exam'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'quiz',
+                                child: Text('Modular Quiz'),
+                              ),
                             ],
                             onChanged: (val) {
-                              if (val != null) setState(() => _type = val);
+                              if (val != null) {
+                                setState(() => _type = val);
+                              }
                             },
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _status,
+                            initialValue: _status,
                             decoration: const InputDecoration(
                               labelText: 'Status',
                               prefixIcon: Icon(Icons.toggle_on_outlined),
                             ),
                             items: const [
-                              DropdownMenuItem(value: 'active', child: Text('Active')),
-                              DropdownMenuItem(value: 'scheduled', child: Text('Scheduled')),
-                              DropdownMenuItem(value: 'draft', child: Text('Draft')),
-                              DropdownMenuItem(value: 'completed', child: Text('Completed')),
+                              DropdownMenuItem(
+                                value: 'active',
+                                child: Text('Active'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'scheduled',
+                                child: Text('Scheduled'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'draft',
+                                child: Text('Draft'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'completed',
+                                child: Text('Completed'),
+                              ),
                             ],
                             onChanged: (val) {
-                              if (val != null) setState(() => _status = val);
+                              if (val != null) {
+                                setState(() => _status = val);
+                              }
                             },
                           ),
                         ),
@@ -331,8 +389,12 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                               prefixIcon: Icon(Icons.grade_outlined),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (int.tryParse(v) == null) return 'Must be a number';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (int.tryParse(v) == null) {
+                                return 'Must be a number';
+                              }
                               return null;
                             },
                           ),
@@ -347,8 +409,12 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                               prefixIcon: Icon(Icons.check_circle_outline),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (int.tryParse(v) == null) return 'Must be a number';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (int.tryParse(v) == null) {
+                                return 'Must be a number';
+                              }
                               return null;
                             },
                           ),
@@ -363,8 +429,12 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                               prefixIcon: Icon(Icons.timer_outlined),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (int.tryParse(v) == null) return 'Must be a number';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (int.tryParse(v) == null) {
+                                return 'Must be a number';
+                              }
                               return null;
                             },
                           ),
@@ -382,10 +452,16 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                               final picked = await showDatePicker(
                                 context: context,
                                 initialDate: _scheduledDate,
-                                firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                                lastDate: DateTime.now().add(const Duration(days: 365)),
+                                firstDate: DateTime.now().subtract(
+                                  const Duration(days: 30),
+                                ),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365),
+                                ),
                               );
-                              if (picked != null) setState(() => _scheduledDate = picked);
+                              if (picked != null) {
+                                setState(() => _scheduledDate = picked);
+                              }
                             },
                             child: InputDecorator(
                               decoration: const InputDecoration(
@@ -394,7 +470,10 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                               ),
                               child: Text(
                                 DateFormatter.formatDate(_scheduledDate),
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -407,7 +486,9 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                                 context: context,
                                 initialTime: _scheduledTime,
                               );
-                              if (picked != null) setState(() => _scheduledTime = picked);
+                              if (picked != null) {
+                                setState(() => _scheduledTime = picked);
+                              }
                             },
                             child: InputDecorator(
                               decoration: const InputDecoration(
@@ -416,7 +497,10 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                               ),
                               child: Text(
                                 _scheduledTime.format(context),
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -438,14 +522,18 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface : AppColors.surface,
                   border: Border(
-                    top: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.divider),
+                    top: BorderSide(
+                      color: isDark ? AppColors.darkBorder : AppColors.divider,
+                    ),
                   ),
                 ),
                 child: Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: const Text('Cancel'),
                       ),
                     ),
@@ -463,10 +551,16 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
-                            : Text(isEditing ? 'Save Changes' : 'Create Assessment'),
+                            : Text(
+                                isEditing
+                                    ? 'Save Changes'
+                                    : 'Create Assessment',
+                              ),
                       ),
                     ),
                   ],
@@ -479,4 +573,3 @@ class _CreateAssessmentSheetState extends ConsumerState<CreateAssessmentSheet> {
     );
   }
 }
-

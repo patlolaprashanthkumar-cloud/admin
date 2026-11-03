@@ -3,7 +3,11 @@ import '../models/course_lesson.dart';
 import '../models/course_module.dart';
 
 abstract class CourseRepository {
-  Future<List<Course>> getCourses({String? categoryId, String? status, String? searchQuery});
+  Future<List<Course>> getCourses({
+    String? categoryId,
+    String? status,
+    String? searchQuery,
+  });
   Future<Course?> getCourseById(String id);
   Future<Course> createCourse({
     required String title,
@@ -39,4 +43,3 @@ abstract class CourseRepository {
   Future<CourseLesson> updateLesson(CourseLesson lesson);
   Future<void> deleteLesson(String lessonId);
 }
-

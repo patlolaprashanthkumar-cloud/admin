@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+
 import '../../../../core/network/supabase_client.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../domain/models/live_class.dart';
@@ -21,7 +22,9 @@ class SupabaseClassRepository implements ClassRepository {
       if (status != null && status.isNotEmpty && status != 'all') {
         query = query.eq('status', status);
       }
-      if (instructorId != null && instructorId.isNotEmpty && instructorId != 'all') {
+      if (instructorId != null &&
+          instructorId.isNotEmpty &&
+          instructorId != 'all') {
         query = query.eq('instructor_id', instructorId);
       }
       if (courseId != null && courseId.isNotEmpty && courseId != 'all') {
@@ -34,8 +37,13 @@ class SupabaseClassRepository implements ClassRepository {
         query = query.lte('scheduled_at', endDate.toIso8601String());
       }
 
-      final List<dynamic> rows = await query.order('scheduled_at', ascending: true);
-      return rows.map((r) => LiveClass.fromJson(r as Map<String, dynamic>)).toList();
+      final List<dynamic> rows = await query.order(
+        'scheduled_at',
+        ascending: true,
+      );
+      return rows
+          .map((r) => LiveClass.fromJson(r as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       developer.log('Error in getClasses: $e', name: 'SupabaseClassRepository');
       rethrow;
@@ -55,7 +63,10 @@ class SupabaseClassRepository implements ClassRepository {
       if (rows.isEmpty) return null;
       return LiveClass.fromJson(rows.first as Map<String, dynamic>);
     } catch (e) {
-      developer.log('Error in getClassById: $e', name: 'SupabaseClassRepository');
+      developer.log(
+        'Error in getClassById: $e',
+        name: 'SupabaseClassRepository',
+      );
       rethrow;
     }
   }
@@ -87,7 +98,9 @@ class SupabaseClassRepository implements ClassRepository {
       }
 
       final List<dynamic> rows = await query;
-      final existingClasses = rows.map((r) => LiveClass.fromJson(r as Map<String, dynamic>)).toList();
+      final existingClasses = rows
+          .map((r) => LiveClass.fromJson(r as Map<String, dynamic>))
+          .toList();
 
       // Detect overlap
       final conflicts = existingClasses.where((c) {
@@ -96,13 +109,19 @@ class SupabaseClassRepository implements ClassRepository {
 
       return conflicts;
     } catch (e) {
-      developer.log('Error in checkInstructorConflicts: $e', name: 'SupabaseClassRepository');
+      developer.log(
+        'Error in checkInstructorConflicts: $e',
+        name: 'SupabaseClassRepository',
+      );
       return [];
     }
   }
 
   @override
-  Future<LiveClass> createClass(LiveClass liveClass, {bool notifyStudents = true}) async {
+  Future<LiveClass> createClass(
+    LiveClass liveClass, {
+    bool notifyStudents = true,
+  }) async {
     final client = AppSupabase.client;
 
     try {
@@ -116,14 +135,17 @@ class SupabaseClassRepository implements ClassRepository {
         throw Exception('Failed to insert live class.');
       }
 
-      final created = LiveClass.fromJson(inserted.first as Map<String, dynamic>);
+      final created = LiveClass.fromJson(
+        inserted.first as Map<String, dynamic>,
+      );
 
       // Increment total_classes for instructor if present
       if (created.instructorId.isNotEmpty) {
         try {
-          await client.rpc('increment_instructor_classes', params: {
-            'inst_id': created.instructorId,
-          });
+          await client.rpc(
+            'increment_instructor_classes',
+            params: {'inst_id': created.instructorId},
+          );
         } catch (_) {
           // If RPC is absent, update directly
           try {
@@ -156,13 +178,19 @@ class SupabaseClassRepository implements ClassRepository {
             'action_url': created.meetingLink,
           });
         } catch (e) {
-          developer.log('Failed to dispatch notification: $e', name: 'SupabaseClassRepository');
+          developer.log(
+            'Failed to dispatch notification: $e',
+            name: 'SupabaseClassRepository',
+          );
         }
       }
 
       return created;
     } catch (e) {
-      developer.log('Error in createClass: $e', name: 'SupabaseClassRepository');
+      developer.log(
+        'Error in createClass: $e',
+        name: 'SupabaseClassRepository',
+      );
       rethrow;
     }
   }
@@ -176,7 +204,10 @@ class SupabaseClassRepository implements ClassRepository {
       await client.from('live_classes').update(payload).eq('id', liveClass.id);
       return (await getClassById(liveClass.id)) ?? liveClass;
     } catch (e) {
-      developer.log('Error in updateClass: $e', name: 'SupabaseClassRepository');
+      developer.log(
+        'Error in updateClass: $e',
+        name: 'SupabaseClassRepository',
+      );
       rethrow;
     }
   }
@@ -191,11 +222,14 @@ class SupabaseClassRepository implements ClassRepository {
     final client = AppSupabase.client;
 
     try {
-      await client.from('live_classes').update({
-        'scheduled_at': newScheduledAt.toIso8601String(),
-        'duration_minutes': newDuration,
-        'status': 'upcoming',
-      }).eq('id', id);
+      await client
+          .from('live_classes')
+          .update({
+            'scheduled_at': newScheduledAt.toIso8601String(),
+            'duration_minutes': newDuration,
+            'status': 'upcoming',
+          })
+          .eq('id', id);
 
       final updated = await getClassById(id);
       if (updated == null) {
@@ -218,7 +252,10 @@ class SupabaseClassRepository implements ClassRepository {
 
       return updated;
     } catch (e) {
-      developer.log('Error in rescheduleClass: $e', name: 'SupabaseClassRepository');
+      developer.log(
+        'Error in rescheduleClass: $e',
+        name: 'SupabaseClassRepository',
+      );
       rethrow;
     }
   }
@@ -229,7 +266,10 @@ class SupabaseClassRepository implements ClassRepository {
     try {
       await client.from('live_classes').update({'status': status}).eq('id', id);
     } catch (e) {
-      developer.log('Error in updateClassStatus: $e', name: 'SupabaseClassRepository');
+      developer.log(
+        'Error in updateClassStatus: $e',
+        name: 'SupabaseClassRepository',
+      );
       rethrow;
     }
   }
@@ -240,9 +280,11 @@ class SupabaseClassRepository implements ClassRepository {
     try {
       await client.from('live_classes').delete().eq('id', id);
     } catch (e) {
-      developer.log('Error in deleteClass: $e', name: 'SupabaseClassRepository');
+      developer.log(
+        'Error in deleteClass: $e',
+        name: 'SupabaseClassRepository',
+      );
       rethrow;
     }
   }
 }
-

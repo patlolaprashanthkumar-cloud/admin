@@ -40,7 +40,8 @@ void main() {
     test('Question and QuestionOption parse JSONB options correctly', () {
       final qJson = {
         'id': 'q-1',
-        'question_text': 'What is the standard chest compression depth in adult CPR?',
+        'question_text':
+            'What is the standard chest compression depth in adult CPR?',
         'type': 'mcq',
         'marks': 2,
         'options': [
@@ -67,4 +68,3 @@ void main() {
     });
   });
 }
-

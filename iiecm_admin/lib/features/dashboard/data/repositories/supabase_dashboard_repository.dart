@@ -1,5 +1,7 @@
 import 'dart:developer' as developer;
+
 import 'package:intl/intl.dart';
+
 import '../../../../core/network/supabase_client.dart';
 import '../../domain/models/dashboard_stats.dart';
 import '../../domain/repositories/dashboard_repository.dart';
@@ -14,19 +16,27 @@ class SupabaseDashboardRepository implements DashboardRepository {
     try {
       studentsData = await client
           .from('students')
-          .select('id, student_id, full_name, preferred_category, account_status, created_at')
+          .select(
+            'id, student_id, full_name, preferred_category, account_status, created_at',
+          )
           .order('created_at', ascending: false);
     } catch (e) {
-      developer.log('Error fetching students for dashboard: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching students for dashboard: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
 
     final totalStudents = studentsData.length;
-    final activeStudents = studentsData.where((s) => s['account_status'] == 'active').length;
+    final activeStudents = studentsData
+        .where((s) => s['account_status'] == 'active')
+        .length;
 
     // Student ID to Name map for recent enrollment resolution
     final Map<String, String> studentNameMap = {};
     for (final s in studentsData) {
-      studentNameMap[s['id'].toString()] = s['full_name']?.toString() ?? 'Student';
+      studentNameMap[s['id'].toString()] =
+          s['full_name']?.toString() ?? 'Student';
     }
 
     final recentStudents = studentsData.take(5).map((s) {
@@ -36,7 +46,9 @@ class SupabaseDashboardRepository implements DashboardRepository {
         fullName: s['full_name']?.toString() ?? 'Unknown Student',
         preferredCategory: s['preferred_category']?.toString() ?? 'General',
         accountStatus: s['account_status']?.toString() ?? 'active',
-        createdAt: s['created_at'] != null ? DateTime.tryParse(s['created_at'].toString()) ?? DateTime.now() : DateTime.now(),
+        createdAt: s['created_at'] != null
+            ? DateTime.tryParse(s['created_at'].toString()) ?? DateTime.now()
+            : DateTime.now(),
       );
     }).toList();
 
@@ -46,21 +58,31 @@ class SupabaseDashboardRepository implements DashboardRepository {
       final instructorsRes = await client.from('instructors').select('id');
       totalInstructors = instructorsRes.length;
     } catch (e) {
-      developer.log('Error fetching instructors count: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching instructors count: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
 
     // 3. Fetch Courses
     List<dynamic> coursesData = [];
     final Map<String, String> courseTitleMap = {};
     try {
-      coursesData = await client.from('courses').select('id, title, status, created_at');
+      coursesData = await client
+          .from('courses')
+          .select('id, title, status, created_at');
       for (final c in coursesData) {
         courseTitleMap[c['id'].toString()] = c['title']?.toString() ?? 'Course';
       }
     } catch (e) {
-      developer.log('Error fetching courses: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching courses: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
-    final publishedCourses = coursesData.where((c) => c['status'] == 'published').length;
+    final publishedCourses = coursesData
+        .where((c) => c['status'] == 'published')
+        .length;
 
     // 4. Fetch Payments
     List<dynamic> paymentsData = [];
@@ -70,7 +92,10 @@ class SupabaseDashboardRepository implements DashboardRepository {
           .select('id, amount, status, payment_date')
           .order('payment_date', ascending: false);
     } catch (e) {
-      developer.log('Error fetching payments: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching payments: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
 
     double verifiedRevenue = 0.0;
@@ -85,7 +110,9 @@ class SupabaseDashboardRepository implements DashboardRepository {
 
     for (final p in paymentsData) {
       final status = (p['status']?.toString().toLowerCase() ?? 'pending');
-      final amount = (p['amount'] is num) ? (p['amount'] as num).toDouble() : double.tryParse(p['amount']?.toString() ?? '0') ?? 0.0;
+      final amount = (p['amount'] is num)
+          ? (p['amount'] as num).toDouble()
+          : double.tryParse(p['amount']?.toString() ?? '0') ?? 0.0;
 
       paymentBreakdown[status] = (paymentBreakdown[status] ?? 0) + 1;
       if (status == 'verified') {
@@ -100,7 +127,10 @@ class SupabaseDashboardRepository implements DashboardRepository {
     try {
       enquiriesData = await client.from('enquiries').select('id, status');
     } catch (e) {
-      developer.log('Error fetching enquiries: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching enquiries: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
     final totalEnquiries = enquiriesData.length;
     final admissionsLeads = enquiriesData.where((e) {
@@ -123,11 +153,16 @@ class SupabaseDashboardRepository implements DashboardRepository {
         return RecentEnrollmentItem(
           courseTitle: courseTitleMap[courseId] ?? 'Specialized Curricula',
           studentName: studentNameMap[studentId] ?? 'Registered Student',
-          enrolledAt: e['enrolled_at'] != null ? DateTime.tryParse(e['enrolled_at'].toString()) ?? DateTime.now() : DateTime.now(),
+          enrolledAt: e['enrolled_at'] != null
+              ? DateTime.tryParse(e['enrolled_at'].toString()) ?? DateTime.now()
+              : DateTime.now(),
         );
       }).toList();
     } catch (e) {
-      developer.log('Error fetching course enrollments: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching course enrollments: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
 
     // 7. Fetch Upcoming Live Classes
@@ -135,7 +170,9 @@ class SupabaseDashboardRepository implements DashboardRepository {
     try {
       final classesData = await client
           .from('live_classes')
-          .select('id, title, course_name, instructor_name, scheduled_at, status')
+          .select(
+            'id, title, course_name, instructor_name, scheduled_at, status',
+          )
           .order('scheduled_at', ascending: true)
           .limit(4);
 
@@ -144,18 +181,27 @@ class SupabaseDashboardRepository implements DashboardRepository {
           id: c['id']?.toString() ?? '',
           title: c['title']?.toString() ?? 'Clinical Lecture',
           courseName: c['course_name']?.toString() ?? 'Emergency Medicine',
-          instructorName: c['instructor_name']?.toString() ?? 'Faculty Consultant',
-          scheduledAt: c['scheduled_at'] != null ? DateTime.tryParse(c['scheduled_at'].toString()) ?? DateTime.now() : DateTime.now(),
+          instructorName:
+              c['instructor_name']?.toString() ?? 'Faculty Consultant',
+          scheduledAt: c['scheduled_at'] != null
+              ? DateTime.tryParse(c['scheduled_at'].toString()) ??
+                    DateTime.now()
+              : DateTime.now(),
         );
       }).toList();
     } catch (e) {
-      developer.log('Error fetching live classes: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching live classes: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
 
     // 8. Supplementary Management Hubs telemetry
     int activeAssessments = 0;
     try {
-      final assessmentsRes = await client.from('assessments').select('id, status');
+      final assessmentsRes = await client
+          .from('assessments')
+          .select('id, status');
       activeAssessments = assessmentsRes.where((a) {
         final st = a['status']?.toString().toLowerCase();
         return st == 'active' || st == 'scheduled';
@@ -215,7 +261,9 @@ class SupabaseDashboardRepository implements DashboardRepository {
         if (status == 'verified' && p['payment_date'] != null) {
           final dt = DateTime.tryParse(p['payment_date'].toString());
           if (dt != null && dt.year == monthYear && dt.month == monthNumber) {
-            final amt = (p['amount'] is num) ? (p['amount'] as num).toDouble() : double.tryParse(p['amount']?.toString() ?? '0') ?? 0.0;
+            final amt = (p['amount'] is num)
+                ? (p['amount'] as num).toDouble()
+                : double.tryParse(p['amount']?.toString() ?? '0') ?? 0.0;
             monthRevenue += amt;
           }
         }
@@ -252,4 +300,3 @@ class SupabaseDashboardRepository implements DashboardRepository {
     );
   }
 }
-

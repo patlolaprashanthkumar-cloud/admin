@@ -13,7 +13,11 @@ class MockCourseRepository implements CourseRepository {
   }
 
   @override
-  Future<List<Course>> getCourses({String? categoryId, String? status, String? searchQuery}) async {
+  Future<List<Course>> getCourses({
+    String? categoryId,
+    String? status,
+    String? searchQuery,
+  }) async {
     var result = List<Course>.from(store);
     if (categoryId != null && categoryId != 'all') {
       result = result.where((c) => c.categoryId == categoryId).toList();
@@ -23,11 +27,14 @@ class MockCourseRepository implements CourseRepository {
     }
     if (searchQuery != null && searchQuery.isNotEmpty) {
       final q = searchQuery.toLowerCase();
-      result = result.where((c) =>
-        c.title.toLowerCase().contains(q) ||
-        c.description.toLowerCase().contains(q) ||
-        c.categoryName.toLowerCase().contains(q)
-      ).toList();
+      result = result
+          .where(
+            (c) =>
+                c.title.toLowerCase().contains(q) ||
+                c.description.toLowerCase().contains(q) ||
+                c.categoryName.toLowerCase().contains(q),
+          )
+          .toList();
     }
     return result;
   }
@@ -139,7 +146,8 @@ void main() {
       final json = {
         'id': 'crs-101',
         'title': 'Advanced Trauma Life Support',
-        'description': 'Comprehensive resuscitation and surgical airway protocols.',
+        'description':
+            'Comprehensive resuscitation and surgical airway protocols.',
         'category_id': 'cat-trauma',
         'category_name': 'Trauma Care',
         'instructor_id': 'inst-001',
@@ -150,7 +158,11 @@ void main() {
         'created_at': '2026-10-01T10:00:00Z',
       };
 
-      final course = Course.fromJson(json, instructorName: 'Dr. Vikram Rao', enrolledCount: 42);
+      final course = Course.fromJson(
+        json,
+        instructorName: 'Dr. Vikram Rao',
+        enrolledCount: 42,
+      );
 
       expect(course.id, 'crs-101');
       expect(course.title, 'Advanced Trauma Life Support');
@@ -240,7 +252,10 @@ void main() {
 
       notifier.setSelectedCategory('cat-em');
       expect(notifier.state.filteredCourses.length, 2);
-      expect(notifier.state.filteredCourses.every((c) => c.categoryId == 'cat-em'), isTrue);
+      expect(
+        notifier.state.filteredCourses.every((c) => c.categoryId == 'cat-em'),
+        isTrue,
+      );
 
       notifier.setSelectedCategory('cat-disaster');
       expect(notifier.state.filteredCourses.length, 1);
@@ -262,20 +277,23 @@ void main() {
       expect(notifier.state.filteredCourses.first.title, contains('Draft'));
     });
 
-    test('Search query matches title, description, and category name', () async {
-      final notifier = CoursesNotifier(repo);
-      await notifier.loadCourses();
+    test(
+      'Search query matches title, description, and category name',
+      () async {
+        final notifier = CoursesNotifier(repo);
+        await notifier.loadCourses();
 
-      notifier.setSearchQuery('Airway');
-      expect(notifier.state.filteredCourses.length, 1);
-      expect(notifier.state.filteredCourses.first.id, 'c1');
+        notifier.setSearchQuery('Airway');
+        expect(notifier.state.filteredCourses.length, 1);
+        expect(notifier.state.filteredCourses.first.id, 'c1');
 
-      notifier.setSearchQuery('Emergency');
-      expect(notifier.state.filteredCourses.length, 2);
+        notifier.setSearchQuery('Emergency');
+        expect(notifier.state.filteredCourses.length, 2);
 
-      notifier.setSearchQuery('non-existent');
-      expect(notifier.state.filteredCourses, isEmpty);
-    });
+        notifier.setSearchQuery('non-existent');
+        expect(notifier.state.filteredCourses, isEmpty);
+      },
+    );
 
     test('Create, update, and delete course workflow', () async {
       final notifier = CoursesNotifier(repo);

@@ -1,6 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
+
 import '../../../../core/network/supabase_client.dart';
 import '../../data/repositories/supabase_auth_repository.dart';
 import '../../domain/models/auth_exception.dart';
@@ -13,7 +15,9 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 /// Riverpod StateNotifier managing the authentication lifecycle
-final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((
+  ref,
+) {
   final repo = ref.watch(authRepositoryProvider);
   return AuthNotifier(repo);
 });
@@ -62,10 +66,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Attempts to sign in with email & password
-  Future<bool> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<bool> login({required String email, required String password}) async {
     if (email.trim().isEmpty || password.isEmpty) {
       state = const AuthState.unauthenticated(
         errorMessage: 'Please enter both email and password.',
@@ -111,7 +112,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return false;
     }
 
-    final emailFallback = state.pendingEmail ?? _repository.currentSession?.user.email;
+    final emailFallback =
+        state.pendingEmail ?? _repository.currentSession?.user.email;
     state = const AuthState.authenticating();
 
     try {
@@ -133,7 +135,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = AuthState.unauthenticated(errorMessage: e.message);
       return false;
     } catch (e) {
-      state = AuthState.unauthenticated(errorMessage: 'Verification failed: $e');
+      state = AuthState.unauthenticated(
+        errorMessage: 'Verification failed: $e',
+      );
       return false;
     }
   }
@@ -159,4 +163,3 @@ class AuthNotifier extends StateNotifier<AuthState> {
     super.dispose();
   }
 }
-

@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+
 import '../../../../core/network/supabase_client.dart';
 import '../../domain/models/course.dart';
 import '../../domain/models/course_lesson.dart';
@@ -7,7 +8,11 @@ import '../../domain/repositories/course_repository.dart';
 
 class SupabaseCourseRepository implements CourseRepository {
   @override
-  Future<List<Course>> getCourses({String? categoryId, String? status, String? searchQuery}) async {
+  Future<List<Course>> getCourses({
+    String? categoryId,
+    String? status,
+    String? searchQuery,
+  }) async {
     final client = AppSupabase.client;
 
     try {
@@ -20,21 +25,29 @@ class SupabaseCourseRepository implements CourseRepository {
         query = query.eq('status', status);
       }
 
-      final List<dynamic> rows = await query.order('created_at', ascending: false);
+      final List<dynamic> rows = await query.order(
+        'created_at',
+        ascending: false,
+      );
 
       // Fetch instructors for display
       final Map<String, String> instructorNames = {};
       try {
-        final instructors = await client.from('instructors').select('id, full_name');
+        final instructors = await client
+            .from('instructors')
+            .select('id, full_name');
         for (final ins in instructors) {
-          instructorNames[ins['id'].toString()] = ins['full_name']?.toString() ?? 'Faculty Member';
+          instructorNames[ins['id'].toString()] =
+              ins['full_name']?.toString() ?? 'Faculty Member';
         }
       } catch (_) {}
 
       // Fetch enrollment counts
       final Map<String, int> enrollCounts = {};
       try {
-        final enrollments = await client.from('course_enrollments').select('course_id');
+        final enrollments = await client
+            .from('course_enrollments')
+            .select('course_id');
         for (final e in enrollments) {
           final cid = e['course_id']?.toString() ?? '';
           if (cid.isNotEmpty) {
@@ -55,16 +68,22 @@ class SupabaseCourseRepository implements CourseRepository {
 
       if (searchQuery != null && searchQuery.trim().isNotEmpty) {
         final q = searchQuery.toLowerCase().trim();
-        return courses.where((c) =>
-          c.title.toLowerCase().contains(q) ||
-          c.description.toLowerCase().contains(q) ||
-          c.categoryName.toLowerCase().contains(q)
-        ).toList();
+        return courses
+            .where(
+              (c) =>
+                  c.title.toLowerCase().contains(q) ||
+                  c.description.toLowerCase().contains(q) ||
+                  c.categoryName.toLowerCase().contains(q),
+            )
+            .toList();
       }
 
       return courses;
     } catch (e) {
-      developer.log('Error fetching courses: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error fetching courses: $e',
+        name: 'SupabaseCourseRepository',
+      );
       return [];
     }
   }
@@ -73,25 +92,43 @@ class SupabaseCourseRepository implements CourseRepository {
   Future<Course?> getCourseById(String id) async {
     final client = AppSupabase.client;
     try {
-      final res = await client.from('courses').select('*').eq('id', id).maybeSingle();
+      final res = await client
+          .from('courses')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
       if (res == null) return null;
 
       String? instructorName;
       final insId = res['instructor_id']?.toString();
       if (insId != null && insId.isNotEmpty) {
-        final ins = await client.from('instructors').select('full_name').eq('id', insId).maybeSingle();
+        final ins = await client
+            .from('instructors')
+            .select('full_name')
+            .eq('id', insId)
+            .maybeSingle();
         instructorName = ins?['full_name']?.toString();
       }
 
       int enrolledCount = 0;
       try {
-        final enrollments = await client.from('course_enrollments').select('id').eq('course_id', id);
+        final enrollments = await client
+            .from('course_enrollments')
+            .select('id')
+            .eq('course_id', id);
         enrolledCount = enrollments.length;
       } catch (_) {}
 
-      return Course.fromJson(res, instructorName: instructorName, enrolledCount: enrolledCount);
+      return Course.fromJson(
+        res,
+        instructorName: instructorName,
+        enrolledCount: enrolledCount,
+      );
     } catch (e) {
-      developer.log('Error fetching course by id $id: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error fetching course by id $id: $e',
+        name: 'SupabaseCourseRepository',
+      );
       return null;
     }
   }
@@ -119,14 +156,22 @@ class SupabaseCourseRepository implements CourseRepository {
       'fee': fee,
       'format': format,
       'status': status,
-      if (status == 'published') 'published_at': DateTime.now().toIso8601String(),
+      if (status == 'published')
+        'published_at': DateTime.now().toIso8601String(),
     };
 
     try {
-      final res = await client.from('courses').insert(payload).select().single();
+      final res = await client
+          .from('courses')
+          .insert(payload)
+          .select()
+          .single();
       return Course.fromJson(res);
     } catch (e) {
-      developer.log('Error creating course: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error creating course: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }
@@ -162,10 +207,18 @@ class SupabaseCourseRepository implements CourseRepository {
     }
 
     try {
-      final res = await client.from('courses').update(updates).eq('id', id).select().single();
+      final res = await client
+          .from('courses')
+          .update(updates)
+          .eq('id', id)
+          .select()
+          .single();
       return Course.fromJson(res);
     } catch (e) {
-      developer.log('Error updating course $id: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error updating course $id: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }
@@ -176,7 +229,10 @@ class SupabaseCourseRepository implements CourseRepository {
     try {
       await client.from('courses').delete().eq('id', id);
     } catch (e) {
-      developer.log('Error deleting course $id: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error deleting course $id: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }
@@ -204,12 +260,17 @@ class SupabaseCourseRepository implements CourseRepository {
             .map((l) => CourseLesson.fromJson(l as Map<String, dynamic>))
             .toList();
 
-        modules.add(CourseModule.fromJson(m as Map<String, dynamic>, lessons: lessons));
+        modules.add(
+          CourseModule.fromJson(m as Map<String, dynamic>, lessons: lessons),
+        );
       }
 
       return modules;
     } catch (e) {
-      developer.log('Error fetching modules for course $courseId: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error fetching modules for course $courseId: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }
@@ -225,7 +286,10 @@ class SupabaseCourseRepository implements CourseRepository {
           .single();
       return CourseModule.fromJson(res);
     } catch (e) {
-      developer.log('Error creating course module: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error creating course module: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }
@@ -242,7 +306,10 @@ class SupabaseCourseRepository implements CourseRepository {
           .single();
       return CourseModule.fromJson(res, lessons: module.lessons);
     } catch (e) {
-      developer.log('Error updating course module: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error updating course module: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }
@@ -253,7 +320,10 @@ class SupabaseCourseRepository implements CourseRepository {
     try {
       await client.from('course_modules').delete().eq('id', moduleId);
     } catch (e) {
-      developer.log('Error deleting course module: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error deleting course module: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }
@@ -269,7 +339,10 @@ class SupabaseCourseRepository implements CourseRepository {
           .single();
       return CourseLesson.fromJson(res);
     } catch (e) {
-      developer.log('Error creating course lesson: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error creating course lesson: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }
@@ -286,7 +359,10 @@ class SupabaseCourseRepository implements CourseRepository {
           .single();
       return CourseLesson.fromJson(res);
     } catch (e) {
-      developer.log('Error updating course lesson: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error updating course lesson: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }
@@ -297,7 +373,10 @@ class SupabaseCourseRepository implements CourseRepository {
     try {
       await client.from('course_lessons').delete().eq('id', lessonId);
     } catch (e) {
-      developer.log('Error deleting course lesson: $e', name: 'SupabaseCourseRepository');
+      developer.log(
+        'Error deleting course lesson: $e',
+        name: 'SupabaseCourseRepository',
+      );
       rethrow;
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -98,7 +99,9 @@ class HomePlaceholderScreen extends ConsumerWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.radiusLarge,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.1),
@@ -114,16 +117,26 @@ class HomePlaceholderScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                              color: const Color(0xFF10B981)
+                                  .withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFF10B981)),
+                              border: Border.all(
+                                color: const Color(0xFF10B981),
+                              ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.verified_user_rounded, color: Color(0xFF10B981), size: 14),
+                                const Icon(
+                                  Icons.verified_user_rounded,
+                                  color: Color(0xFF10B981),
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 6),
                                 Text(
                                   admin?.role == UserRole.superAdmin
@@ -232,17 +245,47 @@ class HomePlaceholderScreen extends ConsumerWidget {
                 AppCard(
                   child: Column(
                     children: [
-                      _buildModuleRow(context, Icons.dashboard_outlined, 'Institutional Dashboard', 'KPIs, stats, and real-time metrics'),
+                      _buildModuleRow(
+                        context,
+                        Icons.dashboard_outlined,
+                        'Institutional Dashboard',
+                        'KPIs, stats, and real-time metrics',
+                      ),
                       const Divider(height: 20),
-                      _buildModuleRow(context, Icons.school_outlined, 'Students & Registrations', 'Profiles, admissions, and batch status'),
+                      _buildModuleRow(
+                        context,
+                        Icons.school_outlined,
+                        'Students & Registrations',
+                        'Profiles, admissions, and batch status',
+                      ),
                       const Divider(height: 20),
-                      _buildModuleRow(context, Icons.menu_book_outlined, 'Courses & Curriculum', 'Medical modules, syllabi, materials'),
+                      _buildModuleRow(
+                        context,
+                        Icons.menu_book_outlined,
+                        'Courses & Curriculum',
+                        'Medical modules, syllabi, materials',
+                      ),
                       const Divider(height: 20),
-                      _buildModuleRow(context, Icons.badge_outlined, 'Instructors & Faculty', 'Faculty assignments and schedules'),
+                      _buildModuleRow(
+                        context,
+                        Icons.badge_outlined,
+                        'Instructors & Faculty',
+                        'Faculty assignments and schedules',
+                      ),
                       const Divider(height: 20),
-                      _buildModuleRow(context, Icons.quiz_outlined, 'Assessments & Quizzes', 'Grading, results, and evaluations'),
+                      _buildModuleRow(
+                        context,
+                        Icons.quiz_outlined,
+                        'Assessments & Quizzes',
+                        'Grading, results, and evaluations',
+                      ),
                       const Divider(height: 20),
-                      _buildModuleRow(context, Icons.payments_outlined, 'Fee Payments & Invoices', 'Payment gateways and receipts'),
+                      _buildModuleRow(
+                        context,
+                        Icons.payments_outlined,
+                        'Fee Payments & Invoices',
+                        'Payment gateways and receipts',
+                      ),
                     ],
                   ),
                 ),
@@ -283,7 +326,9 @@ class HomePlaceholderScreen extends ConsumerWidget {
                 value,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: isHighlight ? FontWeight.w700 : FontWeight.w500,
-                  color: isHighlight ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                  color: isHighlight
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
                 ),
               ),
             ],
@@ -293,7 +338,12 @@ class HomePlaceholderScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildModuleRow(BuildContext context, IconData icon, String title, String subtitle) {
+  Widget _buildModuleRow(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+  ) {
     final theme = Theme.of(context);
     return Row(
       children: [

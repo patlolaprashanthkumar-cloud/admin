@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+
 import '../../../../core/network/supabase_client.dart';
 import '../../../categories/domain/models/course_category.dart';
 import '../../domain/models/faculty.dart';
@@ -19,7 +20,10 @@ class SupabaseFacultyRepository implements FacultyRepository {
         query = query.eq('account_status', status);
       }
 
-      final List<dynamic> rows = await query.order('created_at', ascending: false);
+      final List<dynamic> rows = await query.order(
+        'created_at',
+        ascending: false,
+      );
 
       // 1. Fetch categories for name/color lookup
       final Map<String, CourseCategory> catMap = {};
@@ -29,13 +33,18 @@ class SupabaseFacultyRepository implements FacultyRepository {
           catMap[c['id'].toString()] = CourseCategory.fromJson(c);
         }
       } catch (e) {
-        developer.log('Error fetching categories: $e', name: 'SupabaseFacultyRepository');
+        developer.log(
+          'Error fetching categories: $e',
+          name: 'SupabaseFacultyRepository',
+        );
       }
 
       // 2. Fetch instructor_categories mappings
       final Map<String, List<CourseCategory>> instructorCats = {};
       try {
-        final jRows = await client.from('instructor_categories').select('instructor_id, category_id');
+        final jRows = await client
+            .from('instructor_categories')
+            .select('instructor_id, category_id');
         for (final j in jRows) {
           final instId = j['instructor_id']?.toString() ?? '';
           final cId = j['category_id']?.toString() ?? '';
@@ -44,14 +53,19 @@ class SupabaseFacultyRepository implements FacultyRepository {
           }
         }
       } catch (e) {
-        developer.log('Error fetching instructor_categories: $e', name: 'SupabaseFacultyRepository');
+        developer.log(
+          'Error fetching instructor_categories: $e',
+          name: 'SupabaseFacultyRepository',
+        );
       }
 
       // 3. Fetch courses assigned to instructors
       final Map<String, List<FacultyCourseRef>> instructorCourses = {};
       final Map<String, List<String>> instructorCourseIds = {};
       try {
-        final cRows = await client.from('courses').select('id, title, category_name, instructor_id');
+        final cRows = await client
+            .from('courses')
+            .select('id, title, category_name, instructor_id');
         for (final c in cRows) {
           final instId = c['instructor_id']?.toString();
           if (instId != null && instId.isNotEmpty) {
@@ -61,7 +75,10 @@ class SupabaseFacultyRepository implements FacultyRepository {
           }
         }
       } catch (e) {
-        developer.log('Error fetching courses for instructors: $e', name: 'SupabaseFacultyRepository');
+        developer.log(
+          'Error fetching courses for instructors: $e',
+          name: 'SupabaseFacultyRepository',
+        );
       }
 
       List<Faculty> facultyList = rows.map((r) {
@@ -94,7 +111,10 @@ class SupabaseFacultyRepository implements FacultyRepository {
 
       return facultyList;
     } catch (e) {
-      developer.log('Error in getFaculty: $e', name: 'SupabaseFacultyRepository');
+      developer.log(
+        'Error in getFaculty: $e',
+        name: 'SupabaseFacultyRepository',
+      );
       rethrow;
     }
   }
@@ -124,11 +144,18 @@ class SupabaseFacultyRepository implements FacultyRepository {
 
         for (final j in jRows) {
           if (j['course_categories'] != null) {
-            assignedCategories.add(CourseCategory.fromJson(j['course_categories'] as Map<String, dynamic>));
+            assignedCategories.add(
+              CourseCategory.fromJson(
+                j['course_categories'] as Map<String, dynamic>,
+              ),
+            );
           }
         }
       } catch (e) {
-        developer.log('Error fetching instructor categories by id: $e', name: 'SupabaseFacultyRepository');
+        developer.log(
+          'Error fetching instructor categories by id: $e',
+          name: 'SupabaseFacultyRepository',
+        );
       }
 
       // Load assigned courses
@@ -142,11 +169,14 @@ class SupabaseFacultyRepository implements FacultyRepository {
 
         for (final c in cRows) {
           final cId = c['id']?.toString() ?? '';
-          courses.add(FacultyCourseRef.fromJson(c as Map<String, dynamic>));
+          courses.add(FacultyCourseRef.fromJson(c));
           courseIds.add(cId);
         }
       } catch (e) {
-        developer.log('Error fetching courses by instructor id: $e', name: 'SupabaseFacultyRepository');
+        developer.log(
+          'Error fetching courses by instructor id: $e',
+          name: 'SupabaseFacultyRepository',
+        );
       }
 
       return Faculty.fromJson(
@@ -156,7 +186,10 @@ class SupabaseFacultyRepository implements FacultyRepository {
         assignedCourses: courses,
       );
     } catch (e) {
-      developer.log('Error in getFacultyById: $e', name: 'SupabaseFacultyRepository');
+      developer.log(
+        'Error in getFacultyById: $e',
+        name: 'SupabaseFacultyRepository',
+      );
       rethrow;
     }
   }
@@ -194,13 +227,19 @@ class SupabaseFacultyRepository implements FacultyRepository {
       // 2. Link courses to this instructor
       if (courseIds.isNotEmpty) {
         for (final cId in courseIds) {
-          await client.from('courses').update({'instructor_id': newId}).eq('id', cId);
+          await client
+              .from('courses')
+              .update({'instructor_id': newId})
+              .eq('id', cId);
         }
       }
 
       return (await getFacultyById(newId)) ?? Faculty.fromJson(newInst);
     } catch (e) {
-      developer.log('Error in createFaculty: $e', name: 'SupabaseFacultyRepository');
+      developer.log(
+        'Error in createFaculty: $e',
+        name: 'SupabaseFacultyRepository',
+      );
       rethrow;
     }
   }
@@ -219,10 +258,15 @@ class SupabaseFacultyRepository implements FacultyRepository {
 
       // 1. Update category associations if provided
       if (categoryIds != null) {
-        await client.from('instructor_categories').delete().eq('instructor_id', faculty.id);
+        await client
+            .from('instructor_categories')
+            .delete()
+            .eq('instructor_id', faculty.id);
         if (categoryIds.isNotEmpty) {
           final jPayload = categoryIds
-              .map((catId) => {'instructor_id': faculty.id, 'category_id': catId})
+              .map(
+                (catId) => {'instructor_id': faculty.id, 'category_id': catId},
+              )
               .toList();
           await client.from('instructor_categories').insert(jPayload);
         }
@@ -238,14 +282,20 @@ class SupabaseFacultyRepository implements FacultyRepository {
 
         if (courseIds.isNotEmpty) {
           for (final cId in courseIds) {
-            await client.from('courses').update({'instructor_id': faculty.id}).eq('id', cId);
+            await client
+                .from('courses')
+                .update({'instructor_id': faculty.id})
+                .eq('id', cId);
           }
         }
       }
 
       return (await getFacultyById(faculty.id)) ?? faculty;
     } catch (e) {
-      developer.log('Error in updateFaculty: $e', name: 'SupabaseFacultyRepository');
+      developer.log(
+        'Error in updateFaculty: $e',
+        name: 'SupabaseFacultyRepository',
+      );
       rethrow;
     }
   }
@@ -254,9 +304,15 @@ class SupabaseFacultyRepository implements FacultyRepository {
   Future<void> updateFacultyStatus(String id, String status) async {
     final client = AppSupabase.client;
     try {
-      await client.from('instructors').update({'account_status': status}).eq('id', id);
+      await client
+          .from('instructors')
+          .update({'account_status': status})
+          .eq('id', id);
     } catch (e) {
-      developer.log('Error in updateFacultyStatus: $e', name: 'SupabaseFacultyRepository');
+      developer.log(
+        'Error in updateFacultyStatus: $e',
+        name: 'SupabaseFacultyRepository',
+      );
       rethrow;
     }
   }
@@ -266,15 +322,23 @@ class SupabaseFacultyRepository implements FacultyRepository {
     final client = AppSupabase.client;
     try {
       // Unlink courses first
-      await client.from('courses').update({'instructor_id': null}).eq('instructor_id', id);
+      await client
+          .from('courses')
+          .update({'instructor_id': null})
+          .eq('instructor_id', id);
       // Remove junction mappings
-      await client.from('instructor_categories').delete().eq('instructor_id', id);
+      await client
+          .from('instructor_categories')
+          .delete()
+          .eq('instructor_id', id);
       // Delete instructor
       await client.from('instructors').delete().eq('id', id);
     } catch (e) {
-      developer.log('Error in deleteFaculty: $e', name: 'SupabaseFacultyRepository');
+      developer.log(
+        'Error in deleteFaculty: $e',
+        name: 'SupabaseFacultyRepository',
+      );
       rethrow;
     }
   }
 }
-

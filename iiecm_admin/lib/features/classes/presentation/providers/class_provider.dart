@@ -1,14 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/repositories/supabase_class_repository.dart';
 import '../../domain/models/live_class.dart';
 import '../../domain/repositories/class_repository.dart';
 
-enum ClassViewMode {
-  list,
-  daily,
-  weekly,
-  monthly,
-}
+enum ClassViewMode { list, daily, weekly, monthly }
 
 class ClassState {
   final List<LiveClass> classList;
@@ -66,7 +62,7 @@ class ClassNotifier extends StateNotifier<ClassState> {
   final ClassRepository _repository;
 
   ClassNotifier(this._repository)
-      : super(ClassState(selectedDate: DateTime.now())) {
+    : super(ClassState(selectedDate: DateTime.now())) {
     loadClasses();
   }
 
@@ -120,7 +116,10 @@ class ClassNotifier extends StateNotifier<ClassState> {
   void setInstructorFilter(String instructorId) {
     state = state.copyWith(
       selectedInstructorId: instructorId,
-      filteredClasses: _applyFilters(state.classList, instructorId: instructorId),
+      filteredClasses: _applyFilters(
+        state.classList,
+        instructorId: instructorId,
+      ),
     );
   }
 
@@ -157,10 +156,14 @@ class ClassNotifier extends StateNotifier<ClassState> {
             c.scheduledAt.day == effectiveDate.day;
       }).toList();
     } else if (effectiveMode == ClassViewMode.weekly) {
-      final startOfWeek = effectiveDate.subtract(Duration(days: effectiveDate.weekday - 1));
+      final startOfWeek = effectiveDate.subtract(
+        Duration(days: effectiveDate.weekday - 1),
+      );
       final endOfWeek = startOfWeek.add(const Duration(days: 7));
       result = result.where((c) {
-        return c.scheduledAt.isAfter(startOfWeek.subtract(const Duration(seconds: 1))) &&
+        return c.scheduledAt.isAfter(
+              startOfWeek.subtract(const Duration(seconds: 1)),
+            ) &&
             c.scheduledAt.isBefore(endOfWeek);
       }).toList();
     } else if (effectiveMode == ClassViewMode.monthly) {
@@ -172,12 +175,16 @@ class ClassNotifier extends StateNotifier<ClassState> {
 
     // Filter by status
     if (effectiveStatus != 'all') {
-      result = result.where((c) => c.status.toLowerCase() == effectiveStatus.toLowerCase()).toList();
+      result = result
+          .where((c) => c.status.toLowerCase() == effectiveStatus.toLowerCase())
+          .toList();
     }
 
     // Filter by instructor
     if (effectiveInstructor != 'all') {
-      result = result.where((c) => c.instructorId == effectiveInstructor).toList();
+      result = result
+          .where((c) => c.instructorId == effectiveInstructor)
+          .toList();
     }
 
     // Filter by course
@@ -198,11 +205,18 @@ class ClassNotifier extends StateNotifier<ClassState> {
     return result;
   }
 
-  Future<bool> createClass(LiveClass liveClass, {bool notifyStudents = true}) async {
+  Future<bool> createClass(
+    LiveClass liveClass, {
+    bool notifyStudents = true,
+  }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final created = await _repository.createClass(liveClass, notifyStudents: notifyStudents);
-      final updatedList = [...state.classList, created]..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+      final created = await _repository.createClass(
+        liveClass,
+        notifyStudents: notifyStudents,
+      );
+      final updatedList = [...state.classList, created]
+        ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
       state = state.copyWith(
         classList: updatedList,
         filteredClasses: _applyFilters(updatedList),
@@ -218,12 +232,17 @@ class ClassNotifier extends StateNotifier<ClassState> {
     }
   }
 
-  Future<bool> rescheduleClass(String id, DateTime newDate, int duration) async {
+  Future<bool> rescheduleClass(
+    String id,
+    DateTime newDate,
+    int duration,
+  ) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final updated = await _repository.rescheduleClass(id, newDate, duration);
-      final updatedList = state.classList.map((c) => c.id == id ? updated : c).toList()
-        ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+      final updatedList =
+          state.classList.map((c) => c.id == id ? updated : c).toList()
+            ..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
       state = state.copyWith(
         classList: updatedList,
         filteredClasses: _applyFilters(updatedList),
@@ -276,8 +295,9 @@ final classRepositoryProvider = Provider<ClassRepository>((ref) {
   return SupabaseClassRepository();
 });
 
-final classNotifierProvider = StateNotifierProvider<ClassNotifier, ClassState>((ref) {
+final classNotifierProvider = StateNotifierProvider<ClassNotifier, ClassState>((
+  ref,
+) {
   final repo = ref.watch(classRepositoryProvider);
   return ClassNotifier(repo);
 });
-

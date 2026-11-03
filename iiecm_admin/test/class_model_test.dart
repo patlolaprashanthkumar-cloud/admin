@@ -24,8 +24,17 @@ void main() {
       expect(liveClass.title, equals('Emergency Cardiology Lecture'));
       expect(liveClass.durationMinutes, equals(90));
       expect(liveClass.isUpcoming, isTrue);
-      expect(liveClass.meetingLink, equals('https://meet.google.com/abc-def-ghi'));
-      expect(liveClass.endTime, equals(DateTime.parse('2026-11-05T14:00:00Z').add(const Duration(minutes: 90))));
+      expect(
+        liveClass.meetingLink,
+        equals('https://meet.google.com/abc-def-ghi'),
+      );
+      expect(
+        liveClass.endTime,
+        equals(
+          DateTime.parse('2026-11-05T14:00:00Z')
+              .add(const Duration(minutes: 90)),
+        ),
+      );
     });
 
     test('Accurately detects overlapping time intervals for conflicts', () {
@@ -48,22 +57,13 @@ void main() {
       );
 
       // Overlap case 2: starts before base class and ends inside (09:30 - 10:30)
-      expect(
-        baseClass.overlapsWith(DateTime(2026, 11, 10, 9, 30), 60),
-        isTrue,
-      );
+      expect(baseClass.overlapsWith(DateTime(2026, 11, 10, 9, 30), 60), isTrue);
 
       // Overlap case 3: completely wraps base class (09:00 - 12:00)
-      expect(
-        baseClass.overlapsWith(DateTime(2026, 11, 10, 9, 0), 180),
-        isTrue,
-      );
+      expect(baseClass.overlapsWith(DateTime(2026, 11, 10, 9, 0), 180), isTrue);
 
       // Non-overlap case 1: finishes right before base starts (09:00 - 10:00)
-      expect(
-        baseClass.overlapsWith(DateTime(2026, 11, 10, 9, 0), 60),
-        isFalse,
-      );
+      expect(baseClass.overlapsWith(DateTime(2026, 11, 10, 9, 0), 60), isFalse);
 
       // Non-overlap case 2: starts after base finishes (11:30 - 12:30)
       expect(
@@ -80,4 +80,3 @@ void main() {
     });
   });
 }
-

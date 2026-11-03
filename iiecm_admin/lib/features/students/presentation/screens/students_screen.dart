@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -76,17 +77,30 @@ class StudentsScreen extends ConsumerWidget {
                             prefixIcon: const Icon(Icons.search_rounded),
                             suffixIcon: state.searchQuery.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear_rounded, size: 18),
-                                    onPressed: () => notifier.setSearchQuery(''),
+                                    icon: const Icon(
+                                      Icons.clear_rounded,
+                                      size: 18,
+                                    ),
+                                    onPressed: () =>
+                                        notifier.setSearchQuery(''),
                                   )
                                 : null,
                             filled: true,
-                            fillColor: isDark ? AppColors.darkSurface : Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? AppColors.darkSurface
+                                : Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.radiusMedium,
+                              ),
                               borderSide: BorderSide(
-                                color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+                                color: isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.borderNeutral,
                               ),
                             ),
                           ),
@@ -101,18 +115,29 @@ class StudentsScreen extends ConsumerWidget {
                               FilterChip(
                                 label: const Text('All Categories'),
                                 selected: state.selectedCategoryId == 'all',
-                                onSelected: (_) => notifier.setSelectedCategory('all'),
+                                onSelected: (_) =>
+                                    notifier.setSelectedCategory('all'),
                               ),
                               const SizedBox(width: 8),
                               ...categoriesState.categories.map((cat) {
-                                final isSelected = state.selectedCategoryId == cat.id;
+                                final isSelected =
+                                    state.selectedCategoryId == cat.id;
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 8),
                                   child: FilterChip(
-                                    avatar: Icon(Icons.category_rounded, size: 14, color: isSelected ? Colors.white : AppColors.primaryForest),
+                                    avatar: Icon(
+                                      Icons.category_rounded,
+                                      size: 14,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppColors.primaryForest,
+                                    ),
                                     label: Text(cat.name),
                                     selected: isSelected,
-                                    onSelected: (_) => notifier.setSelectedCategory(isSelected ? 'all' : cat.id),
+                                    onSelected: (_) =>
+                                        notifier.setSelectedCategory(
+                                          isSelected ? 'all' : cat.id,
+                                        ),
                                   ),
                                 );
                               }),
@@ -128,14 +153,25 @@ class StudentsScreen extends ConsumerWidget {
                 if (state.errorMessage != null)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMedium,
+                          ),
                         ),
-                        child: Text(state.errorMessage!, style: const TextStyle(color: AppColors.error, fontSize: 12)),
+                        child: Text(
+                          state.errorMessage!,
+                          style: const TextStyle(
+                            color: AppColors.error,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -143,7 +179,11 @@ class StudentsScreen extends ConsumerWidget {
                 // Loading
                 if (state.isLoading && state.students.isEmpty)
                   const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator(color: AppColors.primaryForest)),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryForest,
+                      ),
+                    ),
                   )
                 // Empty State
                 else if (state.filteredStudents.isEmpty)
@@ -161,7 +201,11 @@ class StudentsScreen extends ConsumerWidget {
                                 color: AppColors.forestSoft,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.people_alt_rounded, size: 40, color: AppColors.primaryForest),
+                              child: const Icon(
+                                Icons.people_alt_rounded,
+                                size: 40,
+                                color: AppColors.primaryForest,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -177,12 +221,17 @@ class StudentsScreen extends ConsumerWidget {
                             const Text(
                               'Register new student admissions and assign multiple academic categories.',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                              ),
                             ),
                             const SizedBox(height: 20),
                             FilledButton.icon(
                               onPressed: () => context.push('/students/add'),
-                              style: FilledButton.styleFrom(backgroundColor: AppColors.primaryForest),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppColors.primaryForest,
+                              ),
                               icon: const Icon(Icons.person_add_rounded),
                               label: const Text('Add Student'),
                             ),
@@ -194,22 +243,20 @@ class StudentsScreen extends ConsumerWidget {
                 // Students List
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 100),
                     sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final student = state.filteredStudents[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _StudentCard(
-                              student: student,
-                              parseHex: _parseHex,
-                              onTap: () => context.push('/students/${student.id}'),
-                            ),
-                          );
-                        },
-                        childCount: state.filteredStudents.length,
-                      ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final student = state.filteredStudents[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _StudentCard(
+                            student: student,
+                            parseHex: _parseHex,
+                            onTap: () =>
+                                context.push('/students/${student.id}'),
+                          ),
+                        );
+                      }, childCount: state.filteredStudents.length),
                     ),
                   ),
               ],
@@ -250,8 +297,13 @@ class _StudentCard extends StatelessWidget {
                   radius: 20,
                   backgroundColor: AppColors.forestSoft,
                   child: Text(
-                    student.fullName.isNotEmpty ? student.fullName.substring(0, 1) : 'S',
-                    style: const TextStyle(color: AppColors.primaryForest, fontWeight: FontWeight.w800),
+                    student.fullName.isNotEmpty
+                        ? student.fullName.substring(0, 1)
+                        : 'S',
+                    style: const TextStyle(
+                      color: AppColors.primaryForest,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -271,15 +323,22 @@ class _StudentCard extends StatelessWidget {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2.5,
+                            ),
                             decoration: BoxDecoration(
-                              color: student.accountStatus == 'active' ? AppColors.forestSoft : Colors.grey.withValues(alpha: 0.15),
+                              color: student.accountStatus == 'active'
+                                  ? AppColors.forestSoft
+                                  : Colors.grey.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               student.accountStatus,
                               style: TextStyle(
-                                color: student.accountStatus == 'active' ? AppColors.primaryForest : AppColors.textSecondary,
+                                color: student.accountStatus == 'active'
+                                    ? AppColors.primaryForest
+                                    : AppColors.textSecondary,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -290,17 +349,27 @@ class _StudentCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         '${student.studentId} · ${student.qualification} · ${student.educationLevel}',
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${student.email} · ${student.phone}',
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary, size: 20),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
               ],
             ),
             const SizedBox(height: 10),
@@ -310,13 +379,21 @@ class _StudentCard extends StatelessWidget {
             // Multi-Category Badges
             Row(
               children: [
-                const Icon(Icons.school_rounded, size: 14, color: AppColors.primaryForest),
+                const Icon(
+                  Icons.school_rounded,
+                  size: 14,
+                  color: AppColors.primaryForest,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: student.assignedCategories.isEmpty
                       ? Text(
                           'Category: ${student.preferredCategory}',
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
                         )
                       : Wrap(
                           spacing: 4,
@@ -324,14 +401,21 @@ class _StudentCard extends StatelessWidget {
                           children: student.assignedCategories.map((c) {
                             final col = parseHex(c.color);
                             return Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: col.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 c.name,
-                                style: TextStyle(color: col, fontWeight: FontWeight.w700, fontSize: 10),
+                                style: TextStyle(
+                                  color: col,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10,
+                                ),
                               ),
                             );
                           }).toList(),
@@ -339,7 +423,11 @@ class _StudentCard extends StatelessWidget {
                 ),
                 Text(
                   '${student.enrolledCourseIds.length} Courses',
-                  style: const TextStyle(color: AppColors.accentTerracotta, fontWeight: FontWeight.w700, fontSize: 11),
+                  style: const TextStyle(
+                    color: AppColors.accentTerracotta,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11,
+                  ),
                 ),
               ],
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/app_card.dart';
@@ -77,7 +78,9 @@ class CategoriesScreen extends ConsumerWidget {
     );
 
     if (confirmed == true) {
-      await ref.read(categoryNotifierProvider.notifier).deleteCategory(category.id);
+      await ref
+          .read(categoryNotifierProvider.notifier)
+          .deleteCategory(category.id);
     }
   }
 
@@ -104,25 +107,27 @@ class CategoriesScreen extends ConsumerWidget {
               CategoryFormSheet.show(
                 context,
                 existingCategories: state.categories,
-                onSave: ({
-                  required String name,
-                  required String description,
-                  required String color,
-                  String? iconName,
-                  bool isActive = true,
-                }) async {
-                  final ok = await notifier.createCategory(
-                    name: name,
-                    description: description,
-                    color: color,
-                    iconName: iconName,
-                    isActive: isActive,
-                  );
-                  if (!ok) {
-                    return notifier.errorMessage ?? 'Failed to save category. Ensure name is unique.';
-                  }
-                  return null;
-                },
+                onSave:
+                    ({
+                      required String name,
+                      required String description,
+                      required String color,
+                      String? iconName,
+                      bool isActive = true,
+                    }) async {
+                      final ok = await notifier.createCategory(
+                        name: name,
+                        description: description,
+                        color: color,
+                        iconName: iconName,
+                        isActive: isActive,
+                      );
+                      if (!ok) {
+                        return notifier.errorMessage ??
+                            'Failed to save category. Ensure name is unique.';
+                      }
+                      return null;
+                    },
               );
             },
             style: FilledButton.styleFrom(
@@ -157,17 +162,30 @@ class CategoriesScreen extends ConsumerWidget {
                             prefixIcon: const Icon(Icons.search_rounded),
                             suffixIcon: state.searchQuery.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear_rounded, size: 18),
-                                    onPressed: () => notifier.setSearchQuery(''),
+                                    icon: const Icon(
+                                      Icons.clear_rounded,
+                                      size: 18,
+                                    ),
+                                    onPressed: () =>
+                                        notifier.setSearchQuery(''),
                                   )
                                 : null,
                             filled: true,
-                            fillColor: isDark ? AppColors.darkSurface : Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? AppColors.darkSurface
+                                : Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.radiusMedium,
+                              ),
                               borderSide: BorderSide(
-                                color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+                                color: isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.borderNeutral,
                               ),
                             ),
                           ),
@@ -181,13 +199,15 @@ class CategoriesScreen extends ConsumerWidget {
                               FilterChip(
                                 label: Text('All (${state.categories.length})'),
                                 selected: state.statusFilter == 'all',
-                                onSelected: (_) => notifier.setStatusFilter('all'),
+                                onSelected: (_) =>
+                                    notifier.setStatusFilter('all'),
                               ),
                               const SizedBox(width: 8),
                               FilterChip(
                                 label: Text('Active (${state.activeCount})'),
                                 selected: state.statusFilter == 'active',
-                                onSelected: (_) => notifier.setStatusFilter('active'),
+                                onSelected: (_) =>
+                                    notifier.setStatusFilter('active'),
                               ),
                               const SizedBox(width: 8),
                               FilterChip(
@@ -195,7 +215,8 @@ class CategoriesScreen extends ConsumerWidget {
                                   'Inactive (${state.categories.length - state.activeCount})',
                                 ),
                                 selected: state.statusFilter == 'inactive',
-                                onSelected: (_) => notifier.setStatusFilter('inactive'),
+                                onSelected: (_) =>
+                                    notifier.setStatusFilter('inactive'),
                               ),
                             ],
                           ),
@@ -209,22 +230,36 @@ class CategoriesScreen extends ConsumerWidget {
                 if (state.errorMessage != null)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMedium,
+                          ),
+                          border: Border.all(
+                            color: AppColors.error.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              color: AppColors.error,
+                              size: 20,
+                            ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 state.errorMessage!,
-                                style: const TextStyle(color: AppColors.error, fontSize: 12),
+                                style: const TextStyle(
+                                  color: AppColors.error,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                             TextButton(
@@ -241,7 +276,9 @@ class CategoriesScreen extends ConsumerWidget {
                 if (state.isLoading && state.categories.isEmpty)
                   const SliverFillRemaining(
                     child: Center(
-                      child: CircularProgressIndicator(color: AppColors.primaryForest),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryForest,
+                      ),
                     ),
                   )
                 // Empty State
@@ -293,25 +330,28 @@ class CategoriesScreen extends ConsumerWidget {
                                 CategoryFormSheet.show(
                                   context,
                                   existingCategories: state.categories,
-                                  onSave: ({
-                                    required String name,
-                                    required String description,
-                                    required String color,
-                                    String? iconName,
-                                    bool isActive = true,
-                                  }) async {
-                                    final ok = await notifier.createCategory(
-                                      name: name,
-                                      description: description,
-                                      color: color,
-                                      iconName: iconName,
-                                      isActive: isActive,
-                                    );
-                                    if (!ok) {
-                                      return notifier.errorMessage ?? 'Failed to save category. Ensure name is unique.';
-                                    }
-                                    return null;
-                                  },
+                                  onSave:
+                                      ({
+                                        required String name,
+                                        required String description,
+                                        required String color,
+                                        String? iconName,
+                                        bool isActive = true,
+                                      }) async {
+                                        final ok = await notifier
+                                            .createCategory(
+                                              name: name,
+                                              description: description,
+                                              color: color,
+                                              iconName: iconName,
+                                              isActive: isActive,
+                                            );
+                                        if (!ok) {
+                                          return notifier.errorMessage ??
+                                              'Failed to save category. Ensure name is unique.';
+                                        }
+                                        return null;
+                                      },
                                 );
                               },
                               style: FilledButton.styleFrom(
@@ -328,223 +368,292 @@ class CategoriesScreen extends ConsumerWidget {
                 // Categories List
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                     sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final category = state.filteredCategories[index];
-                          final catColor = _parseHex(category.color);
-                          final catIcon = _getIconData(category.iconName);
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final category = state.filteredCategories[index];
+                        final catColor = _parseHex(category.color);
+                        final catIcon = _getIconData(category.iconName);
 
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: AppCard(
-                              child: InkWell(
-                                onTap: () => context.push('/categories/${category.id}'),
-                                borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Header row: Color icon, Name, Status Badge, Actions Menu
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            color: catColor.withValues(alpha: 0.12),
-                                            borderRadius: BorderRadius.circular(12),
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: AppCard(
+                            child: InkWell(
+                              onTap: () =>
+                                  context.push('/categories/${category.id}'),
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.radiusMedium,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Header row: Color icon, Name, Status Badge, Actions Menu
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: catColor.withValues(
+                                            alpha: 0.12,
                                           ),
-                                          child: Icon(catIcon, color: catColor, size: 22),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: Text(
-                                                      category.name,
-                                                      style: theme.textTheme.titleMedium?.copyWith(
-                                                        fontWeight: FontWeight.w800,
-                                                        color: AppColors.textPrimary,
-                                                      ),
-                                                    ),
+                                        child: Icon(
+                                          catIcon,
+                                          color: catColor,
+                                          size: 22,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    category.name,
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: theme
+                                                        .textTheme
+                                                        .titleMedium
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w800,
+                                                          color: AppColors
+                                                              .textPrimary,
+                                                        ),
                                                   ),
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 3,
-                                                    ),
-                                                    decoration: BoxDecoration(
-                                                      color: category.isActive
-                                                          ? AppColors.forestSoft
-                                                          : Colors.grey.withValues(alpha: 0.15),
-                                                      borderRadius: BorderRadius.circular(6),
-                                                    ),
-                                                    child: Text(
-                                                      category.isActive ? 'Active' : 'Inactive',
-                                                      style: TextStyle(
-                                                        color: category.isActive
-                                                            ? AppColors.primaryForest
-                                                            : AppColors.textSecondary,
-                                                        fontSize: 10,
-                                                        fontWeight: FontWeight.w700,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                category.description,
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  color: AppColors.textSecondary,
-                                                  fontSize: 12,
-                                                  height: 1.3,
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        PopupMenuButton<String>(
-                                          icon: const Icon(
-                                            Icons.more_vert_rounded,
-                                            color: AppColors.textSecondary,
-                                            size: 20,
-                                          ),
-                                          onSelected: (action) {
-                                            if (action == 'details') {
-                                              context.push('/categories/${category.id}');
-                                            } else if (action == 'edit') {
-                                              CategoryFormSheet.show(
-                                                context,
-                                                initialCategory: category,
-                                                existingCategories: state.categories,
-                                                onSave: ({
-                                                  required String name,
-                                                  required String description,
-                                                  required String color,
-                                                  String? iconName,
-                                                  bool isActive = true,
-                                                }) async {
-                                                  final ok = await notifier.updateCategory(
-                                                    category.id,
-                                                    name: name,
-                                                    description: description,
-                                                    color: color,
-                                                    iconName: iconName,
-                                                    isActive: isActive,
-                                                  );
-                                                  if (!ok) {
-                                                    return notifier.errorMessage ?? 'Failed to update category.';
-                                                  }
-                                                  return null;
-                                                },
-                                              );
-                                            } else if (action == 'toggle') {
-                                              notifier.toggleActive(category.id, category.isActive);
-                                            } else if (action == 'delete') {
-                                              _confirmDelete(context, ref, category);
-                                            }
-                                          },
-                                          itemBuilder: (context) => [
-                                            const PopupMenuItem(
-                                              value: 'details',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.visibility_rounded, size: 18),
-                                                  SizedBox(width: 8),
-                                                  Text('View Details'),
-                                                ],
-                                              ),
-                                            ),
-                                            const PopupMenuItem(
-                                              value: 'edit',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.edit_rounded, size: 18),
-                                                  SizedBox(width: 8),
-                                                  Text('Edit Category'),
-                                                ],
-                                              ),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'toggle',
-                                              child: Row(
-                                                children: [
-                                                  Icon(
-                                                    category.isActive
-                                                        ? Icons.visibility_off_rounded
-                                                        : Icons.visibility_rounded,
-                                                    size: 18,
+                                                const SizedBox(width: 6),
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 3,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: category.isActive
+                                                        ? AppColors.forestSoft
+                                                        : Colors.grey
+                                                              .withValues(
+                                                                alpha: 0.15,
+                                                              ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          6,
+                                                        ),
                                                   ),
-                                                  const SizedBox(width: 8),
-                                                  Text(category.isActive ? 'Deactivate' : 'Activate'),
-                                                ],
-                                              ),
+                                                  child: Text(
+                                                    category.isActive
+                                                        ? 'Active'
+                                                        : 'Inactive',
+                                                    style: TextStyle(
+                                                      color: category.isActive
+                                                          ? AppColors
+                                                                .primaryForest
+                                                          : AppColors
+                                                                .textSecondary,
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            const PopupMenuDivider(),
-                                            const PopupMenuItem(
-                                              value: 'delete',
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.delete_outline_rounded,
-                                                      size: 18, color: AppColors.error),
-                                                  SizedBox(width: 8),
-                                                  Text('Delete', style: TextStyle(color: AppColors.error)),
-                                                ],
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              category.description,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                color: AppColors.textSecondary,
+                                                fontSize: 12,
+                                                height: 1.3,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
-
-                                    const SizedBox(height: 14),
-                                    const Divider(height: 1),
-                                    const SizedBox(height: 12),
-
-                                    // Metrics counters
-                                    Row(
-                                      children: [
-                                        _MetricChip(
-                                          icon: Icons.book_rounded,
-                                          label: '${category.courseCount} Courses',
-                                          color: AppColors.primaryForest,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        _MetricChip(
-                                          icon: Icons.school_rounded,
-                                          label: '${category.instructorCount} Faculty',
-                                          color: AppColors.accentTerracotta,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        _MetricChip(
-                                          icon: Icons.people_alt_rounded,
-                                          label: '${category.studentCount} Students',
-                                          color: AppColors.forestLight,
-                                        ),
-                                        const Spacer(),
-                                        const Icon(
-                                          Icons.chevron_right_rounded,
-                                          size: 18,
+                                      ),
+                                      PopupMenuButton<String>(
+                                        icon: const Icon(
+                                          Icons.more_vert_rounded,
                                           color: AppColors.textSecondary,
+                                          size: 20,
                                         ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                        onSelected: (action) {
+                                          if (action == 'details') {
+                                            context.push(
+                                              '/categories/${category.id}',
+                                            );
+                                          } else if (action == 'edit') {
+                                            CategoryFormSheet.show(
+                                              context,
+                                              initialCategory: category,
+                                              existingCategories:
+                                                  state.categories,
+                                              onSave:
+                                                  ({
+                                                    required String name,
+                                                    required String description,
+                                                    required String color,
+                                                    String? iconName,
+                                                    bool isActive = true,
+                                                  }) async {
+                                                    final ok = await notifier
+                                                        .updateCategory(
+                                                          category.id,
+                                                          name: name,
+                                                          description:
+                                                              description,
+                                                          color: color,
+                                                          iconName: iconName,
+                                                          isActive: isActive,
+                                                        );
+                                                    if (!ok) {
+                                                      return notifier
+                                                              .errorMessage ??
+                                                          'Failed to update category.';
+                                                    }
+                                                    return null;
+                                                  },
+                                            );
+                                          } else if (action == 'toggle') {
+                                            notifier.toggleActive(
+                                              category.id,
+                                              category.isActive,
+                                            );
+                                          } else if (action == 'delete') {
+                                            _confirmDelete(
+                                              context,
+                                              ref,
+                                              category,
+                                            );
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          const PopupMenuItem(
+                                            value: 'details',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.visibility_rounded,
+                                                  size: 18,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text('View Details'),
+                                              ],
+                                            ),
+                                          ),
+                                          const PopupMenuItem(
+                                            value: 'edit',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.edit_rounded,
+                                                  size: 18,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text('Edit Category'),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'toggle',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  category.isActive
+                                                      ? Icons
+                                                            .visibility_off_rounded
+                                                      : Icons
+                                                            .visibility_rounded,
+                                                  size: 18,
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  category.isActive
+                                                      ? 'Deactivate'
+                                                      : 'Activate',
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const PopupMenuDivider(),
+                                          const PopupMenuItem(
+                                            value: 'delete',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.delete_outline_rounded,
+                                                  size: 18,
+                                                  color: AppColors.error,
+                                                ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  'Delete',
+                                                  style: TextStyle(
+                                                    color: AppColors.error,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 14),
+                                  const Divider(height: 1),
+                                  const SizedBox(height: 12),
+
+                                  // Metrics counters
+                                  Row(
+                                    children: [
+                                      _MetricChip(
+                                        icon: Icons.book_rounded,
+                                        label:
+                                            '${category.courseCount} Courses',
+                                        color: AppColors.primaryForest,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _MetricChip(
+                                        icon: Icons.school_rounded,
+                                        label:
+                                            '${category.instructorCount} Faculty',
+                                        color: AppColors.accentTerracotta,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      _MetricChip(
+                                        icon: Icons.people_alt_rounded,
+                                        label:
+                                            '${category.studentCount} Students',
+                                        color: AppColors.forestLight,
+                                      ),
+                                      const Spacer(),
+                                      const Icon(
+                                        Icons.chevron_right_rounded,
+                                        size: 18,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                          );
-                        },
-                        childCount: state.filteredCategories.length,
-                      ),
+                          ),
+                        );
+                      }, childCount: state.filteredCategories.length),
                     ),
                   ),
               ],
@@ -593,4 +702,3 @@ class _MetricChip extends StatelessWidget {
     );
   }
 }
-

@@ -26,7 +26,10 @@ class FakeAuthRepository implements AuthRepository {
   Stream<sb.AuthState> get onAuthStateChange => const Stream.empty();
 
   @override
-  Future<AdminUser> signIn({required String email, required String password}) async {
+  Future<AdminUser> signIn({
+    required String email,
+    required String password,
+  }) async {
     if (shouldThrowAccessDenied) {
       throw const AccessDeniedNonAdminException('student');
     }
@@ -44,7 +47,10 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AdminUser> fetchAuthoritativeProfile({required String userId, String? emailFallback}) async {
+  Future<AdminUser> fetchAuthoritativeProfile({
+    required String userId,
+    String? emailFallback,
+  }) async {
     if (shouldThrowAccessDenied) {
       throw const AccessDeniedNonAdminException('student');
     }
@@ -79,7 +85,10 @@ void main() {
 
   group('AuthNotifier Tests', () {
     test('Valid admin credentials transition state to authenticated', () async {
-      final success = await notifier.login(email: 'admin@iiecm.org', password: 'password123');
+      final success = await notifier.login(
+        email: 'admin@iiecm.org',
+        password: 'password123',
+      );
       expect(success, isTrue);
       expect(notifier.state.status, AuthStatus.authenticated);
       expect(notifier.state.adminUser?.email, 'admin@iiecm.org');
@@ -88,23 +97,35 @@ void main() {
 
     test('Non-admin credentials trigger AccessDenied error and deny authentication', () async {
       fakeRepo.shouldThrowAccessDenied = true;
-      final success = await notifier.login(email: 'student@iiecm.org', password: 'password123');
+      final success = await notifier.login(
+        email: 'student@iiecm.org',
+        password: 'password123',
+      );
       expect(success, isFalse);
       expect(notifier.state.status, AuthStatus.unauthenticated);
       expect(notifier.state.errorMessage, contains('Access denied'));
     });
 
-    test('Missing public.profiles row triggers profile missing error', () async {
-      fakeRepo.shouldThrowProfileNotFound = true;
-      final success = await notifier.login(email: 'orphan@iiecm.org', password: 'password123');
-      expect(success, isFalse);
-      expect(notifier.state.status, AuthStatus.unauthenticated);
-      expect(notifier.state.errorMessage, contains('profile was not found'));
-    });
+    test(
+      'Missing public.profiles row triggers profile missing error',
+      () async {
+        fakeRepo.shouldThrowProfileNotFound = true;
+        final success = await notifier.login(
+          email: 'orphan@iiecm.org',
+          password: 'password123',
+        );
+        expect(success, isFalse);
+        expect(notifier.state.status, AuthStatus.unauthenticated);
+        expect(notifier.state.errorMessage, contains('profile was not found'));
+      },
+    );
 
     test('Temporary network error enters profileVerificationError and allows retry', () async {
       fakeRepo.shouldThrowNetworkError = true;
-      final success = await notifier.login(email: 'admin@iiecm.org', password: 'password123');
+      final success = await notifier.login(
+        email: 'admin@iiecm.org',
+        password: 'password123',
+      );
       expect(success, isFalse);
       expect(notifier.state.status, AuthStatus.profileVerificationError);
       expect(notifier.state.isRetryable, isTrue);
@@ -126,4 +147,3 @@ void main() {
     });
   });
 }
-

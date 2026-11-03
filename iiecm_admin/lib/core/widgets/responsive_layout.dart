@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../constants/app_constants.dart';
 
 /// Ensures content remains centered and nicely bounded on tablets, foldables, and wide screens
@@ -11,20 +12,20 @@ class ResponsiveLayout extends StatelessWidget {
     super.key,
     required this.child,
     this.maxWidth = AppConstants.maxContentWidth,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+    this.padding = EdgeInsets.zero,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        child: Padding(
-          padding: padding,
-          child: child,
-        ),
-      ),
+    Widget content = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: child,
     );
+
+    if (padding != EdgeInsets.zero) {
+      content = Padding(padding: padding, child: content);
+    }
+
+    return Align(alignment: Alignment.topCenter, child: content);
   }
 }
-

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/youtube_helper.dart';
@@ -60,10 +61,14 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
     super.initState();
     final l = widget.existingLesson;
     _titleController = TextEditingController(text: l?.title ?? '');
-    _durationController = TextEditingController(text: l != null ? l.durationMinutes.toString() : '30');
+    _durationController = TextEditingController(
+      text: l != null ? l.durationMinutes.toString() : '30',
+    );
     _contentUrlController = TextEditingController(text: l?.contentUrl ?? '');
     _orderController = TextEditingController(
-      text: l != null ? l.orderIndex.toString() : widget.nextOrderIndex.toString(),
+      text: l != null
+          ? l.orderIndex.toString()
+          : widget.nextOrderIndex.toString(),
     );
     _type = l?.type ?? 'video';
 
@@ -139,14 +144,19 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
       Navigator.of(context).pop(true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(isEditing ? 'Lesson updated' : 'Lesson added to module'),
+          content: Text(
+            isEditing ? 'Lesson updated' : 'Lesson added to module',
+          ),
           backgroundColor: AppColors.primaryForest,
         ),
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -161,14 +171,18 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
     final mediaQuery = MediaQuery.of(context);
     final bottomInset = mediaQuery.viewInsets.bottom;
     final availableHeight = mediaQuery.size.height - mediaQuery.padding.top;
-    final effectiveHeight = (availableHeight - bottomInset) * 0.85;
+    final maxSheetHeight = availableHeight - bottomInset;
+    final effectiveHeight = maxSheetHeight * 0.85;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        height: effectiveHeight.clamp(320.0, availableHeight),
+        height: effectiveHeight.clamp(
+          260.0,
+          maxSheetHeight > 260.0 ? maxSheetHeight : availableHeight,
+        ),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: const BorderRadius.vertical(
@@ -208,7 +222,11 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       color: AppColors.primaryForest.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.play_lesson_rounded, color: AppColors.primaryForest, size: 22),
+                    child: const Icon(
+                      Icons.play_lesson_rounded,
+                      color: AppColors.primaryForest,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -219,14 +237,18 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                           isEditing ? 'Edit Lesson' : 'Add Lesson to Module',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         Text(
                           'Configure video, auto-extracted thumbnail & content',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -247,7 +269,10 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
               child: Form(
                 key: _formKey,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   children: [
                     // Title
                     TextFormField(
@@ -257,7 +282,9 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         hintText: 'e.g. Interpretation of Central Venous Pressure Tracings',
                         prefixIcon: Icon(Icons.title_rounded),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter title' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Please enter title'
+                          : null,
                     ),
                     const SizedBox(height: 16),
 
@@ -266,16 +293,28 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _type,
+                            initialValue: _type,
                             decoration: const InputDecoration(
                               labelText: 'Lesson Type',
                               prefixIcon: Icon(Icons.category_outlined),
                             ),
                             items: const [
-                              DropdownMenuItem(value: 'video', child: Text('Video Lecture')),
-                              DropdownMenuItem(value: 'reading', child: Text('Clinical Reading')),
-                              DropdownMenuItem(value: 'quiz', child: Text('Checkpoint Quiz')),
-                              DropdownMenuItem(value: 'assignment', child: Text('Practical Task')),
+                              DropdownMenuItem(
+                                value: 'video',
+                                child: Text('Video Lecture'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'reading',
+                                child: Text('Clinical Reading'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'quiz',
+                                child: Text('Checkpoint Quiz'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'assignment',
+                                child: Text('Practical Task'),
+                              ),
                             ],
                             onChanged: (val) {
                               if (val != null) {
@@ -295,8 +334,12 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                               prefixIcon: Icon(Icons.timer_outlined),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (int.tryParse(v) == null) return 'Must be a number';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (int.tryParse(v) == null) {
+                                return 'Must be a number';
+                              }
                               return null;
                             },
                           ),
@@ -326,14 +369,21 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       controller: _contentUrlController,
                       keyboardType: TextInputType.url,
                       decoration: InputDecoration(
-                        labelText: _type == 'video' ? 'YouTube Video URL *' : 'Content URL / Resource Link',
+                        labelText: _type == 'video'
+                            ? 'YouTube Video URL *'
+                            : 'Content URL / Resource Link',
                         hintText: _type == 'video'
                             ? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
                             : 'https://...',
-                        prefixIcon: Icon(_type == 'video' ? Icons.smart_display_rounded : Icons.link_rounded),
+                        prefixIcon: Icon(
+                          _type == 'video'
+                              ? Icons.smart_display_rounded
+                              : Icons.link_rounded,
+                        ),
                       ),
                       validator: (v) {
-                        if (_type == 'video' && (v == null || v.trim().isEmpty)) {
+                        if (_type == 'video' &&
+                            (v == null || v.trim().isEmpty)) {
                           return 'Video lessons require a URL';
                         }
                         return null;
@@ -349,14 +399,22 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                           decoration: BoxDecoration(
                             color: AppColors.forestSoft,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppColors.primaryForest.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: AppColors.primaryForest.withValues(
+                                alpha: 0.3,
+                              ),
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.check_circle_rounded, size: 16, color: AppColors.primaryForest),
+                                  const Icon(
+                                    Icons.check_circle_rounded,
+                                    size: 16,
+                                    color: AppColors.primaryForest,
+                                  ),
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
@@ -381,7 +439,10 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                     errorBuilder: (_, _, _) => Container(
                                       color: Colors.grey.shade300,
                                       child: const Center(
-                                        child: Text('Thumbnail unavailable', style: TextStyle(fontSize: 12)),
+                                        child: Text(
+                                          'Thumbnail unavailable',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -392,20 +453,36 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         ),
                       ] else ...[
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? AppColors.darkSurface : AppColors.warmCream,
+                            color: isDark
+                                ? AppColors.darkSurface
+                                : AppColors.warmCream,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.divider),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.divider,
+                            ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.textSecondary),
+                              const Icon(
+                                Icons.info_outline_rounded,
+                                size: 16,
+                                color: AppColors.textSecondary,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   'Paste a YouTube URL (watch, youtu.be, embed, shorts) to automatically extract high-resolution thumbnails.',
-                                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ),
                             ],
@@ -428,14 +505,18 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface : AppColors.surface,
                   border: Border(
-                    top: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.divider),
+                    top: BorderSide(
+                      color: isDark ? AppColors.darkBorder : AppColors.divider,
+                    ),
                   ),
                 ),
                 child: Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: const Text('Cancel'),
                       ),
                     ),
@@ -453,7 +534,9 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
                             : Text(isEditing ? 'Save Changes' : 'Add Lesson'),

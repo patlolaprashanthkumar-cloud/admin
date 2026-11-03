@@ -1,5 +1,7 @@
 import 'dart:developer' as developer;
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../config/app_config.dart';
 
 /// Centralized access to the Supabase client
@@ -26,9 +28,7 @@ class AppSupabase {
         url: AppConfig.supabaseUrl.trim(),
         // ignore: deprecated_member_use
         anonKey: AppConfig.supabaseAnonKey.trim(),
-        authOptions: const FlutterAuthClientOptions(
-          autoRefreshToken: true,
-        ),
+        authOptions: const FlutterAuthClientOptions(autoRefreshToken: true),
       );
       _isInitialized = true;
       developer.log(

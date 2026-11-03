@@ -28,9 +28,16 @@ abstract class AssessmentRepository {
 
   // Question Management
   Future<List<Question>> getAssessmentQuestions(String assessmentId);
-  Future<Question> addQuestionToAssessment(String assessmentId, Question question, int orderIndex);
+  Future<Question> addQuestionToAssessment(
+    String assessmentId,
+    Question question,
+    int orderIndex,
+  );
   Future<Question> updateQuestion(Question question);
-  Future<void> removeQuestionFromAssessment(String assessmentId, String questionId);
+  Future<void> removeQuestionFromAssessment(
+    String assessmentId,
+    String questionId,
+  );
 
   // Student Results & Monitoring
   Future<List<AssignmentSubmission>> getAssessmentResults(String assessmentId);

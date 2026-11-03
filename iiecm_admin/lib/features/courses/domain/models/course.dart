@@ -37,7 +37,11 @@ class Course {
     this.enrolledCount = 0,
   });
 
-  factory Course.fromJson(Map<String, dynamic> json, {String? instructorName, int enrolledCount = 0}) {
+  factory Course.fromJson(
+    Map<String, dynamic> json, {
+    String? instructorName,
+    int enrolledCount = 0,
+  }) {
     return Course(
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Untitled Course',
@@ -47,14 +51,30 @@ class Course {
       instructorId: json['instructor_id']?.toString(),
       instructorName: instructorName,
       thumbnailUrl: json['thumbnail_url']?.toString(),
-      durationWeeks: json['duration_weeks'] is int ? json['duration_weeks'] as int : 8,
-      fee: json['fee'] is num ? (json['fee'] as num).toDouble() : double.tryParse(json['fee']?.toString() ?? '0') ?? 0.0,
+      durationWeeks: json['duration_weeks'] is int
+          ? json['duration_weeks'] as int
+          : 8,
+      fee: json['fee'] is num
+          ? (json['fee'] as num).toDouble()
+          : double.tryParse(json['fee']?.toString() ?? '0') ?? 0.0,
       format: json['format']?.toString() ?? 'hybrid',
       status: json['status']?.toString() ?? 'draft',
-      learningObjectives: (json['learning_objectives'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      prerequisites: (json['prerequisites'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      publishedAt: json['published_at'] != null ? DateTime.tryParse(json['published_at'].toString()) : null,
-      createdAt: json['created_at'] != null ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now() : DateTime.now(),
+      learningObjectives:
+          (json['learning_objectives'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      prerequisites:
+          (json['prerequisites'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      publishedAt: json['published_at'] != null
+          ? DateTime.tryParse(json['published_at'].toString())
+          : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
+          : DateTime.now(),
       enrolledCount: enrolledCount,
     );
   }
@@ -76,4 +96,3 @@ class Course {
     };
   }
 }
-

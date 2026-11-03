@@ -77,7 +77,8 @@ class Assignment {
           : int.tryParse(json['passing_marks']?.toString() ?? '40') ?? 40,
       durationMinutes: json['duration_minutes'] is int
           ? json['duration_minutes'] as int
-          : int.tryParse(json['duration_minutes']?.toString() ?? '1440') ?? 1440,
+          : int.tryParse(json['duration_minutes']?.toString() ?? '1440') ??
+                1440,
       status: json['status']?.toString() ?? 'active',
       deadline: json['scheduled_at'] != null
           ? DateTime.tryParse(json['scheduled_at'].toString())
@@ -158,4 +159,3 @@ class Assignment {
     );
   }
 }
-

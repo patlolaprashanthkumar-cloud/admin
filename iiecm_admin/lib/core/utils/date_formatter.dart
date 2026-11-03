@@ -8,10 +8,12 @@ class AppDateFormatter {
   static final DateFormat _monthYear = DateFormat('MMMM yyyy');
 
   static String formatDate(DateTime dateTime) => _displayDate.format(dateTime);
-  static String formatDateTime(DateTime dateTime) => _displayDateTime.format(dateTime);
-  static String formatShortDate(DateTime dateTime) => _shortDate.format(dateTime);
-  static String formatMonthYear(DateTime dateTime) => _monthYear.format(dateTime);
+  static String formatDateTime(DateTime dateTime) =>
+      _displayDateTime.format(dateTime);
+  static String formatShortDate(DateTime dateTime) =>
+      _shortDate.format(dateTime);
+  static String formatMonthYear(DateTime dateTime) =>
+      _monthYear.format(dateTime);
 }
 
 typedef DateFormatter = AppDateFormatter;
-

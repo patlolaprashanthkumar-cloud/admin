@@ -39,53 +39,54 @@ class AuthState {
   });
 
   const AuthState.initial()
-      : status = AuthStatus.initial,
-        adminUser = null,
-        errorMessage = null,
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.initial,
+      adminUser = null,
+      errorMessage = null,
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.unconfigured()
-      : status = AuthStatus.unconfigured,
-        adminUser = null,
-        errorMessage = 'Supabase credentials are not configured.',
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.unconfigured,
+      adminUser = null,
+      errorMessage = 'Supabase credentials are not configured.',
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.unauthenticated({this.errorMessage})
-      : status = AuthStatus.unauthenticated,
-        adminUser = null,
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.unauthenticated,
+      adminUser = null,
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.authenticating()
-      : status = AuthStatus.authenticating,
-        adminUser = null,
-        errorMessage = null,
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.authenticating,
+      adminUser = null,
+      errorMessage = null,
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.authenticated(AdminUser user)
-      : status = AuthStatus.authenticated,
-        adminUser = user,
-        errorMessage = null,
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.authenticated,
+      adminUser = user,
+      errorMessage = null,
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.profileVerificationError({
     required this.errorMessage,
     required this.pendingUserId,
     this.pendingEmail,
-  })  : status = AuthStatus.profileVerificationError,
-        adminUser = null,
-        isRetryable = true;
+  }) : status = AuthStatus.profileVerificationError,
+       adminUser = null,
+       isRetryable = true;
 
-  bool get isAuthenticated => status == AuthStatus.authenticated && adminUser != null;
-  bool get isLoading => status == AuthStatus.authenticating || status == AuthStatus.initial;
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && adminUser != null;
+  bool get isLoading =>
+      status == AuthStatus.authenticating || status == AuthStatus.initial;
 }
-

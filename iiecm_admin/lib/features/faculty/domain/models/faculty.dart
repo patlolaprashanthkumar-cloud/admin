@@ -18,7 +18,9 @@ class FacultyCourseRef {
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? 'Untitled Course',
       categoryName: json['category_name']?.toString() ?? 'General',
-      enrolledCount: json['enrolled_count'] is int ? json['enrolled_count'] as int : 0,
+      enrolledCount: json['enrolled_count'] is int
+          ? json['enrolled_count'] as int
+          : 0,
     );
   }
 }

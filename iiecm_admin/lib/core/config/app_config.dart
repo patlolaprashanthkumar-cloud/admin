@@ -27,4 +27,3 @@ class AppConfig {
     return 'Connected to $host with anon key (${supabaseAnonKey.length} chars)';
   }
 }
-

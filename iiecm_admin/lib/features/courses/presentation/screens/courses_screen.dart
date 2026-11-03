@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -30,7 +31,10 @@ class CoursesScreen extends ConsumerWidget {
         actions: [
           IconButton(
             tooltip: 'Course Taxonomies',
-            icon: const Icon(Icons.category_rounded, color: AppColors.accentTerracotta),
+            icon: const Icon(
+              Icons.category_rounded,
+              color: AppColors.accentTerracotta,
+            ),
             onPressed: () => context.push('/categories'),
           ),
           IconButton(
@@ -42,28 +46,28 @@ class CoursesScreen extends ConsumerWidget {
             onPressed: () {
               CourseFormSheet.show(
                 context,
-                onSave: ({
-                  required String title,
-                  required String description,
-                  required String categoryId,
-                  required String categoryName,
-                  String? instructorId,
-                  int durationWeeks = 8,
-                  double fee = 0.0,
-                  String format = 'hybrid',
-                  String status = 'draft',
-                }) =>
-                    notifier.createCourse(
-                  title: title,
-                  description: description,
-                  categoryId: categoryId,
-                  categoryName: categoryName,
-                  instructorId: instructorId,
-                  durationWeeks: durationWeeks,
-                  fee: fee,
-                  format: format,
-                  status: status,
-                ),
+                onSave:
+                    ({
+                      required String title,
+                      required String description,
+                      required String categoryId,
+                      required String categoryName,
+                      String? instructorId,
+                      int durationWeeks = 8,
+                      double fee = 0.0,
+                      String format = 'hybrid',
+                      String status = 'draft',
+                    }) => notifier.createCourse(
+                      title: title,
+                      description: description,
+                      categoryId: categoryId,
+                      categoryName: categoryName,
+                      instructorId: instructorId,
+                      durationWeeks: durationWeeks,
+                      fee: fee,
+                      format: format,
+                      status: status,
+                    ),
               );
             },
             style: FilledButton.styleFrom(
@@ -98,17 +102,30 @@ class CoursesScreen extends ConsumerWidget {
                             prefixIcon: const Icon(Icons.search_rounded),
                             suffixIcon: state.searchQuery.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear_rounded, size: 18),
-                                    onPressed: () => notifier.setSearchQuery(''),
+                                    icon: const Icon(
+                                      Icons.clear_rounded,
+                                      size: 18,
+                                    ),
+                                    onPressed: () =>
+                                        notifier.setSearchQuery(''),
                                   )
                                 : null,
                             filled: true,
-                            fillColor: isDark ? AppColors.darkSurface : Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? AppColors.darkSurface
+                                : Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.radiusMedium,
+                              ),
                               borderSide: BorderSide(
-                                color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+                                color: isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.borderNeutral,
                               ),
                             ),
                           ),
@@ -123,18 +140,29 @@ class CoursesScreen extends ConsumerWidget {
                               FilterChip(
                                 label: const Text('All Categories'),
                                 selected: state.selectedCategoryId == 'all',
-                                onSelected: (_) => notifier.setSelectedCategory('all'),
+                                onSelected: (_) =>
+                                    notifier.setSelectedCategory('all'),
                               ),
                               const SizedBox(width: 8),
                               ...categoriesState.categories.map((cat) {
-                                final isSelected = state.selectedCategoryId == cat.id;
+                                final isSelected =
+                                    state.selectedCategoryId == cat.id;
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 8),
                                   child: FilterChip(
-                                    avatar: Icon(Icons.category_rounded, size: 14, color: isSelected ? Colors.white : AppColors.primaryForest),
+                                    avatar: Icon(
+                                      Icons.category_rounded,
+                                      size: 14,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppColors.primaryForest,
+                                    ),
                                     label: Text(cat.name),
                                     selected: isSelected,
-                                    onSelected: (_) => notifier.setSelectedCategory(isSelected ? 'all' : cat.id),
+                                    onSelected: (_) =>
+                                        notifier.setSelectedCategory(
+                                          isSelected ? 'all' : cat.id,
+                                        ),
                                   ),
                                 );
                               }),
@@ -150,14 +178,25 @@ class CoursesScreen extends ConsumerWidget {
                 if (state.errorMessage != null)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMedium,
+                          ),
                         ),
-                        child: Text(state.errorMessage!, style: const TextStyle(color: AppColors.error, fontSize: 12)),
+                        child: Text(
+                          state.errorMessage!,
+                          style: const TextStyle(
+                            color: AppColors.error,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -165,7 +204,11 @@ class CoursesScreen extends ConsumerWidget {
                 // Loading
                 if (state.isLoading && state.courses.isEmpty)
                   const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator(color: AppColors.primaryForest)),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryForest,
+                      ),
+                    ),
                   )
                 // Empty State
                 else if (state.filteredCourses.isEmpty)
@@ -183,7 +226,11 @@ class CoursesScreen extends ConsumerWidget {
                                 color: AppColors.forestSoft,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.menu_book_rounded, size: 40, color: AppColors.primaryForest),
+                              child: const Icon(
+                                Icons.menu_book_rounded,
+                                size: 40,
+                                color: AppColors.primaryForest,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -199,7 +246,10 @@ class CoursesScreen extends ConsumerWidget {
                             const Text(
                               'Create medical curriculum programs and link them to dynamic categories.',
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -209,18 +259,15 @@ class CoursesScreen extends ConsumerWidget {
                 // Courses List
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 100),
                     sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final course = state.filteredCourses[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _CourseCard(course: course),
-                          );
-                        },
-                        childCount: state.filteredCourses.length,
-                      ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final course = state.filteredCourses[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _CourseCard(course: course),
+                        );
+                      }, childCount: state.filteredCourses.length),
                     ),
                   ),
               ],
@@ -255,7 +302,11 @@ class _CourseCard extends ConsumerWidget {
                   color: AppColors.forestSoft,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.menu_book_rounded, color: AppColors.primaryForest, size: 22),
+                child: const Icon(
+                  Icons.menu_book_rounded,
+                  color: AppColors.primaryForest,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -270,10 +321,16 @@ class _CourseCard extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Row(
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.terracottaSoft,
                             borderRadius: BorderRadius.circular(6),
@@ -287,9 +344,11 @@ class _CourseCard extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: course.status == 'published'
                                 ? AppColors.forestSoft
@@ -313,35 +372,39 @@ class _CourseCard extends ConsumerWidget {
                 ),
               ),
               PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary, size: 20),
+                icon: const Icon(
+                  Icons.more_vert_rounded,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
                 onSelected: (val) {
                   if (val == 'edit') {
                     CourseFormSheet.show(
                       context,
                       initialCourse: course,
-                      onSave: ({
-                        required String title,
-                        required String description,
-                        required String categoryId,
-                        required String categoryName,
-                        String? instructorId,
-                        int durationWeeks = 8,
-                        double fee = 0.0,
-                        String format = 'hybrid',
-                        String status = 'draft',
-                      }) =>
-                          notifier.updateCourse(
-                        course.id,
-                        title: title,
-                        description: description,
-                        categoryId: categoryId,
-                        categoryName: categoryName,
-                        instructorId: instructorId,
-                        durationWeeks: durationWeeks,
-                        fee: fee,
-                        format: format,
-                        status: status,
-                      ),
+                      onSave:
+                          ({
+                            required String title,
+                            required String description,
+                            required String categoryId,
+                            required String categoryName,
+                            String? instructorId,
+                            int durationWeeks = 8,
+                            double fee = 0.0,
+                            String format = 'hybrid',
+                            String status = 'draft',
+                          }) => notifier.updateCourse(
+                            course.id,
+                            title: title,
+                            description: description,
+                            categoryId: categoryId,
+                            categoryName: categoryName,
+                            instructorId: instructorId,
+                            durationWeeks: durationWeeks,
+                            fee: fee,
+                            format: format,
+                            status: status,
+                          ),
                     );
                   } else if (val == 'curriculum') {
                     context.push('/courses/${course.id}/curriculum');
@@ -350,11 +413,18 @@ class _CourseCard extends ConsumerWidget {
                       context: context,
                       builder: (context) => AlertDialog(
                         title: Text('Delete "${course.title}"?'),
-                        content: const Text('Are you sure you want to permanently remove this course?'),
+                        content: const Text(
+                          'Are you sure you want to permanently remove this course?',
+                        ),
                         actions: [
-                          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
                           FilledButton(
-                            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.error,
+                            ),
                             onPressed: () {
                               notifier.deleteCourse(course.id);
                               Navigator.pop(context);
@@ -369,15 +439,44 @@ class _CourseCard extends ConsumerWidget {
                 itemBuilder: (context) => [
                   const PopupMenuItem(
                     value: 'curriculum',
-                    child: Row(children: [Icon(Icons.video_library_rounded, size: 18, color: AppColors.primaryForest), SizedBox(width: 8), Text('Curriculum & Videos')]),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.video_library_rounded,
+                          size: 18,
+                          color: AppColors.primaryForest,
+                        ),
+                        SizedBox(width: 8),
+                        Text('Curriculum & Videos'),
+                      ],
+                    ),
                   ),
                   const PopupMenuItem(
                     value: 'edit',
-                    child: Row(children: [Icon(Icons.edit_rounded, size: 18), SizedBox(width: 8), Text('Edit Course')]),
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_rounded, size: 18),
+                        SizedBox(width: 8),
+                        Text('Edit Course'),
+                      ],
+                    ),
                   ),
                   const PopupMenuItem(
                     value: 'delete',
-                    child: Row(children: [Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error), SizedBox(width: 8), Text('Delete', style: TextStyle(color: AppColors.error))]),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_outline_rounded,
+                          size: 18,
+                          color: AppColors.error,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Delete',
+                          style: TextStyle(color: AppColors.error),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -388,44 +487,82 @@ class _CourseCard extends ConsumerWidget {
             course.description,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 12),
           const Divider(height: 1),
           const SizedBox(height: 10),
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
             children: [
-              Text(
-                CurrencyFormatter.format(course.fee),
-                style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primaryForest, fontSize: 14),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    CurrencyFormatter.format(course.fee),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryForest,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '${course.durationWeeks} wks',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '${course.enrolledCount} enrolled',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 14),
-              Text(
-                '${course.durationWeeks} weeks',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (course.instructorName != null &&
+                      course.instructorName!.isNotEmpty) ...[
+                    Text(
+                      'Lead: ${course.instructorName}',
+                      style: const TextStyle(
+                        color: AppColors.accentTerracotta,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        context.push('/courses/${course.id}/curriculum'),
+                    icon: const Icon(Icons.video_library_rounded, size: 14),
+                    label: const Text(
+                      'Curriculum',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 14),
-              Text(
-                '${course.enrolledCount} enrolled',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-              ),
-              const Spacer(),
-              OutlinedButton.icon(
-                onPressed: () => context.push('/courses/${course.id}/curriculum'),
-                icon: const Icon(Icons.video_library_rounded, size: 14),
-                label: const Text('Curriculum', style: TextStyle(fontSize: 11)),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-              if (course.instructorName != null) ...[
-                const SizedBox(width: 8),
-                Text(
-                  'Lead: ${course.instructorName}',
-                  style: const TextStyle(color: AppColors.accentTerracotta, fontWeight: FontWeight.w600, fontSize: 11),
-                ),
-              ],
             ],
           ),
         ],

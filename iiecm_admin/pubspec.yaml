@@ -30,6 +30,7 @@ dependencies:
 
   # Localization, Dates, and INR Currency Formatting
   intl: ^0.20.2
+  pdf: ^3.10.8
 
 dev_dependencies:
   flutter_test:

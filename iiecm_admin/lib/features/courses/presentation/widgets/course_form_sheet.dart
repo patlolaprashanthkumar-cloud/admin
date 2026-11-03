@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/network/supabase_client.dart';
 import '../../../categories/domain/models/course_category.dart';
@@ -18,13 +19,10 @@ class CourseFormSheet extends ConsumerStatefulWidget {
     double fee,
     String format,
     String status,
-  }) onSave;
+  })
+  onSave;
 
-  const CourseFormSheet({
-    super.key,
-    this.initialCourse,
-    required this.onSave,
-  });
+  const CourseFormSheet({super.key, this.initialCourse, required this.onSave});
 
   static Future<void> show(
     BuildContext context, {
@@ -39,17 +37,16 @@ class CourseFormSheet extends ConsumerStatefulWidget {
       double fee,
       String format,
       String status,
-    }) onSave,
+    })
+    onSave,
   }) {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => CourseFormSheet(
-        initialCourse: initialCourse,
-        onSave: onSave,
-      ),
+      builder: (context) =>
+          CourseFormSheet(initialCourse: initialCourse, onSave: onSave),
     );
   }
 
@@ -82,7 +79,9 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
     final c = widget.initialCourse;
     _titleController = TextEditingController(text: c?.title ?? '');
     _descController = TextEditingController(text: c?.description ?? '');
-    _durationController = TextEditingController(text: '${c?.durationWeeks ?? 8}');
+    _durationController = TextEditingController(
+      text: '${c?.durationWeeks ?? 8}',
+    );
     _feeController = TextEditingController(text: '${c?.fee.toInt() ?? 4999}');
     _selectedCategoryId = c?.categoryId;
     _selectedCategoryName = c?.categoryName;
@@ -97,7 +96,9 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
     try {
       final catRepo = ref.read(categoryRepositoryProvider);
       // If editing an existing course, include inactive categories so the current selection is valid
-      final cats = await catRepo.getCategories(onlyActive: widget.initialCourse == null);
+      final cats = await catRepo.getCategories(
+        onlyActive: widget.initialCourse == null,
+      );
 
       // Load instructors from Supabase safely
       List<Map<String, dynamic>> insList = [];
@@ -178,7 +179,9 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
         } else if (result is String) {
           setState(() => _errorMessage = result);
         } else {
-          setState(() => _errorMessage = 'Failed to save course. Check requirements.');
+          setState(
+            () => _errorMessage = 'Failed to save course. Check requirements.',
+          );
         }
       }
     } catch (e) {
@@ -231,7 +234,10 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
               ),
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 6,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -240,7 +246,11 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                         color: AppColors.forestSoft,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.menu_book_rounded, color: AppColors.primaryForest, size: 20),
+                      child: const Icon(
+                        Icons.menu_book_rounded,
+                        color: AppColors.primaryForest,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -266,204 +276,317 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                   ? const Padding(
                       padding: EdgeInsets.all(40),
                       child: Center(
-                        child: CircularProgressIndicator(color: AppColors.primaryForest),
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryForest,
+                        ),
                       ),
                     )
                   : Flexible(
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
                         child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (_errorMessage != null)
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              margin: const EdgeInsets.only(bottom: 16),
-                              decoration: BoxDecoration(
-                                color: AppColors.error.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.error),
-                              ),
-                              child: Text(
-                                _errorMessage!,
-                                style: const TextStyle(color: AppColors.error, fontSize: 12),
-                              ),
-                            ),
-
-                          // Title
-                          Text('Course Title *', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 6),
-                          TextFormField(
-                            controller: _titleController,
-                            decoration: const InputDecoration(
-                              hintText: 'e.g. Advanced Emergency Resuscitation',
-                              prefixIcon: Icon(Icons.school_outlined),
-                            ),
-                            validator: (v) => v == null || v.trim().isEmpty ? 'Enter course title' : null,
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Description
-                          Text('Course Description *', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 6),
-                          TextFormField(
-                            controller: _descController,
-                            maxLines: 3,
-                            decoration: const InputDecoration(
-                              hintText: 'Syllabus breakdown and clinical training aims...',
-                            ),
-                            validator: (v) => v == null || v.trim().isEmpty ? 'Enter course description' : null,
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Category Picker (Loaded dynamically from Supabase)
-                          Text('Course Category *', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 6),
-                          DropdownButtonFormField<String>(
-                            isExpanded: true,
-                            initialValue: _selectedCategoryId,
-                            decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.category_outlined),
-                              hintText: 'Select active category stream',
-                            ),
-                            items: _categories.map((cat) {
-                              return DropdownMenuItem<String>(
-                                value: cat.id,
-                                child: Text(cat.name, overflow: TextOverflow.ellipsis),
-                              );
-                            }).toList(),
-                            onChanged: (id) {
-                              final match = _categories.firstWhere((c) => c.id == id);
-                              setState(() {
-                                _selectedCategoryId = id;
-                                _selectedCategoryName = match.name;
-                              });
-                            },
-                            validator: (v) => v == null ? 'Please select a category' : null,
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Lead Instructor (Loaded dynamically from Supabase)
-                          Text('Assigned Faculty Lead (Optional)', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 6),
-                          DropdownButtonFormField<String?>(
-                            isExpanded: true,
-                            initialValue: _selectedInstructorId,
-                            decoration: const InputDecoration(
-                              prefixIcon: Icon(Icons.person_pin_outlined),
-                              hintText: 'Unassigned',
-                            ),
-                            items: [
-                              const DropdownMenuItem<String?>(
-                                value: null,
-                                child: Text('No Instructor Assigned'),
-                              ),
-                              ..._instructors.map((ins) {
-                                return DropdownMenuItem<String?>(
-                                  value: ins['id']?.toString(),
-                                  child: Text(
-                                    '${ins['full_name']} (${ins['specialization']})',
-                                    overflow: TextOverflow.ellipsis,
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (_errorMessage != null)
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.error.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: AppColors.error),
                                   ),
-                                );
-                              }),
-                            ],
-                            onChanged: (id) => setState(() => _selectedInstructorId = id),
-                          ),
-                          const SizedBox(height: 16),
+                                  child: Text(
+                                    _errorMessage!,
+                                    style: const TextStyle(
+                                      color: AppColors.error,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
 
-                          // Duration & Fee in Row
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Duration (Weeks)', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                                    const SizedBox(height: 6),
-                                    TextFormField(
-                                      controller: _durationController,
-                                      keyboardType: TextInputType.number,
-                                      decoration: const InputDecoration(prefixIcon: Icon(Icons.schedule_rounded)),
-                                    ),
-                                  ],
+                              // Title
+                              Text(
+                                'Course Title *',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Tuition Fee (₹)', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                                    const SizedBox(height: 6),
-                                    TextFormField(
-                                      controller: _feeController,
-                                      keyboardType: TextInputType.number,
-                                      decoration: const InputDecoration(prefixIcon: Icon(Icons.currency_rupee_rounded)),
-                                    ),
-                                  ],
+                              const SizedBox(height: 6),
+                              TextFormField(
+                                controller: _titleController,
+                                decoration: const InputDecoration(
+                                  hintText:
+                                      'e.g. Advanced Emergency Resuscitation',
+                                  prefixIcon: Icon(Icons.school_outlined),
                                 ),
+                                validator: (v) => v == null || v.trim().isEmpty
+                                    ? 'Enter course title'
+                                    : null,
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
+                              const SizedBox(height: 16),
 
-                          // Format & Status in Row
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Format', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                                    const SizedBox(height: 6),
-                                    DropdownButtonFormField<String>(
-                                      isExpanded: true,
-                                      initialValue: _selectedFormat,
-                                      decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12)),
-                                      items: const [
-                                        DropdownMenuItem(value: 'hybrid', child: Text('Hybrid')),
-                                        DropdownMenuItem(value: 'live', child: Text('Live Virtual')),
-                                        DropdownMenuItem(value: 'recorded', child: Text('Self-Paced')),
-                                      ],
-                                      onChanged: (val) => setState(() => _selectedFormat = val ?? 'hybrid'),
-                                    ),
-                                  ],
+                              // Description
+                              Text(
+                                'Course Description *',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Publication Status', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
-                                    const SizedBox(height: 6),
-                                    DropdownButtonFormField<String>(
-                                      isExpanded: true,
-                                      initialValue: _selectedStatus,
-                                      decoration: const InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12)),
-                                      items: const [
-                                        DropdownMenuItem(value: 'draft', child: Text('Draft')),
-                                        DropdownMenuItem(value: 'published', child: Text('Published')),
-                                        DropdownMenuItem(value: 'archived', child: Text('Archived')),
-                                      ],
-                                      onChanged: (val) => setState(() => _selectedStatus = val ?? 'draft'),
-                                    ),
-                                  ],
+                              const SizedBox(height: 6),
+                              TextFormField(
+                                controller: _descController,
+                                maxLines: 3,
+                                decoration: const InputDecoration(
+                                  hintText: 'Syllabus breakdown and clinical training aims...',
+                                ),
+                                validator: (v) => v == null || v.trim().isEmpty
+                                    ? 'Enter course description'
+                                    : null,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Category Picker (Loaded dynamically from Supabase)
+                              Text(
+                                'Course Category *',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
+                              const SizedBox(height: 6),
+                              DropdownButtonFormField<String>(
+                                isExpanded: true,
+                                initialValue: _selectedCategoryId,
+                                decoration: const InputDecoration(
+                                  prefixIcon: Icon(Icons.category_outlined),
+                                  hintText: 'Select active category stream',
+                                ),
+                                items: _categories.map((cat) {
+                                  return DropdownMenuItem<String>(
+                                    value: cat.id,
+                                    child: Text(
+                                      cat.name,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (id) {
+                                  final match = _categories.firstWhere(
+                                    (c) => c.id == id,
+                                  );
+                                  setState(() {
+                                    _selectedCategoryId = id;
+                                    _selectedCategoryName = match.name;
+                                  });
+                                },
+                                validator: (v) => v == null
+                                    ? 'Please select a category'
+                                    : null,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Lead Instructor (Loaded dynamically from Supabase)
+                              Text(
+                                'Assigned Faculty Lead (Optional)',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              DropdownButtonFormField<String?>(
+                                isExpanded: true,
+                                initialValue: _selectedInstructorId,
+                                decoration: const InputDecoration(
+                                  prefixIcon: Icon(Icons.person_pin_outlined),
+                                  hintText: 'Unassigned',
+                                ),
+                                items: [
+                                  const DropdownMenuItem<String?>(
+                                    value: null,
+                                    child: Text('No Instructor Assigned'),
+                                  ),
+                                  ..._instructors.map((ins) {
+                                    return DropdownMenuItem<String?>(
+                                      value: ins['id']?.toString(),
+                                      child: Text(
+                                        '${ins['full_name']} (${ins['specialization']})',
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    );
+                                  }),
+                                ],
+                                onChanged: (id) =>
+                                    setState(() => _selectedInstructorId = id),
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Duration & Fee in Row
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Duration (Weeks)',
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        TextFormField(
+                                          controller: _durationController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            prefixIcon: Icon(
+                                              Icons.schedule_rounded,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Tuition Fee (₹)',
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        TextFormField(
+                                          controller: _feeController,
+                                          keyboardType: TextInputType.number,
+                                          decoration: const InputDecoration(
+                                            prefixIcon: Icon(
+                                              Icons.currency_rupee_rounded,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Format & Status in Row
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Format',
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        DropdownButtonFormField<String>(
+                                          isExpanded: true,
+                                          initialValue: _selectedFormat,
+                                          decoration: const InputDecoration(
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                  vertical: 12,
+                                                ),
+                                          ),
+                                          items: const [
+                                            DropdownMenuItem(
+                                              value: 'hybrid',
+                                              child: Text('Hybrid'),
+                                            ),
+                                            DropdownMenuItem(
+                                              value: 'live',
+                                              child: Text('Live Virtual'),
+                                            ),
+                                            DropdownMenuItem(
+                                              value: 'recorded',
+                                              child: Text('Self-Paced'),
+                                            ),
+                                          ],
+                                          onChanged: (val) => setState(
+                                            () => _selectedFormat =
+                                                val ?? 'hybrid',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Publication Status',
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        DropdownButtonFormField<String>(
+                                          isExpanded: true,
+                                          initialValue: _selectedStatus,
+                                          decoration: const InputDecoration(
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                  horizontal: 10,
+                                                  vertical: 12,
+                                                ),
+                                          ),
+                                          items: const [
+                                            DropdownMenuItem(
+                                              value: 'draft',
+                                              child: Text('Draft'),
+                                            ),
+                                            DropdownMenuItem(
+                                              value: 'published',
+                                              child: Text('Published'),
+                                            ),
+                                            DropdownMenuItem(
+                                              value: 'archived',
+                                              child: Text('Archived'),
+                                            ),
+                                          ],
+                                          onChanged: (val) => setState(
+                                            () => _selectedStatus =
+                                                val ?? 'draft',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
 
               const Divider(height: 1),
 
@@ -477,7 +600,9 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+                          onPressed: _isSaving
+                              ? null
+                              : () => Navigator.of(context).pop(),
                           child: const Text('Cancel'),
                         ),
                       ),
@@ -486,12 +611,17 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                         flex: 2,
                         child: FilledButton(
                           onPressed: _isSaving ? null : _submit,
-                          style: FilledButton.styleFrom(backgroundColor: AppColors.primaryForest),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primaryForest,
+                          ),
                           child: _isSaving
                               ? const SizedBox(
                                   height: 18,
                                   width: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
                                 )
                               : Text(isEdit ? 'Save Changes' : 'Create Course'),
                         ),

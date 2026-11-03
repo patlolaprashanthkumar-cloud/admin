@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../core/widgets/app_bottom_nav_scaffold.dart';
 import '../../core/widgets/app_loading_screen.dart';
 import '../../features/assessments/presentation/screens/assessment_monitoring_screen.dart';
@@ -41,7 +42,9 @@ class AppRoutes {
   static const String login = '/login';
 }
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
 
 /// Listenable that notifies GoRouter whenever the auth state changes
 class RouterNotifier extends ChangeNotifier {

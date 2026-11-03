@@ -19,7 +19,10 @@ void main() {
         'created_at': '2026-11-01T10:00:00Z',
       };
 
-      const course = AssignmentCourseRef(id: 'c1', title: 'Critical Care Fellowship');
+      const course = AssignmentCourseRef(
+        id: 'c1',
+        title: 'Critical Care Fellowship',
+      );
 
       final assignment = Assignment.fromJson(
         json,
@@ -62,8 +65,10 @@ void main() {
       final payload = sub.toGradingPayload();
       expect(payload['score'], equals(85.0));
       expect(payload['passed'], isTrue);
-      expect((payload['answers'] as Map)['feedback'], equals('Excellent clinical rationale'));
+      expect(
+        (payload['answers'] as Map)['feedback'],
+        equals('Excellent clinical rationale'),
+      );
     });
   });
 }
-

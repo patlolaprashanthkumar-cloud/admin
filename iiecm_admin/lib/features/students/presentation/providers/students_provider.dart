@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/repositories/supabase_student_repository.dart';
 import '../../domain/models/student.dart';
 import '../../domain/repositories/student_repository.dart';
@@ -26,10 +27,13 @@ class StudentsState {
 
   List<Student> get filteredStudents {
     return students.where((s) {
-      final matchesCategory = selectedCategoryId == 'all' ||
+      final matchesCategory =
+          selectedCategoryId == 'all' ||
           s.assignedCategories.any((c) => c.id == selectedCategoryId);
-      final matchesStatus = statusFilter == 'all' || s.accountStatus == statusFilter;
-      final matchesSearch = searchQuery.isEmpty ||
+      final matchesStatus =
+          statusFilter == 'all' || s.accountStatus == statusFilter;
+      final matchesSearch =
+          searchQuery.isEmpty ||
           s.fullName.toLowerCase().contains(searchQuery.toLowerCase()) ||
           s.studentId.toLowerCase().contains(searchQuery.toLowerCase()) ||
           s.email.toLowerCase().contains(searchQuery.toLowerCase());
@@ -147,7 +151,10 @@ class StudentsNotifier extends StateNotifier<StudentsState> {
     }
   }
 
-  Future<void> updateStudentCategories(String studentId, List<String> categoryIds) async {
+  Future<void> updateStudentCategories(
+    String studentId,
+    List<String> categoryIds,
+  ) async {
     try {
       await _repository.updateStudentCategories(studentId, categoryIds);
       await loadStudents();
@@ -157,18 +164,25 @@ class StudentsNotifier extends StateNotifier<StudentsState> {
   }
 }
 
-final studentsNotifierProvider = StateNotifierProvider<StudentsNotifier, StudentsState>((ref) {
-  final repo = ref.watch(studentRepositoryProvider);
-  return StudentsNotifier(repo);
-});
+final studentsNotifierProvider =
+    StateNotifierProvider<StudentsNotifier, StudentsState>((ref) {
+      final repo = ref.watch(studentRepositoryProvider);
+      return StudentsNotifier(repo);
+    });
 
-final studentLmsDetailsFamily = FutureProvider.family<List<StudentCategoryLmsGroup>, String>((ref, studentId) async {
-  final repo = ref.watch(studentRepositoryProvider);
-  return repo.getStudentCategoryLmsDetails(studentId);
-});
+final studentLmsDetailsFamily =
+    FutureProvider.family<List<StudentCategoryLmsGroup>, String>((
+      ref,
+      studentId,
+    ) async {
+      final repo = ref.watch(studentRepositoryProvider);
+      return repo.getStudentCategoryLmsDetails(studentId);
+    });
 
-final studentDetailFamily = FutureProvider.family<Student?, String>((ref, studentId) async {
+final studentDetailFamily = FutureProvider.family<Student?, String>((
+  ref,
+  studentId,
+) async {
   final repo = ref.watch(studentRepositoryProvider);
   return repo.getStudentById(studentId);
 });
-

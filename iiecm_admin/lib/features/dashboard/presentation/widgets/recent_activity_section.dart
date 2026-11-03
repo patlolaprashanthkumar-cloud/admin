@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/date_formatter.dart';
@@ -9,10 +10,7 @@ import '../../domain/models/dashboard_stats.dart';
 class RecentActivitySection extends StatelessWidget {
   final DashboardStats stats;
 
-  const RecentActivitySection({
-    super.key,
-    required this.stats,
-  });
+  const RecentActivitySection({super.key, required this.stats});
 
   @override
   Widget build(BuildContext context) {
@@ -62,12 +60,17 @@ class RecentActivitySection extends StatelessWidget {
                     final isActive = student.accountStatus == 'active';
 
                     return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
                       leading: CircleAvatar(
                         radius: 18,
                         backgroundColor: AppColors.forestSoft,
                         child: Text(
-                          student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : 'S',
+                          student.fullName.isNotEmpty
+                              ? student.fullName[0].toUpperCase()
+                              : 'S',
                           style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             color: AppColors.primaryForest,
@@ -92,7 +95,10 @@ class RecentActivitySection extends StatelessWidget {
                         ),
                       ),
                       trailing: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: isActive
                               ? AppColors.forestSoft
@@ -107,7 +113,9 @@ class RecentActivitySection extends StatelessWidget {
                         child: Text(
                           student.accountStatus,
                           style: TextStyle(
-                            color: isActive ? AppColors.primaryForest : AppColors.textSecondary,
+                            color: isActive
+                                ? AppColors.primaryForest
+                                : AppColors.textSecondary,
                             fontWeight: FontWeight.w800,
                             fontSize: 10,
                           ),
@@ -159,14 +167,23 @@ class RecentActivitySection extends StatelessWidget {
                     final item = stats.recentEnrollments[index];
 
                     return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: AppColors.terracottaSoft,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMedium,
+                          ),
                         ),
-                        child: const Icon(Icons.auto_stories_rounded, size: 18, color: AppColors.accentTerracotta),
+                        child: const Icon(
+                          Icons.auto_stories_rounded,
+                          size: 18,
+                          color: AppColors.accentTerracotta,
+                        ),
                       ),
                       title: Text(
                         item.courseTitle,
@@ -233,14 +250,23 @@ class RecentActivitySection extends StatelessWidget {
                 final lecture = stats.upcomingLiveClasses[index];
 
                 return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: AppColors.forestSoft,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusMedium,
+                      ),
                     ),
-                    child: const Icon(Icons.video_camera_front_rounded, size: 18, color: AppColors.primaryForest),
+                    child: const Icon(
+                      Icons.video_camera_front_rounded,
+                      size: 18,
+                      color: AppColors.primaryForest,
+                    ),
                   ),
                   title: Text(
                     lecture.title,
@@ -259,7 +285,10 @@ class RecentActivitySection extends StatelessWidget {
                     ),
                   ),
                   trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.warmCream,
                       borderRadius: BorderRadius.circular(8),
@@ -283,13 +312,21 @@ class RecentActivitySection extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, {required IconData icon, required String message}) {
+  Widget _buildEmptyState(
+    BuildContext context, {
+    required IconData icon,
+    required String message,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Center(
         child: Column(
           children: [
-            Icon(icon, size: 36, color: AppColors.textMuted.withValues(alpha: 0.5)),
+            Icon(
+              icon,
+              size: 36,
+              color: AppColors.textMuted.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 8),
             Text(
               message,

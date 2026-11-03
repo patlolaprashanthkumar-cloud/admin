@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/constants/app_constants.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_text_field.dart';
@@ -20,7 +21,8 @@ class ForgotPasswordSheet extends ConsumerStatefulWidget {
   }
 
   @override
-  ConsumerState<ForgotPasswordSheet> createState() => _ForgotPasswordSheetState();
+  ConsumerState<ForgotPasswordSheet> createState() =>
+      _ForgotPasswordSheetState();
 }
 
 class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
@@ -51,7 +53,9 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
     });
 
     try {
-      await ref.read(authNotifierProvider.notifier).sendPasswordReset(_emailController.text.trim());
+      await ref
+          .read(authNotifierProvider.notifier)
+          .sendPasswordReset(_emailController.text.trim());
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -146,12 +150,20 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: const Color(0xFF10B981).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.radiusMedium,
+                  ),
+                  border: Border.all(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.check_circle_outline, color: Color(0xFF10B981), size: 24),
+                    const Icon(
+                      Icons.check_circle_outline,
+                      color: Color(0xFF10B981),
+                      size: 24,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -188,11 +200,17 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.radiusMedium,
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.error_outline, size: 20, color: theme.colorScheme.onErrorContainer),
+                      Icon(
+                        Icons.error_outline,
+                        size: 20,
+                        color: theme.colorScheme.onErrorContainer,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -234,7 +252,10 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Text('Send Reset Link'),
                 ),
@@ -246,4 +267,3 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
     );
   }
 }
-

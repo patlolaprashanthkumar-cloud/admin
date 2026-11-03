@@ -1,14 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+
 import '../../../../app/theme/app_colors.dart';
 
 class PaymentBreakdownChart extends StatelessWidget {
   final Map<String, int> breakdown;
 
-  const PaymentBreakdownChart({
-    super.key,
-    required this.breakdown,
-  });
+  const PaymentBreakdownChart({super.key, required this.breakdown});
 
   static const Map<String, ({String label, Color color})> statusConfig = {
     'verified': (label: 'Verified', color: AppColors.primaryForest),
@@ -21,7 +19,10 @@ class PaymentBreakdownChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final totalTransactions = breakdown.values.fold<int>(0, (sum, count) => sum + count);
+    final totalTransactions = breakdown.values.fold<int>(
+      0,
+      (sum, count) => sum + count,
+    );
 
     if (totalTransactions == 0) {
       return Container(
@@ -30,7 +31,11 @@ class PaymentBreakdownChart extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.pie_chart_outline_rounded, size: 36, color: AppColors.textMuted.withValues(alpha: 0.5)),
+            Icon(
+              Icons.pie_chart_outline_rounded,
+              size: 36,
+              color: AppColors.textMuted.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 8),
             Text(
               'No fee payment transactions found.',

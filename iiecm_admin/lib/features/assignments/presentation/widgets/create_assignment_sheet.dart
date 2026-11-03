@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/date_formatter.dart';
@@ -12,17 +13,22 @@ class CreateAssignmentSheet extends ConsumerStatefulWidget {
 
   const CreateAssignmentSheet({super.key, this.existingAssignment});
 
-  static Future<bool?> show(BuildContext context, {Assignment? existingAssignment}) {
+  static Future<bool?> show(
+    BuildContext context, {
+    Assignment? existingAssignment,
+  }) {
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => CreateAssignmentSheet(existingAssignment: existingAssignment),
+      builder: (ctx) =>
+          CreateAssignmentSheet(existingAssignment: existingAssignment),
     );
   }
 
   @override
-  ConsumerState<CreateAssignmentSheet> createState() => _CreateAssignmentSheetState();
+  ConsumerState<CreateAssignmentSheet> createState() =>
+      _CreateAssignmentSheetState();
 }
 
 class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
@@ -49,15 +55,22 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
     final a = widget.existingAssignment;
     _titleController = TextEditingController(text: a?.title ?? '');
     _descriptionController = TextEditingController(text: a?.description ?? '');
-    _totalMarksController = TextEditingController(text: a != null ? a.totalMarks.toString() : '100');
-    _passingMarksController = TextEditingController(text: a != null ? a.passingMarks.toString() : '40');
+    _totalMarksController = TextEditingController(
+      text: a != null ? a.totalMarks.toString() : '100',
+    );
+    _passingMarksController = TextEditingController(
+      text: a != null ? a.passingMarks.toString() : '40',
+    );
     _type = a?.type ?? 'assignment';
     _status = a?.status ?? 'active';
 
     if (a != null) {
       if (a.deadline != null) {
         _deadline = a.deadline!;
-        _deadlineTime = TimeOfDay(hour: a.deadline!.hour, minute: a.deadline!.minute);
+        _deadlineTime = TimeOfDay(
+          hour: a.deadline!.hour,
+          minute: a.deadline!.minute,
+        );
       }
       _selectedCourseIds.addAll(a.assignedCourses.map((c) => c.id));
     }
@@ -87,7 +100,9 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
     if (_selectedCourseIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select at least one course for this assignment.'),
+          content: Text(
+            'Please select at least one course for this assignment.',
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -142,7 +157,9 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isEditing ? 'Assignment updated successfully' : 'Assignment published successfully',
+              isEditing
+                  ? 'Assignment updated successfully'
+                  : 'Assignment published successfully',
             ),
             backgroundColor: AppColors.primaryForest,
           ),
@@ -158,7 +175,10 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -173,7 +193,8 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
     final mediaQuery = MediaQuery.of(context);
     final bottomInset = mediaQuery.viewInsets.bottom;
     final availableHeight = mediaQuery.size.height - mediaQuery.padding.top;
-    final effectiveHeight = (availableHeight - bottomInset) * 0.90;
+    final maxSheetHeight = availableHeight - bottomInset;
+    final effectiveHeight = maxSheetHeight * 0.90;
 
     final coursesState = ref.watch(coursesNotifierProvider);
 
@@ -182,7 +203,10 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        height: effectiveHeight.clamp(320.0, availableHeight),
+        height: effectiveHeight.clamp(
+          260.0,
+          maxSheetHeight > 260.0 ? maxSheetHeight : availableHeight,
+        ),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: const BorderRadius.vertical(
@@ -234,10 +258,14 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isEditing ? 'Edit Assignment / Project' : 'Create New Assignment',
+                          isEditing
+                              ? 'Edit Assignment / Project'
+                              : 'Create New Assignment',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                         Text(
@@ -246,7 +274,9 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                               : 'Set evaluation criteria, submission deadlines & target courses',
                           style: TextStyle(
                             fontSize: 12,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -267,7 +297,10 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
               child: Form(
                 key: _formKey,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   children: [
                     // Title
                     TextFormField(
@@ -277,7 +310,9 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                         hintText: 'e.g. Case Study: Acute Coronary Syndrome Protocols',
                         prefixIcon: Icon(Icons.title_rounded),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter title' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Please enter title'
+                          : null,
                     ),
                     const SizedBox(height: 16),
 
@@ -290,7 +325,9 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                         hintText: 'Detailed requirements, case background, and submission deliverables...',
                         alignLabelWithHint: true,
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter instructions' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Please enter instructions'
+                          : null,
                     ),
                     const SizedBox(height: 16),
 
@@ -299,36 +336,58 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _type,
+                            initialValue: _type,
                             decoration: const InputDecoration(
                               labelText: 'Type',
                               prefixIcon: Icon(Icons.category_outlined),
                             ),
                             items: const [
-                              DropdownMenuItem(value: 'assignment', child: Text('Assignment')),
-                              DropdownMenuItem(value: 'project', child: Text('Clinical Project')),
+                              DropdownMenuItem(
+                                value: 'assignment',
+                                child: Text('Assignment'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'project',
+                                child: Text('Clinical Project'),
+                              ),
                             ],
                             onChanged: (val) {
-                              if (val != null) setState(() => _type = val);
+                              if (val != null) {
+                                setState(() => _type = val);
+                              }
                             },
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _status,
+                            initialValue: _status,
                             decoration: const InputDecoration(
                               labelText: 'Status',
                               prefixIcon: Icon(Icons.toggle_on_outlined),
                             ),
                             items: const [
-                              DropdownMenuItem(value: 'active', child: Text('Active')),
-                              DropdownMenuItem(value: 'scheduled', child: Text('Scheduled')),
-                              DropdownMenuItem(value: 'draft', child: Text('Draft')),
-                              DropdownMenuItem(value: 'completed', child: Text('Completed')),
+                              DropdownMenuItem(
+                                value: 'active',
+                                child: Text('Active'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'scheduled',
+                                child: Text('Scheduled'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'draft',
+                                child: Text('Draft'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'completed',
+                                child: Text('Completed'),
+                              ),
                             ],
                             onChanged: (val) {
-                              if (val != null) setState(() => _status = val);
+                              if (val != null) {
+                                setState(() => _status = val);
+                              }
                             },
                           ),
                         ),
@@ -348,8 +407,12 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                               prefixIcon: Icon(Icons.grade_outlined),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (int.tryParse(v) == null) return 'Must be a number';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (int.tryParse(v) == null) {
+                                return 'Must be a number';
+                              }
                               return null;
                             },
                           ),
@@ -361,11 +424,17 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: 'Passing Marks *',
-                              prefixIcon: Icon(Icons.check_circle_outline_rounded),
+                              prefixIcon: Icon(
+                                Icons.check_circle_outline_rounded,
+                              ),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (int.tryParse(v) == null) return 'Must be a number';
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Required';
+                              }
+                              if (int.tryParse(v) == null) {
+                                return 'Must be a number';
+                              }
                               return null;
                             },
                           ),
@@ -383,10 +452,16 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                               final picked = await showDatePicker(
                                 context: context,
                                 initialDate: _deadline,
-                                firstDate: DateTime.now().subtract(const Duration(days: 30)),
-                                lastDate: DateTime.now().add(const Duration(days: 365)),
+                                firstDate: DateTime.now().subtract(
+                                  const Duration(days: 30),
+                                ),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365),
+                                ),
                               );
-                              if (picked != null) setState(() => _deadline = picked);
+                              if (picked != null) {
+                                setState(() => _deadline = picked);
+                              }
                             },
                             child: InputDecorator(
                               decoration: const InputDecoration(
@@ -395,7 +470,10 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                               ),
                               child: Text(
                                 DateFormatter.formatDate(_deadline),
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -408,7 +486,9 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                                 context: context,
                                 initialTime: _deadlineTime,
                               );
-                              if (picked != null) setState(() => _deadlineTime = picked);
+                              if (picked != null) {
+                                setState(() => _deadlineTime = picked);
+                              }
                             },
                             child: InputDecorator(
                               decoration: const InputDecoration(
@@ -417,7 +497,10 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                               ),
                               child: Text(
                                 _deadlineTime.format(context),
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -432,7 +515,9 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                       'Target Courses (Cohort Allocation)',
                       style: theme.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -440,7 +525,9 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                       'Select courses where enrolled candidates will receive this assignment.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -448,35 +535,49 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                     if (coursesState.courses.isEmpty)
                       const Text(
                         'No courses available.',
-                        style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
                       )
                     else
                       Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: isDark ? AppColors.darkBorder : AppColors.divider,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.divider,
                           ),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMedium,
+                          ),
                         ),
                         child: ListView.separated(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: coursesState.courses.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          separatorBuilder: (_, _) => const Divider(height: 1),
                           itemBuilder: (context, index) {
                             final course = coursesState.courses[index];
-                            final isAllocated = _selectedCourseIds.contains(course.id);
+                            final isAllocated = _selectedCourseIds.contains(
+                              course.id,
+                            );
                             return CheckboxListTile(
                               dense: true,
                               title: Text(
                                 course.title,
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                               subtitle: Text(
                                 '${course.categoryName} • ${course.enrolledCount} enrolled candidates',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.textSecondary,
                                 ),
                               ),
                               value: isAllocated,
@@ -518,7 +619,9 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: const Text('Cancel'),
                       ),
                     ),
@@ -536,10 +639,16 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
-                            : Text(isEditing ? 'Save Changes' : 'Publish Assignment'),
+                            : Text(
+                                isEditing
+                                    ? 'Save Changes'
+                                    : 'Publish Assignment',
+                              ),
                       ),
                     ),
                   ],
@@ -552,4 +661,3 @@ class _CreateAssignmentSheetState extends ConsumerState<CreateAssignmentSheet> {
     );
   }
 }
-

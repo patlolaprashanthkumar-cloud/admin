@@ -4,29 +4,32 @@ import 'package:iiecm_admin/features/courses/domain/models/course_module.dart';
 
 void main() {
   group('Course Video Lessons & Curriculum Models Tests', () {
-    test('Constructs CourseLesson and extracts YouTube thumbnail automatically', () {
-      final json = {
-        'id': 'les-1',
-        'module_id': 'mod-1',
-        'title': 'Mechanical Ventilation Waveforms',
-        'duration_minutes': 45,
-        'type': 'video',
-        'order_index': 2,
-        'content_url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        'created_at': '2026-11-01T10:00:00Z',
-      };
+    test(
+      'Constructs CourseLesson and extracts YouTube thumbnail automatically',
+      () {
+        final json = {
+          'id': 'les-1',
+          'module_id': 'mod-1',
+          'title': 'Mechanical Ventilation Waveforms',
+          'duration_minutes': 45,
+          'type': 'video',
+          'order_index': 2,
+          'content_url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          'created_at': '2026-11-01T10:00:00Z',
+        };
 
-      final lesson = CourseLesson.fromJson(json);
+        final lesson = CourseLesson.fromJson(json);
 
-      expect(lesson.id, equals('les-1'));
-      expect(lesson.isVideo, isTrue);
-      expect(lesson.durationMinutes, equals(45));
-      expect(lesson.youtubeVideoId, equals('dQw4w9WgXcQ'));
-      expect(
-        lesson.videoThumbnailUrl,
-        equals('https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg'),
-      );
-    });
+        expect(lesson.id, equals('les-1'));
+        expect(lesson.isVideo, isTrue);
+        expect(lesson.durationMinutes, equals(45));
+        expect(lesson.youtubeVideoId, equals('dQw4w9WgXcQ'));
+        expect(
+          lesson.videoThumbnailUrl,
+          equals('https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg'),
+        );
+      },
+    );
 
     test('CourseModule calculates total duration and video counts', () {
       final lesson1 = CourseLesson(
@@ -61,4 +64,3 @@ void main() {
     });
   });
 }
-

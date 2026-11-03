@@ -89,4 +89,3 @@ class AdminUser {
   @override
   int get hashCode => id.hashCode ^ email.hashCode ^ role.hashCode;
 }
-

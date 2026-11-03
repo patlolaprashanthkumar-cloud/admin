@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../domain/models/course_module.dart';
@@ -55,7 +56,9 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
     _titleController = TextEditingController(text: m?.title ?? '');
     _descController = TextEditingController(text: m?.description ?? '');
     _orderController = TextEditingController(
-      text: m != null ? m.orderIndex.toString() : widget.nextOrderIndex.toString(),
+      text: m != null
+          ? m.orderIndex.toString()
+          : widget.nextOrderIndex.toString(),
     );
   }
 
@@ -79,7 +82,9 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
         id: widget.existingModule?.id ?? '',
         courseId: widget.courseId,
         title: _titleController.text.trim(),
-        description: _descController.text.trim().isNotEmpty ? _descController.text.trim() : null,
+        description: _descController.text.trim().isNotEmpty
+            ? _descController.text.trim()
+            : null,
         orderIndex: order,
         createdAt: widget.existingModule?.createdAt ?? DateTime.now(),
       );
@@ -94,14 +99,19 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
       Navigator.of(context).pop(true);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(isEditing ? 'Module updated' : 'Module added to curriculum'),
+          content: Text(
+            isEditing ? 'Module updated' : 'Module added to curriculum',
+          ),
           backgroundColor: AppColors.primaryForest,
         ),
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -116,14 +126,18 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
     final mediaQuery = MediaQuery.of(context);
     final bottomInset = mediaQuery.viewInsets.bottom;
     final availableHeight = mediaQuery.size.height - mediaQuery.padding.top;
-    final effectiveHeight = (availableHeight - bottomInset) * 0.70;
+    final maxSheetHeight = availableHeight - bottomInset;
+    final effectiveHeight = maxSheetHeight * 0.70;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
-        height: effectiveHeight.clamp(280.0, availableHeight),
+        height: effectiveHeight.clamp(
+          240.0,
+          maxSheetHeight > 240.0 ? maxSheetHeight : availableHeight,
+        ),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: const BorderRadius.vertical(
@@ -162,15 +176,23 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
                       color: AppColors.primaryForest.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.folder_outlined, color: AppColors.primaryForest, size: 22),
+                    child: const Icon(
+                      Icons.folder_outlined,
+                      color: AppColors.primaryForest,
+                      size: 22,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      isEditing ? 'Edit Curriculum Module' : 'Add Curriculum Module',
+                      isEditing
+                          ? 'Edit Curriculum Module'
+                          : 'Add Curriculum Module',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -188,7 +210,10 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
               child: Form(
                 key: _formKey,
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   children: [
                     TextFormField(
                       controller: _titleController,
@@ -197,7 +222,9 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
                         hintText: 'e.g. Module 1: Hemodynamic Monitoring',
                         prefixIcon: Icon(Icons.title_rounded),
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter title' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Please enter title'
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -205,7 +232,8 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
                       maxLines: 2,
                       decoration: const InputDecoration(
                         labelText: 'Module Summary (Optional)',
-                        hintText: 'Overview of learning outcomes in this module...',
+                        hintText:
+                            'Overview of learning outcomes in this module...',
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -218,8 +246,12 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
                         prefixIcon: Icon(Icons.format_list_numbered_rounded),
                       ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        if (int.tryParse(v) == null) return 'Must be a valid integer';
+                        if (v == null || v.trim().isEmpty) {
+                          return 'Required';
+                        }
+                        if (int.tryParse(v) == null) {
+                          return 'Must be a valid integer';
+                        }
                         return null;
                       },
                     ),
@@ -235,14 +267,18 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkSurface : AppColors.surface,
                   border: Border(
-                    top: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.divider),
+                    top: BorderSide(
+                      color: isDark ? AppColors.darkBorder : AppColors.divider,
+                    ),
                   ),
                 ),
                 child: Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         child: const Text('Cancel'),
                       ),
                     ),
@@ -260,10 +296,14 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
                                 width: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
                                 ),
                               )
-                            : Text(isEditing ? 'Save Changes' : 'Create Module'),
+                            : Text(
+                                isEditing ? 'Save Changes' : 'Create Module',
+                              ),
                       ),
                     ),
                   ],
@@ -276,4 +316,3 @@ class _AddModuleSheetState extends ConsumerState<AddModuleSheet> {
     );
   }
 }
-

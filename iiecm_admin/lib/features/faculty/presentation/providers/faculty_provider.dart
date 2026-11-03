@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../data/repositories/supabase_faculty_repository.dart';
 import '../../domain/models/faculty.dart';
 import '../../domain/repositories/faculty_repository.dart';
@@ -119,7 +120,9 @@ class FacultyNotifier extends StateNotifier<FacultyState> {
     var result = list;
 
     if (status != 'all') {
-      result = result.where((f) => f.accountStatus.toLowerCase() == status.toLowerCase()).toList();
+      result = result
+          .where((f) => f.accountStatus.toLowerCase() == status.toLowerCase())
+          .toList();
     }
 
     if (categoryId != 'all') {
@@ -186,7 +189,9 @@ class FacultyNotifier extends StateNotifier<FacultyState> {
         categoryIds: categoryIds,
         courseIds: courseIds,
       );
-      final updatedList = state.facultyList.map((f) => f.id == updated.id ? updated : f).toList();
+      final updatedList = state.facultyList
+          .map((f) => f.id == updated.id ? updated : f)
+          .toList();
       state = state.copyWith(
         facultyList: updatedList,
         filteredFaculty: _applyFilters(
@@ -254,13 +259,16 @@ final facultyRepositoryProvider = Provider<FacultyRepository>((ref) {
   return SupabaseFacultyRepository();
 });
 
-final facultyNotifierProvider = StateNotifierProvider<FacultyNotifier, FacultyState>((ref) {
-  final repo = ref.watch(facultyRepositoryProvider);
-  return FacultyNotifier(repo);
-});
+final facultyNotifierProvider =
+    StateNotifierProvider<FacultyNotifier, FacultyState>((ref) {
+      final repo = ref.watch(facultyRepositoryProvider);
+      return FacultyNotifier(repo);
+    });
 
-final facultyDetailProvider = FutureProvider.family<Faculty?, String>((ref, id) async {
+final facultyDetailProvider = FutureProvider.family<Faculty?, String>((
+  ref,
+  id,
+) async {
   final repo = ref.watch(facultyRepositoryProvider);
   return repo.getFacultyById(id);
 });
-

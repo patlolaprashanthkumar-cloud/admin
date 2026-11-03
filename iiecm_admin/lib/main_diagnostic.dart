@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'diagnostic_render_app.dart';
 
 /// Temporary diagnostic entry point to isolate the Flutter Android rendering pipeline
@@ -7,4 +8,3 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const IIECMRenderDiagnosticApp());
 }
-
