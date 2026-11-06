@@ -8,6 +8,7 @@ import '../../data/repositories/supabase_payment_repository.dart';
 import '../../domain/models/payment.dart';
 import '../../domain/models/payment_filter.dart';
 import '../../domain/models/payment_summary.dart';
+import '../../domain/models/razorpay_models.dart';
 import '../../domain/models/student_fee_profile.dart';
 import '../../domain/repositories/payment_repository.dart';
 
@@ -293,6 +294,68 @@ class PaymentActionsNotifier extends StateNotifier<PaymentActionsState> {
         errorMessage: e.toString().replaceFirst('Exception: ', ''),
       );
       return false;
+    }
+  }
+
+  Future<RazorpayOrderResponse?> createRazorpayOrder(
+    RazorpayOrderRequest request,
+  ) async {
+    state = state.copyWith(isLoading: true, clearErrors: true);
+
+    try {
+      final repo = _ref.read(paymentRepositoryProvider);
+      final orderResponse = await repo.createRazorpayOrder(request);
+      state = state.copyWith(isLoading: false);
+      return orderResponse;
+    } catch (e, stack) {
+      developer.log(
+        'Error creating Razorpay order: $e',
+        name: 'PaymentActionsNotifier',
+        error: e,
+        stackTrace: stack,
+      );
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+      return null;
+    }
+  }
+
+  Future<RazorpayVerificationResult> verifyRazorpayPayment(
+    RazorpayVerificationRequest request,
+  ) async {
+    state = state.copyWith(isLoading: true, clearErrors: true);
+
+    try {
+      final repo = _ref.read(paymentRepositoryProvider);
+      final result = await repo.verifyRazorpayPayment(request);
+
+      if (result.success) {
+        _invalidateAll();
+        state = state.copyWith(
+          isLoading: false,
+          successMessage:
+              'Razorpay payment successfully verified and captured.',
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: result.error ?? 'Server payment verification failed.',
+        );
+      }
+
+      return result;
+    } catch (e, stack) {
+      developer.log(
+        'Error verifying Razorpay payment: $e',
+        name: 'PaymentActionsNotifier',
+        error: e,
+        stackTrace: stack,
+      );
+      final errorMsg = e.toString().replaceFirst('Exception: ', '');
+      state = state.copyWith(isLoading: false, errorMessage: errorMsg);
+      return RazorpayVerificationResult.failure(error: errorMsg);
     }
   }
 }

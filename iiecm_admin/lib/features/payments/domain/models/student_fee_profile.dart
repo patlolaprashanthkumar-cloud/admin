@@ -94,17 +94,17 @@ class StudentFeeProfile {
     // 1. Total fee is sum of enrolled course fees
     final totalFee = enrolledCourses.fold<double>(0.0, (sum, c) => sum + c.fee);
 
-    // 2. Verified paid amount
-    final verifiedPaid = payments
+    // 2. Net verified paid amount accounting for partial and full refunds
+    final netPaid = payments
         .where((p) => p.isVerified)
-        .fold<double>(0.0, (sum, p) => sum + p.amount);
+        .fold<double>(0.0, (sum, p) => sum + p.netRetainedAmount);
 
-    // 3. Refunded amount
-    final refundedAmount = payments
-        .where((p) => p.isRefunded)
-        .fold<double>(0.0, (sum, p) => sum + p.amount);
+    // 3. Total refunded amount across all transactions
+    final refundedAmount = payments.fold<double>(
+      0.0,
+      (sum, p) => sum + p.refundedAmount,
+    );
 
-    final netPaid = math.max(0.0, verifiedPaid - refundedAmount);
     final balance = math.max(0.0, totalFee - netPaid);
 
     final percentage = totalFee > 0

@@ -72,6 +72,59 @@ class Payment {
       status.toLowerCase() == 'refunded' ||
       refundStatus.toLowerCase() == 'completed';
 
+  /// Authoritative refunded amount in INR (accounting for partial and full refunds)
+  double get refundedAmount {
+    if (rawProviderPayload != null &&
+        rawProviderPayload!['total_refunded_amount'] != null) {
+      final val = rawProviderPayload!['total_refunded_amount'];
+      return (val is num)
+          ? val.toDouble()
+          : (double.tryParse(val.toString()) ?? 0.0);
+    }
+    if (status.toLowerCase() == 'refunded') {
+      return amount;
+    }
+    return 0.0;
+  }
+
+  /// Net amount actually retained by institution after deducting all refunds
+  double get netRetainedAmount {
+    if (!isVerified) return 0.0;
+    final net = amount - refundedAmount;
+    return net > 0 ? net : 0.0;
+  }
+
+  bool get isRazorpay =>
+      paymentMethod.toLowerCase() == 'razorpay' ||
+      transactionRef.startsWith('pay_') ||
+      transactionRef.startsWith('order_');
+
+  String? get razorpayPaymentId {
+    if (rawProviderPayload != null &&
+        rawProviderPayload!['razorpay_payment_id'] != null) {
+      return rawProviderPayload!['razorpay_payment_id'].toString();
+    }
+    if (transactionRef.startsWith('pay_')) {
+      return transactionRef;
+    }
+    return null;
+  }
+
+  String? get razorpayOrderId {
+    if (rawProviderPayload != null &&
+        rawProviderPayload!['razorpay_order_id'] != null) {
+      return rawProviderPayload!['razorpay_order_id'].toString();
+    }
+    if (transactionRef.startsWith('order_')) {
+      return transactionRef.substring(6);
+    }
+    return null;
+  }
+
+  String? get gatewayPaymentMethod =>
+      rawProviderPayload?['payment_method_type']?.toString() ??
+      rawProviderPayload?['method']?.toString();
+
   String get formattedMethod {
     switch (paymentMethod.toLowerCase()) {
       case 'bank_transfer':

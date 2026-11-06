@@ -30,6 +30,18 @@ class _PaymentReceiptPreviewScreenState
   bool _isGeneratingPdf = false;
 
   Future<void> _downloadOrSavePdf() async {
+    if (!widget.payment.isVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Cannot export official PDF: Transaction is not yet verified and captured.',
+          ),
+          backgroundColor: AppColors.accentTerracotta,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isGeneratingPdf = true);
     try {
       final pdfBytes = await ReceiptGenerator.generateReceiptPdf(
@@ -138,6 +150,40 @@ class _PaymentReceiptPreviewScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Unverified Transaction Warning Banner
+                  if (!p.isVerified) ...[
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.amber[50],
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.amber[400]!),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.amber[900],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'PROVISIONAL TRANSACTION: Status is ${p.status.toUpperCase()}. This document is NOT an official verified tax/fee receipt.',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber[900],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
                   // Institutional Banner
                   Container(
                     padding: const EdgeInsets.all(14),

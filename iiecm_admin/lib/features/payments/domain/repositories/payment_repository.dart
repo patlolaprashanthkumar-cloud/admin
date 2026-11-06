@@ -1,6 +1,7 @@
 import '../models/payment.dart';
 import '../models/payment_filter.dart';
 import '../models/payment_summary.dart';
+import '../models/razorpay_models.dart';
 import '../models/student_fee_profile.dart';
 
 abstract class PaymentRepository {
@@ -52,4 +53,14 @@ abstract class PaymentRepository {
 
   /// Fetches all active students and their enrolled courses for payment recording
   Future<List<Map<String, dynamic>>> fetchStudentsWithEnrollments();
+
+  /// Creates an authoritative server-side Razorpay order via Supabase Edge Function
+  Future<RazorpayOrderResponse> createRazorpayOrder(
+    RazorpayOrderRequest request,
+  );
+
+  /// Cryptographically verifies Razorpay payment on server via Supabase Edge Function
+  Future<RazorpayVerificationResult> verifyRazorpayPayment(
+    RazorpayVerificationRequest request,
+  );
 }

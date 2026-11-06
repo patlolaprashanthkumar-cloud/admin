@@ -345,6 +345,21 @@ class PaymentDetailDialog extends ConsumerWidget {
               if (payment.verifiedBy != null)
                 _buildDataTile('Verified By', payment.verifiedBy!),
 
+              if (payment.isRazorpay) ...[
+                if (payment.razorpayPaymentId != null)
+                  _buildDataTile(
+                    'Razorpay Payment ID',
+                    payment.razorpayPaymentId!,
+                  ),
+                if (payment.razorpayOrderId != null)
+                  _buildDataTile('Razorpay Order ID', payment.razorpayOrderId!),
+                if (payment.gatewayPaymentMethod != null)
+                  _buildDataTile(
+                    'Gateway Channel',
+                    payment.gatewayPaymentMethod!.toUpperCase(),
+                  ),
+              ],
+
               if (payment.rejectionReason != null)
                 Container(
                   margin: const EdgeInsets.only(top: 8),
@@ -462,30 +477,68 @@ class PaymentDetailDialog extends ConsumerWidget {
                 const SizedBox(height: 10),
               ],
 
-              // View PDF Receipt Button
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.tonalIcon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.forestSoft,
-                    foregroundColor: AppColors.primaryForest,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (ctx) =>
-                            PaymentReceiptPreviewScreen(payment: payment),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.receipt_long_rounded, size: 18),
-                  label: const Text(
-                    'View & Print PDF Receipt',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+              // View PDF Receipt Button (Strictly restricted to verified transactions)
+              if (payment.isVerified) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonalIcon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.forestSoft,
+                      foregroundColor: AppColors.primaryForest,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (ctx) =>
+                              PaymentReceiptPreviewScreen(payment: payment),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.receipt_long_rounded, size: 18),
+                    label: const Text(
+                      'View & Print PDF Receipt',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ),
-              ),
+              ] else ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.warmCream,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.lock_clock_rounded,
+                        size: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          payment.isPending
+                              ? 'Official receipt will be available once this payment is verified and captured.'
+                              : 'Official receipts are not issued for ${payment.status} transactions.',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
 
               const SizedBox(height: 6),
               Align(

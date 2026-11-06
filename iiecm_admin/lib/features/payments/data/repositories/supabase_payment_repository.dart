@@ -5,6 +5,7 @@ import '../../../../core/network/supabase_client.dart';
 import '../../domain/models/payment.dart';
 import '../../domain/models/payment_filter.dart';
 import '../../domain/models/payment_summary.dart';
+import '../../domain/models/razorpay_models.dart';
 import '../../domain/models/student_fee_profile.dart';
 import '../../domain/repositories/payment_repository.dart';
 
@@ -550,7 +551,9 @@ class SupabasePaymentRepository implements PaymentRepository {
       // Also get all verified payments to calculate current balances
       final List<dynamic> payments = await client
           .from('payments')
-          .select('student_id, course_id, amount, status');
+          .select(
+            'student_id, course_id, amount, status, refund_status, raw_provider_payload',
+          );
 
       final Map<String, double> studentTotalPaid = {};
       final Map<String, Map<String, double>> studentCoursePaid = {};
@@ -563,11 +566,27 @@ class SupabasePaymentRepository implements PaymentRepository {
               ? (p['amount'] as num).toDouble()
               : double.tryParse(p['amount']?.toString() ?? '0') ?? 0.0;
 
-          studentTotalPaid[sId] = (studentTotalPaid[sId] ?? 0.0) + amt;
+          // Authoritative refund deduction
+          double refundedAmt = 0.0;
+          final refStatus = p['refund_status']?.toString().toLowerCase();
+          if (refStatus == 'completed') {
+            final payload = p['raw_provider_payload'];
+            if (payload is Map && payload['total_refunded_amount'] != null) {
+              final rVal = payload['total_refunded_amount'];
+              refundedAmt = (rVal is num)
+                  ? rVal.toDouble()
+                  : (double.tryParse(rVal.toString()) ?? 0.0);
+            } else {
+              refundedAmt = amt;
+            }
+          }
+          final netAmt = math.max(0.0, amt - refundedAmt);
+
+          studentTotalPaid[sId] = (studentTotalPaid[sId] ?? 0.0) + netAmt;
           if (cId != null && cId.isNotEmpty) {
             studentCoursePaid.putIfAbsent(sId, () => {});
             studentCoursePaid[sId]![cId] =
-                (studentCoursePaid[sId]![cId] ?? 0.0) + amt;
+                (studentCoursePaid[sId]![cId] ?? 0.0) + netAmt;
           }
         }
       }
@@ -621,6 +640,92 @@ class SupabasePaymentRepository implements PaymentRepository {
         stackTrace: stack,
       );
       return [];
+    }
+  }
+
+  @override
+  Future<RazorpayOrderResponse> createRazorpayOrder(
+    RazorpayOrderRequest request,
+  ) async {
+    final client = AppSupabase.client;
+    try {
+      final response = await client.functions.invoke(
+        'create-razorpay-order',
+        body: request.toJson(),
+      );
+
+      if (response.status != 200) {
+        final errorMsg = response.data is Map && response.data['error'] != null
+            ? response.data['error'].toString()
+            : 'Failed to create Razorpay Order (HTTP ${response.status})';
+        throw Exception(errorMsg);
+      }
+
+      final data = response.data is Map
+          ? Map<String, dynamic>.from(response.data as Map)
+          : <String, dynamic>{};
+
+      if (data['success'] != true) {
+        throw Exception(
+          data['error']?.toString() ?? 'Failed to initiate Razorpay order.',
+        );
+      }
+
+      return RazorpayOrderResponse.fromJson(data);
+    } catch (e, stack) {
+      developer.log(
+        'createRazorpayOrder failed: $e',
+        name: 'SupabasePaymentRepository',
+        error: e,
+        stackTrace: stack,
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<RazorpayVerificationResult> verifyRazorpayPayment(
+    RazorpayVerificationRequest request,
+  ) async {
+    final client = AppSupabase.client;
+    try {
+      final response = await client.functions.invoke(
+        'verify-razorpay-payment',
+        body: request.toJson(),
+      );
+
+      if (response.status != 200) {
+        final errorMsg = response.data is Map && response.data['error'] != null
+            ? response.data['error'].toString()
+            : 'Payment verification failed (HTTP ${response.status})';
+        return RazorpayVerificationResult.failure(error: errorMsg);
+      }
+
+      final data = response.data is Map
+          ? Map<String, dynamic>.from(response.data as Map)
+          : <String, dynamic>{};
+
+      if (data['success'] == true && data['payment'] != null) {
+        final paymentMap = Map<String, dynamic>.from(data['payment'] as Map);
+        final payment = Payment.fromJson(paymentMap);
+        return RazorpayVerificationResult.success(
+          payment: payment,
+          receiptNumber: data['receiptNumber']?.toString(),
+          message: data['message']?.toString(),
+        );
+      } else {
+        return RazorpayVerificationResult.failure(
+          error: data['error']?.toString() ?? 'Verification unsuccessful',
+        );
+      }
+    } catch (e, stack) {
+      developer.log(
+        'verifyRazorpayPayment failed: $e',
+        name: 'SupabasePaymentRepository',
+        error: e,
+        stackTrace: stack,
+      );
+      return RazorpayVerificationResult.failure(error: e.toString());
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iiecm_admin/features/payments/domain/models/payment.dart';
 import 'package:iiecm_admin/features/payments/domain/models/payment_filter.dart';
+import 'package:iiecm_admin/features/payments/domain/models/razorpay_models.dart';
 import 'package:iiecm_admin/features/payments/domain/models/student_fee_profile.dart';
 
 void main() {
@@ -297,6 +298,184 @@ void main() {
       expect(range.start?.day, 10);
       expect(range.end?.day, 20);
       expect(range.end?.hour, 23);
+    });
+  });
+
+  group('Razorpay Gateway Domain & Integration Tests', () {
+    test('Payment correctly detects Razorpay attributes from payload', () {
+      final payment = Payment(
+        id: 'rzp-p-1',
+        transactionRef: 'pay_ABC123XYZ',
+        studentId: 'stu-1',
+        studentName: 'Dr. Suresh Kumar',
+        amount: 25000.0,
+        paymentMethod: 'razorpay',
+        status: 'verified',
+        paymentDate: DateTime.now(),
+        rawProviderPayload: {
+          'razorpay_payment_id': 'pay_ABC123XYZ',
+          'razorpay_order_id': 'order_DEF456UVW',
+          'payment_method_type': 'upi',
+          'receipt_number': 'IIECM-REC-2026-ABC123XYZ',
+        },
+      );
+
+      expect(payment.isRazorpay, isTrue);
+      expect(payment.razorpayPaymentId, 'pay_ABC123XYZ');
+      expect(payment.razorpayOrderId, 'order_DEF456UVW');
+      expect(payment.gatewayPaymentMethod, 'upi');
+      expect(payment.receiptNumber, 'IIECM-REC-2026-ABC123XYZ');
+      expect(payment.formattedMethod, 'Razorpay / Online');
+    });
+
+    test('RazorpayOrderRequest produces correct JSON and handles optional courseId', () {
+      const req = RazorpayOrderRequest(
+        studentId: 's-10',
+        courseId: 'c-20',
+        amount: 15000.0,
+        notes: 'Semester 1 fee',
+      );
+
+      final json = req.toJson();
+      expect(json['studentId'], 's-10');
+      expect(json['courseId'], 'c-20');
+      expect(json['amount'], 15000.0);
+      expect(json['notes'], 'Semester 1 fee');
+    });
+
+    test(
+      'RazorpayOrderResponse parses server response and converts amounts',
+      () {
+        final json = {
+          'success': true,
+          'paymentId': 'pay-rec-uuid',
+          'orderId': 'order_HJKL999',
+          'amountPaise': 1500000,
+          'amountInr': 15000.0,
+          'currency': 'INR',
+          'keyId': 'rzp_test_MOCKKEY123',
+          'student': {
+            'id': 's-10',
+            'name': 'Priya Sharma',
+            'email': 'priya@example.com',
+          },
+          'course': {'id': 'c-20', 'title': 'Emergency Toxicology'},
+        };
+
+        final resp = RazorpayOrderResponse.fromJson(json);
+        expect(resp.success, isTrue);
+        expect(resp.orderId, 'order_HJKL999');
+        expect(resp.amountPaise, 1500000);
+        expect(resp.amountInr, 15000.0);
+        expect(resp.keyId, 'rzp_test_MOCKKEY123');
+        expect(resp.student['name'], 'Priya Sharma');
+        expect(resp.course?['title'], 'Emergency Toxicology');
+      },
+    );
+
+    test('RazorpayVerificationRequest and Result model validation', () {
+      const vReq = RazorpayVerificationRequest(
+        paymentId: 'pay-uuid-77',
+        razorpayPaymentId: 'pay_998877',
+        razorpayOrderId: 'order_112233',
+        razorpaySignature: 'abcdef0123456789',
+      );
+
+      final vJson = vReq.toJson();
+      expect(vJson['paymentId'], 'pay-uuid-77');
+      expect(vJson['razorpayPaymentId'], 'pay_998877');
+      expect(vJson['razorpayOrderId'], 'order_112233');
+      expect(vJson['razorpaySignature'], 'abcdef0123456789');
+
+      final failResult = RazorpayVerificationResult.failure(
+        error: 'Signature forged',
+      );
+      expect(failResult.success, isFalse);
+      expect(failResult.error, 'Signature forged');
+      expect(failResult.payment, isNull);
+    });
+
+    test('Payment netRetainedAmount and refundedAmount handle partial and full refunds', () {
+      final verifiedWithPartialRefund = Payment(
+        id: 'p-partial',
+        transactionRef: 'pay_PARTIAL1',
+        studentId: 's-1',
+        studentName: 'Amit',
+        amount: 20000.0,
+        paymentMethod: 'razorpay',
+        status: 'verified',
+        refundStatus: 'completed',
+        paymentDate: DateTime.now(),
+        rawProviderPayload: {
+          'total_refunded_amount': 5000.0,
+          'is_partial_refund': true,
+        },
+      );
+
+      expect(verifiedWithPartialRefund.isVerified, isTrue);
+      expect(verifiedWithPartialRefund.refundedAmount, 5000.0);
+      expect(verifiedWithPartialRefund.netRetainedAmount, 15000.0);
+
+      final fullyRefunded = Payment(
+        id: 'p-full',
+        transactionRef: 'pay_FULL1',
+        studentId: 's-1',
+        studentName: 'Amit',
+        amount: 10000.0,
+        paymentMethod: 'razorpay',
+        status: 'refunded',
+        refundStatus: 'completed',
+        paymentDate: DateTime.now(),
+      );
+
+      expect(fullyRefunded.isRefunded, isTrue);
+      expect(fullyRefunded.refundedAmount, 10000.0);
+      expect(fullyRefunded.netRetainedAmount, 0.0);
+    });
+
+    test('StudentFeeProfile accurately restores balance when partial refund occurs', () {
+      final courses = [
+        const EnrolledCourseFeeInfo(
+          courseId: 'c-1',
+          title: 'Fellowship',
+          fee: 50000.0,
+          categoryName: 'General',
+        ),
+      ];
+
+      final payments = [
+        Payment(
+          id: 'p-1',
+          transactionRef: 'pay_001',
+          studentId: 's-1',
+          studentName: 'Amit',
+          amount: 50000.0,
+          paymentMethod: 'razorpay',
+          status: 'verified',
+          refundStatus: 'completed',
+          paymentDate: DateTime.now(),
+          rawProviderPayload: {
+            'total_refunded_amount': 15000.0,
+            'is_partial_refund': true,
+          },
+        ),
+      ];
+
+      final profile = StudentFeeProfile.calculate(
+        studentId: 's-1',
+        studentCode: 'STU-001',
+        studentName: 'Amit',
+        email: 'amit@test.com',
+        phone: '9876543210',
+        enrolledCourses: courses,
+        payments: payments,
+      );
+
+      // Student paid 50,000, was refunded 15,000 -> net paid is 35,000
+      expect(profile.totalCourseFee, 50000.0);
+      expect(profile.totalPaid, 35000.0);
+      expect(profile.outstandingBalance, 15000.0);
+      expect(profile.derivedStatus, 'partially_refunded');
     });
   });
 }
