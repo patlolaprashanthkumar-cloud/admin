@@ -3,7 +3,7 @@ project_id = "iiecm-admin"
 
 [api]
 enabled = true
-port = 54321
+port = 54324
 schemas = ["public", "storage", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
@@ -22,7 +22,6 @@ enable_signup = false
 
 [edge_runtime]
 enabled = true
-port = 54324
 
 [storage]
 enabled = true

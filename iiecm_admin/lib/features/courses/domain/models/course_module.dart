@@ -23,6 +23,9 @@ class CourseModule {
       lessons.fold<int>(0, (sum, lesson) => sum + lesson.durationMinutes);
 
   int get videoCount => lessons.where((l) => l.isVideo).length;
+  int get pdfCount => lessons.where((l) => l.isPdf).length;
+  int get imageCount => lessons.where((l) => l.isImage).length;
+  int get fileCount => lessons.where((l) => l.isFile).length;
 
   factory CourseModule.fromJson(
     Map<String, dynamic> json, {

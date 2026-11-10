@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -49,7 +50,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
   late TextEditingController _contentUrlController;
   late TextEditingController _orderController;
 
-  late String _type;
+  late String _type; // 'video', 'pdf', 'image', 'file', 'reading', 'quiz', 'assignment'
   String? _previewThumbnailUrl;
   String? _previewVideoId;
   bool _isSubmitting = false;
@@ -62,7 +63,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
     final l = widget.existingLesson;
     _titleController = TextEditingController(text: l?.title ?? '');
     _durationController = TextEditingController(
-      text: l != null ? l.durationMinutes.toString() : '30',
+      text: l != null ? l.durationMinutes.toString() : '15',
     );
     _contentUrlController = TextEditingController(text: l?.contentUrl ?? '');
     _orderController = TextEditingController(
@@ -72,13 +73,13 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
     );
     _type = l?.type ?? 'video';
 
-    _contentUrlController.addListener(_updateVideoPreview);
-    _updateVideoPreview();
+    _contentUrlController.addListener(_onUrlChanged);
+    _updatePreview();
   }
 
   @override
   void dispose() {
-    _contentUrlController.removeListener(_updateVideoPreview);
+    _contentUrlController.removeListener(_onUrlChanged);
     _titleController.dispose();
     _durationController.dispose();
     _contentUrlController.dispose();
@@ -86,16 +87,88 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
     super.dispose();
   }
 
-  void _updateVideoPreview() {
+  void _onUrlChanged() {
+    final url = _contentUrlController.text.trim();
+    if (url.isNotEmpty) {
+      _autoDetectType(url);
+    }
+    _updatePreview();
+  }
+
+  void _autoDetectType(String url) {
+    final lower = url.toLowerCase();
+
+    // YouTube URLs -> Video
+    if (YouTubeHelper.isValidYouTubeUrl(url)) {
+      if (_type != 'video') {
+        setState(() => _type = 'video');
+      }
+      return;
+    }
+
+    // Direct Video Extensions -> Video
+    if (lower.endsWith('.mp4') ||
+        lower.endsWith('.webm') ||
+        lower.endsWith('.mov') ||
+        lower.endsWith('.mkv') ||
+        lower.endsWith('.m3u8')) {
+      if (_type != 'video') {
+        setState(() => _type = 'video');
+      }
+      return;
+    }
+
+    // PDF Documents -> PDF
+    if (lower.endsWith('.pdf')) {
+      if (_type != 'pdf') {
+        setState(() => _type = 'pdf');
+      }
+      return;
+    }
+
+    // Image Extensions -> Image
+    if (lower.endsWith('.png') ||
+        lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.webp') ||
+        lower.endsWith('.gif') ||
+        lower.endsWith('.svg')) {
+      if (_type != 'image') {
+        setState(() => _type = 'image');
+      }
+      return;
+    }
+
+    // Common Files/Archives/Office Documents -> File
+    if (lower.endsWith('.zip') ||
+        lower.endsWith('.rar') ||
+        lower.endsWith('.doc') ||
+        lower.endsWith('.docx') ||
+        lower.endsWith('.ppt') ||
+        lower.endsWith('.pptx') ||
+        lower.endsWith('.xls') ||
+        lower.endsWith('.xlsx') ||
+        lower.endsWith('.csv') ||
+        lower.endsWith('.tar') ||
+        lower.endsWith('.gz')) {
+      if (_type != 'file') {
+        setState(() => _type = 'file');
+      }
+      return;
+    }
+  }
+
+  void _updatePreview() {
+    final url = _contentUrlController.text.trim();
+
     if (_type == 'video') {
-      final url = _contentUrlController.text.trim();
       if (YouTubeHelper.isValidYouTubeUrl(url)) {
         setState(() {
           _previewVideoId = YouTubeHelper.extractVideoId(url);
           _previewThumbnailUrl = YouTubeHelper.getThumbnailUrl(url);
         });
       } else {
-        if (_previewThumbnailUrl != null) {
+        if (_previewThumbnailUrl != null || _previewVideoId != null) {
           setState(() {
             _previewThumbnailUrl = null;
             _previewVideoId = null;
@@ -103,13 +176,42 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
         }
       }
     } else {
-      if (_previewThumbnailUrl != null) {
+      if (_previewThumbnailUrl != null || _previewVideoId != null) {
         setState(() {
           _previewThumbnailUrl = null;
           _previewVideoId = null;
         });
       }
     }
+  }
+
+  Future<void> _pasteFromClipboard() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text?.trim();
+    if (text != null && text.isNotEmpty) {
+      _contentUrlController.text = text;
+      _onUrlChanged();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pasted link from clipboard'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    }
+  }
+
+  String? _extractFileName(String url) {
+    if (url.trim().isEmpty) return null;
+    try {
+      final uri = Uri.parse(url.trim());
+      final segments = uri.pathSegments;
+      if (segments.isNotEmpty && segments.last.isNotEmpty) {
+        return Uri.decodeComponent(segments.last);
+      }
+    } catch (_) {}
+    return null;
   }
 
   Future<void> _handleSubmit() async {
@@ -145,7 +247,9 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isEditing ? 'Lesson updated' : 'Lesson added to module',
+            isEditing
+                ? '${lesson.typeDisplayLabel} updated'
+                : '${lesson.typeDisplayLabel} added to module',
           ),
           backgroundColor: AppColors.primaryForest,
         ),
@@ -164,6 +268,48 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
     }
   }
 
+  IconData _getTypeIcon(String type) {
+    switch (type.toLowerCase()) {
+      case 'video':
+        return Icons.play_circle_fill_rounded;
+      case 'pdf':
+        return Icons.picture_as_pdf_rounded;
+      case 'image':
+        return Icons.image_rounded;
+      case 'file':
+        return Icons.insert_drive_file_rounded;
+      case 'reading':
+        return Icons.menu_book_rounded;
+      case 'quiz':
+        return Icons.quiz_outlined;
+      case 'assignment':
+        return Icons.assignment_outlined;
+      default:
+        return Icons.attachment_rounded;
+    }
+  }
+
+  Color _getTypeColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'video':
+        return AppColors.primaryForest;
+      case 'pdf':
+        return const Color(0xFFDC2626);
+      case 'image':
+        return const Color(0xFF7C3AED);
+      case 'file':
+        return const Color(0xFF2563EB);
+      case 'reading':
+        return const Color(0xFFD97706);
+      case 'quiz':
+        return const Color(0xFF0D9488);
+      case 'assignment':
+        return AppColors.accentTerracotta;
+      default:
+        return AppColors.primaryForest;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -172,7 +318,11 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
     final bottomInset = mediaQuery.viewInsets.bottom;
     final availableHeight = mediaQuery.size.height - mediaQuery.padding.top;
     final maxSheetHeight = availableHeight - bottomInset;
-    final effectiveHeight = maxSheetHeight * 0.85;
+    final effectiveHeight = maxSheetHeight * 0.90;
+
+    final typeColor = _getTypeColor(_type);
+    final contentUrl = _contentUrlController.text.trim();
+    final fileName = _extractFileName(contentUrl);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -180,8 +330,8 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
         height: effectiveHeight.clamp(
-          260.0,
-          maxSheetHeight > 260.0 ? maxSheetHeight : availableHeight,
+          320.0,
+          maxSheetHeight > 320.0 ? maxSheetHeight : availableHeight,
         ),
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
@@ -190,8 +340,8 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
-              blurRadius: 20,
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 24,
               offset: const Offset(0, -4),
             ),
           ],
@@ -202,7 +352,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Container(
-                width: 40,
+                width: 44,
                 height: 4,
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.darkBorder : AppColors.divider,
@@ -213,18 +363,18 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
 
             // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryForest.withValues(alpha: 0.1),
+                      color: typeColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(
-                      Icons.play_lesson_rounded,
-                      color: AppColors.primaryForest,
+                    child: Icon(
+                      _getTypeIcon(_type),
+                      color: typeColor,
                       size: 22,
                     ),
                   ),
@@ -234,7 +384,9 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isEditing ? 'Edit Lesson' : 'Add Lesson to Module',
+                          isEditing
+                              ? 'Edit Curriculum Item'
+                              : 'Add Curriculum Item to Module',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: isDark
@@ -243,7 +395,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                           ),
                         ),
                         Text(
-                          'Configure video, auto-extracted thumbnail & content',
+                          'Accepts videos, PDFs, images & every learning file',
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark
@@ -264,7 +416,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
 
             const Divider(height: 1),
 
-            // Form
+            // Form Content
             Expanded(
               child: Form(
                 key: _formKey,
@@ -274,13 +426,47 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                     vertical: 16,
                   ),
                   children: [
+                    // Quick Type Selector Chips
+                    Text(
+                      'Content Type',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildTypeChip('video', 'Video', Icons.videocam_rounded),
+                          const SizedBox(width: 8),
+                          _buildTypeChip('pdf', 'PDF Doc', Icons.picture_as_pdf_rounded),
+                          const SizedBox(width: 8),
+                          _buildTypeChip('image', 'Image', Icons.image_rounded),
+                          const SizedBox(width: 8),
+                          _buildTypeChip('file', 'File', Icons.attach_file_rounded),
+                          const SizedBox(width: 8),
+                          _buildTypeChip('reading', 'Reading', Icons.menu_book_rounded),
+                          const SizedBox(width: 8),
+                          _buildTypeChip('quiz', 'Quiz', Icons.quiz_outlined),
+                          const SizedBox(width: 8),
+                          _buildTypeChip('assignment', 'Task', Icons.assignment_outlined),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
                     // Title
                     TextFormField(
                       controller: _titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Lesson Title *',
-                        hintText: 'e.g. Interpretation of Central Venous Pressure Tracings',
-                        prefixIcon: Icon(Icons.title_rounded),
+                      decoration: InputDecoration(
+                        labelText: 'Item Title *',
+                        hintText: _getTitleHintForType(_type),
+                        prefixIcon: const Icon(Icons.title_rounded),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty)
                           ? 'Please enter title'
@@ -288,24 +474,37 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Type & Duration
+                    // Detailed Type Dropdown & Duration
                     Row(
                       children: [
                         Expanded(
+                          flex: 3,
                           child: DropdownButtonFormField<String>(
-                            initialValue: _type,
+                            value: _type,
                             decoration: const InputDecoration(
-                              labelText: 'Lesson Type',
+                              labelText: 'Activity Type',
                               prefixIcon: Icon(Icons.category_outlined),
                             ),
                             items: const [
                               DropdownMenuItem(
                                 value: 'video',
-                                child: Text('Video Lecture'),
+                                child: Text('Video Lecture / Stream'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'pdf',
+                                child: Text('PDF Document / Slides'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'image',
+                                child: Text('Clinical Image / Diagram'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'file',
+                                child: Text('File Attachment (Any Type)'),
                               ),
                               DropdownMenuItem(
                                 value: 'reading',
-                                child: Text('Clinical Reading'),
+                                child: Text('Clinical Reading / Notes'),
                               ),
                               DropdownMenuItem(
                                 value: 'quiz',
@@ -313,32 +512,33 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                               ),
                               DropdownMenuItem(
                                 value: 'assignment',
-                                child: Text('Practical Task'),
+                                child: Text('Practical Assignment'),
                               ),
                             ],
                             onChanged: (val) {
                               if (val != null) {
                                 setState(() => _type = val);
-                                _updateVideoPreview();
+                                _updatePreview();
                               }
                             },
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
+                          flex: 2,
                           child: TextFormField(
                             controller: _durationController,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
-                              labelText: 'Duration (Mins) *',
+                              labelText: 'Duration (Mins)',
+                              hintText: 'e.g. 15',
                               prefixIcon: Icon(Icons.timer_outlined),
                             ),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Required';
-                              }
-                              if (int.tryParse(v) == null) {
-                                return 'Must be a number';
+                              if (v != null && v.trim().isNotEmpty) {
+                                if (int.tryParse(v.trim()) == null) {
+                                  return 'Must be integer';
+                                }
                               }
                               return null;
                             },
@@ -364,131 +564,389 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Content URL / Video Link
+                    // Content URL / File Link
                     TextFormField(
                       controller: _contentUrlController,
                       keyboardType: TextInputType.url,
                       decoration: InputDecoration(
-                        labelText: _type == 'video'
-                            ? 'YouTube Video URL *'
-                            : 'Content URL / Resource Link',
-                        hintText: _type == 'video'
-                            ? 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-                            : 'https://...',
-                        prefixIcon: Icon(
-                          _type == 'video'
-                              ? Icons.smart_display_rounded
-                              : Icons.link_rounded,
+                        labelText: _getUrlLabelForType(_type),
+                        hintText: _getUrlHintForType(_type),
+                        prefixIcon: Icon(_getTypeIcon(_type)),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.content_paste_rounded),
+                          tooltip: 'Paste link from clipboard',
+                          onPressed: _pasteFromClipboard,
                         ),
                       ),
                       validator: (v) {
-                        if (_type == 'video' &&
-                            (v == null || v.trim().isEmpty)) {
-                          return 'Video lessons require a URL';
+                        if (['video', 'pdf', 'image', 'file'].contains(_type)) {
+                          if (v == null || v.trim().isEmpty) {
+                            return 'Please enter a URL or file link';
+                          }
+                          final uri = Uri.tryParse(v.trim());
+                          if (uri == null || !uri.hasScheme) {
+                            return 'Please enter a valid link (e.g. https://...)';
+                          }
                         }
                         return null;
                       },
                     ),
 
-                    // Real-Time YouTube Video Thumbnail Preview
-                    if (_type == 'video') ...[
-                      const SizedBox(height: 16),
-                      if (_previewThumbnailUrl != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.forestSoft,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: AppColors.primaryForest.withValues(
-                                alpha: 0.3,
+                    // REAL-TIME PREVIEWS FOR ALL SUPPORTED FILE TYPES
+                    const SizedBox(height: 14),
+
+                    // 1. YouTube Video Preview
+                    if (_type == 'video' && _previewThumbnailUrl != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.forestSoft,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.primaryForest.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 16,
+                                  color: AppColors.primaryForest,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    'Detected YouTube Video (ID: $_previewVideoId)',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.primaryForest,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: AspectRatio(
+                                aspectRatio: 16 / 9,
+                                child: Image.network(
+                                  _previewThumbnailUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) => Container(
+                                    color: Colors.grey.shade300,
+                                    child: const Center(
+                                      child: Text(
+                                        'Thumbnail unavailable',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
+                          ],
+                        ),
+                      ),
+                    ]
+                    // 2. Direct Video File Preview (MP4, WebM, etc.)
+                    else if (_type == 'video' &&
+                        contentUrl.isNotEmpty &&
+                        _previewThumbnailUrl == null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.forestSoft,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppColors.primaryForest.withValues(alpha: 0.3),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryForest,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.play_arrow_rounded,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(
-                                    Icons.check_circle_rounded,
-                                    size: 16,
-                                    color: AppColors.primaryForest,
+                                  const Text(
+                                    'Direct Video Stream / File Link',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.primaryForest,
+                                    ),
                                   ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      'Detected YouTube Video (ID: $_previewVideoId)',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.primaryForest,
-                                      ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    fileName ?? contentUrl,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 10),
-                              ClipRRect(
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]
+                    // 3. PDF Document Preview
+                    else if (_type == 'pdf' && contentUrl.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDC2626).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFDC2626).withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFDC2626),
                                 borderRadius: BorderRadius.circular(8),
-                                child: AspectRatio(
-                                  aspectRatio: 16 / 9,
-                                  child: Image.network(
-                                    _previewThumbnailUrl!,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => Container(
-                                      color: Colors.grey.shade300,
+                              ),
+                              child: const Icon(
+                                Icons.picture_as_pdf_rounded,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'PDF Document Attached',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFFDC2626),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    fileName ?? contentUrl,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]
+                    // 4. Clinical Image Preview
+                    else if (_type == 'image' && contentUrl.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF7C3AED).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF7C3AED).withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.image_rounded,
+                                  size: 16,
+                                  color: Color(0xFF7C3AED),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    'Image Preview (${fileName ?? 'Direct Image'})',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF7C3AED),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: AspectRatio(
+                                aspectRatio: 16 / 9,
+                                child: Image.network(
+                                  contentUrl,
+                                  fit: BoxFit.contain,
+                                  loadingBuilder: (ctx, child, progress) {
+                                    if (progress == null) return child;
+                                    return Container(
+                                      color: Colors.grey.shade200,
                                       child: const Center(
-                                        child: Text(
-                                          'Thumbnail unavailable',
-                                          style: TextStyle(fontSize: 12),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
                                         ),
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (_, _, _) => Container(
+                                    color: Colors.grey.shade200,
+                                    padding: const EdgeInsets.all(12),
+                                    child: const Center(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.broken_image_rounded,
+                                            color: Colors.grey,
+                                            size: 28,
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'Image preview will display once link is reachable',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: Colors.grey,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]
+                    // 5. Generic File Preview
+                    else if (_type == 'file' && contentUrl.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2563EB).withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF2563EB).withValues(alpha: 0.3),
                           ),
                         ),
-                      ] else ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? AppColors.darkSurface
-                                : AppColors.warmCream,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isDark
-                                  ? AppColors.darkBorder
-                                  : AppColors.divider,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.info_outline_rounded,
-                                size: 16,
-                                color: AppColors.textSecondary,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2563EB),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Paste a YouTube URL (watch, youtu.be, embed, shorts) to automatically extract high-resolution thumbnails.',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: AppColors.textSecondary,
+                              child: const Icon(
+                                Icons.attach_file_rounded,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'File Attachment Linked',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF2563EB),
+                                    ),
                                   ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    fileName ?? contentUrl,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]
+                    // Informational Guide Banner
+                    else ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkSurface
+                              : AppColors.warmCream,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.divider,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.info_outline_rounded,
+                              size: 16,
+                              color: AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _getInfoTextForType(_type),
+                                style: const TextStyle(
+                                  fontSize: 11.5,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ],
 
                     const SizedBox(height: 24),
@@ -525,7 +983,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       child: ElevatedButton(
                         onPressed: _isSubmitting ? null : _handleSubmit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryForest,
+                          backgroundColor: typeColor,
                           foregroundColor: Colors.white,
                         ),
                         child: _isSubmitting
@@ -539,7 +997,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                   ),
                                 ),
                               )
-                            : Text(isEditing ? 'Save Changes' : 'Add Lesson'),
+                            : Text(isEditing ? 'Save Changes' : 'Add to Module'),
                       ),
                     ),
                   ],
@@ -550,5 +1008,125 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
         ),
       ),
     );
+  }
+
+  Widget _buildTypeChip(String typeKey, String label, IconData icon) {
+    final isSelected = _type == typeKey;
+    final color = _getTypeColor(typeKey);
+
+    return InkWell(
+      onTap: () {
+        setState(() => _type = typeKey);
+        _updatePreview();
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? color : color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? color : color.withValues(alpha: 0.25),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isSelected ? Colors.white : color,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: isSelected ? Colors.white : color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getTitleHintForType(String type) {
+    switch (type) {
+      case 'video':
+        return 'e.g. Ultrasound-Guided Vascular Access & Interpretation';
+      case 'pdf':
+        return 'e.g. Advanced Cardiac Life Support (ACLS) Reference Protocol';
+      case 'image':
+        return 'e.g. 12-Lead ECG STEMI Criteria & Localization Diagram';
+      case 'file':
+        return 'e.g. Ventilator Management Worksheet & Dataset';
+      case 'reading':
+        return 'e.g. Trauma Resuscitation Protocol - 2026 Guidelines';
+      case 'quiz':
+        return 'e.g. Rapid Sequence Intubation Checkpoint Assessment';
+      case 'assignment':
+        return 'e.g. Cricothyroidotomy Simulation Case Report';
+      default:
+        return 'e.g. Clinical Curriculum Material';
+    }
+  }
+
+  String _getUrlLabelForType(String type) {
+    switch (type) {
+      case 'video':
+        return 'Video URL (YouTube or Direct Video Stream) *';
+      case 'pdf':
+        return 'PDF Document URL / Supabase Link *';
+      case 'image':
+        return 'Image URL (PNG, JPG, WebP, SVG) *';
+      case 'file':
+        return 'File URL / Download Link (ZIP, DOC, Any) *';
+      case 'reading':
+        return 'Reading URL / Clinical Article Link';
+      case 'quiz':
+        return 'Quiz URL / Assessment Link';
+      case 'assignment':
+        return 'Assignment URL / Resource Link';
+      default:
+        return 'Content URL / Resource Link *';
+    }
+  }
+
+  String _getUrlHintForType(String type) {
+    switch (type) {
+      case 'video':
+        return 'https://www.youtube.com/watch?... or https://domain.com/video.mp4';
+      case 'pdf':
+        return 'https://domain.com/handbook.pdf or storage link';
+      case 'image':
+        return 'https://domain.com/diagram.png or clinical image URL';
+      case 'file':
+        return 'https://domain.com/attachment.zip or document link';
+      default:
+        return 'https://...';
+    }
+  }
+
+  String _getInfoTextForType(String type) {
+    switch (type) {
+      case 'video':
+        return 'Paste a YouTube video link (watch, youtu.be, shorts) or direct MP4 stream URL. Thumbnails are automatically retrieved.';
+      case 'pdf':
+        return 'Paste any public PDF URL or Supabase storage document link. Trainees can view or download the PDF.';
+      case 'image':
+        return 'Paste any image URL (PNG, JPG, WebP, SVG). Real-time image previews and zoom are supported.';
+      case 'file':
+        return 'Paste any downloadable file attachment URL (ZIP, DOCX, PPTX, XLSX, etc.).';
+      case 'reading':
+        return 'Enter a link to a clinical guide, journal article, or reading reference.';
+      case 'quiz':
+        return 'Enter an assessment or interactive quiz URL.';
+      case 'assignment':
+        return 'Enter a practical clinical assignment or case submission resource URL.';
+      default:
+        return 'Paste any valid content URL.';
+    }
   }
 }

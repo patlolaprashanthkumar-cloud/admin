@@ -442,12 +442,12 @@ class _CourseCard extends ConsumerWidget {
                     child: Row(
                       children: [
                         Icon(
-                          Icons.video_library_rounded,
+                          Icons.auto_stories_rounded,
                           size: 18,
                           color: AppColors.primaryForest,
                         ),
                         SizedBox(width: 8),
-                        Text('Curriculum & Videos'),
+                        Text('Curriculum & Content'),
                       ],
                     ),
                   ),

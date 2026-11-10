@@ -75,51 +75,60 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     // Institutional Emblem & Brand Mark
                     Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 11,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              AppColors.forestDark,
-                              AppColors.primaryForest,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.radiusMedium,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primaryForest.withValues(
-                                alpha: 0.25,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        child: Image.asset(
+                          'assets/images/app_logo.png',
+                          width: 88,
+                          height: 88,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 11,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  AppColors.forestDark,
+                                  AppColors.primaryForest,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.school_rounded,
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'IIECM',
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 2.2,
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.radiusMedium,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryForest.withValues(
+                                    alpha: 0.25,
+                                  ),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.school_rounded,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'IIECM',
+                                  style: theme.textTheme.headlineSmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 2.2,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
