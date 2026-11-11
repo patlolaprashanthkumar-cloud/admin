@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#FFFDF7] text-navy-900 selection:bg-saffron-100 selection:text-forest-900;
+  }
+}
+
