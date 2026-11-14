@@ -16,24 +16,24 @@ final notificationsRepositoryProvider =
 final notificationsNotifierProvider =
     StateNotifierProvider<NotificationsNotifier, NotificationsState>((ref) {
   final repository = ref.watch(notificationsRepositoryProvider);
-  return NotificationsNotifier(repository, ref);
+  final authState = ref.watch(authNotifierProvider);
+  return NotificationsNotifier(repository, authState.student?.userId);
 });
 
 class NotificationsNotifier extends StateNotifier<NotificationsState> {
   final NotificationsRepository _repository;
-  final Ref _ref;
+  final String? _userId;
 
-  NotificationsNotifier(this._repository, this._ref)
+  NotificationsNotifier(this._repository, this._userId)
       : super(const NotificationsState()) {
-    loadNotifications();
+    if (_userId != null && _userId.isNotEmpty) {
+      loadNotifications();
+    }
   }
 
   /// Fetches real notifications scoped to authenticated student session
   Future<void> loadNotifications({bool isRefresh = false}) async {
-    final authState = _ref.read(authNotifierProvider);
-    final userId = authState.student?.userId;
-
-    if (userId == null || userId.isEmpty) {
+    if (_userId == null || _userId.isEmpty) {
       state = state.copyWith(
         status: NotificationsStatus.loaded,
         notifications: [],
@@ -47,7 +47,7 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
 
     try {
       final notifications =
-          await _repository.getStudentNotifications(userId: userId);
+          await _repository.getStudentNotifications(userId: _userId);
 
       state = state.copyWith(
         status: NotificationsStatus.loaded,
@@ -72,13 +72,10 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
     final updatedReadIds = Set<String>.from(state.localReadIds)..add(notification.id);
     state = state.copyWith(localReadIds: updatedReadIds);
 
-    final authState = _ref.read(authNotifierProvider);
-    final userId = authState.student?.userId;
-
-    if (userId != null && !notification.isBroadcast) {
+    if (_userId != null && !notification.isBroadcast) {
       await _repository.markAsRead(
         notificationId: notification.id,
-        userId: userId,
+        userId: _userId,
       );
     }
   }
@@ -90,12 +87,8 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
       localReadIds: {...state.localReadIds, ...allIds},
     );
 
-    final authState = _ref.read(authNotifierProvider);
-    final userId = authState.student?.userId;
-
-    if (userId != null && userId.isNotEmpty) {
-      await _repository.markAllAsRead(userId: userId);
+    if (_userId != null && _userId.isNotEmpty) {
+      await _repository.markAllAsRead(userId: _userId);
     }
   }
 }
-

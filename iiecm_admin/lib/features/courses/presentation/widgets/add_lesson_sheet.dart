@@ -419,569 +419,586 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
 
             // Form Content
             Expanded(
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  children: [
-                    // Quick Type Selector Chips
-                    Text(
-                      'Content Type',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
-                      ),
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context)
+                    .copyWith(scrollbars: false),
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
                     ),
-                    const SizedBox(height: 8),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
+                    children: [
+                      // Quick Type Selector Chips
+                      Text(
+                        'Content Type',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildTypeChip(
+                              'video',
+                              'Video',
+                              Icons.videocam_rounded,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildTypeChip(
+                              'pdf',
+                              'PDF Doc',
+                              Icons.picture_as_pdf_rounded,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildTypeChip(
+                              'image',
+                              'Image',
+                              Icons.image_rounded,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildTypeChip(
+                              'file',
+                              'File',
+                              Icons.attach_file_rounded,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildTypeChip(
+                              'reading',
+                              'Reading',
+                              Icons.menu_book_rounded,
+                            ),
+                            const SizedBox(width: 8),
+                            _buildTypeChip('quiz', 'Quiz', Icons.quiz_outlined),
+                            const SizedBox(width: 8),
+                            _buildTypeChip(
+                              'assignment',
+                              'Task',
+                              Icons.assignment_outlined,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Title
+                      TextFormField(
+                        controller: _titleController,
+                        decoration: InputDecoration(
+                          labelText: 'Item Title *',
+                          hintText: _getTitleHintForType(_type),
+                          prefixIcon: const Icon(Icons.title_rounded),
+                        ),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Please enter title'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Detailed Type Dropdown & Duration
+                      Row(
                         children: [
-                          _buildTypeChip(
-                            'video',
-                            'Video',
-                            Icons.videocam_rounded,
+                          Expanded(
+                            flex: 3,
+                            child: DropdownButtonFormField<String>(
+                              initialValue: _type,
+                              decoration: const InputDecoration(
+                                labelText: 'Activity Type',
+                                prefixIcon: Icon(Icons.category_outlined),
+                              ),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: 'video',
+                                  child: Text('Video Lecture / Stream'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'pdf',
+                                  child: Text('PDF Document / Slides'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'image',
+                                  child: Text('Clinical Image / Diagram'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'file',
+                                  child: Text('File Attachment (Any Type)'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'reading',
+                                  child: Text('Clinical Reading / Notes'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'quiz',
+                                  child: Text('Checkpoint Quiz'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'assignment',
+                                  child: Text('Practical Assignment'),
+                                ),
+                              ],
+                              onChanged: (val) {
+                                if (val != null) {
+                                  setState(() => _type = val);
+                                  _updatePreview();
+                                }
+                              },
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                          _buildTypeChip(
-                            'pdf',
-                            'PDF Doc',
-                            Icons.picture_as_pdf_rounded,
-                          ),
-                          const SizedBox(width: 8),
-                          _buildTypeChip('image', 'Image', Icons.image_rounded),
-                          const SizedBox(width: 8),
-                          _buildTypeChip(
-                            'file',
-                            'File',
-                            Icons.attach_file_rounded,
-                          ),
-                          const SizedBox(width: 8),
-                          _buildTypeChip(
-                            'reading',
-                            'Reading',
-                            Icons.menu_book_rounded,
-                          ),
-                          const SizedBox(width: 8),
-                          _buildTypeChip('quiz', 'Quiz', Icons.quiz_outlined),
-                          const SizedBox(width: 8),
-                          _buildTypeChip(
-                            'assignment',
-                            'Task',
-                            Icons.assignment_outlined,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller: _durationController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Duration (Mins)',
+                                hintText: 'e.g. 15',
+                                prefixIcon: Icon(Icons.timer_outlined),
+                              ),
+                              validator: (v) {
+                                if (v != null && v.trim().isNotEmpty) {
+                                  if (int.tryParse(v.trim()) == null) {
+                                    return 'Must be integer';
+                                  }
+                                }
+                                return null;
+                              },
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Title
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        labelText: 'Item Title *',
-                        hintText: _getTitleHintForType(_type),
-                        prefixIcon: const Icon(Icons.title_rounded),
+                      // Display Order
+                      TextFormField(
+                        controller: _orderController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Display Order *',
+                          prefixIcon: Icon(Icons.format_list_numbered_rounded),
+                        ),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) {
+                            return 'Required';
+                          }
+                          if (int.tryParse(v) == null) {
+                            return 'Must be a number';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Please enter title'
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Detailed Type Dropdown & Duration
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _type,
-                            decoration: const InputDecoration(
-                              labelText: 'Activity Type',
-                              prefixIcon: Icon(Icons.category_outlined),
-                            ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: 'video',
-                                child: Text('Video Lecture / Stream'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'pdf',
-                                child: Text('PDF Document / Slides'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'image',
-                                child: Text('Clinical Image / Diagram'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'file',
-                                child: Text('File Attachment (Any Type)'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'reading',
-                                child: Text('Clinical Reading / Notes'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'quiz',
-                                child: Text('Checkpoint Quiz'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'assignment',
-                                child: Text('Practical Assignment'),
-                              ),
-                            ],
-                            onChanged: (val) {
-                              if (val != null) {
-                                setState(() => _type = val);
-                                _updatePreview();
-                              }
-                            },
+                      // Content URL / File Link
+                      TextFormField(
+                        controller: _contentUrlController,
+                        keyboardType: TextInputType.url,
+                        decoration: InputDecoration(
+                          labelText: _getUrlLabelForType(_type),
+                          hintText: _getUrlHintForType(_type),
+                          prefixIcon: Icon(_getTypeIcon(_type)),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.content_paste_rounded),
+                            tooltip: 'Paste link from clipboard',
+                            onPressed: _pasteFromClipboard,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            controller: _durationController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Duration (Mins)',
-                              hintText: 'e.g. 15',
-                              prefixIcon: Icon(Icons.timer_outlined),
+                        validator: (v) {
+                          if ([
+                            'video',
+                            'pdf',
+                            'image',
+                            'file',
+                          ].contains(_type)) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Please enter a URL or file link';
+                            }
+                            final uri = Uri.tryParse(v.trim());
+                            if (uri == null || !uri.hasScheme) {
+                              return 'Please enter a valid link (e.g. https://...)';
+                            }
+                          }
+                          return null;
+                        },
+                      ),
+
+                      // REAL-TIME PREVIEWS FOR ALL SUPPORTED FILE TYPES
+                      const SizedBox(height: 14),
+
+                      // 1. YouTube Video Preview
+                      if (_type == 'video' && _previewThumbnailUrl != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.forestSoft,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: AppColors.primaryForest.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
-                            validator: (v) {
-                              if (v != null && v.trim().isNotEmpty) {
-                                if (int.tryParse(v.trim()) == null) {
-                                  return 'Must be integer';
-                                }
-                              }
-                              return null;
-                            },
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle_rounded,
+                                    size: 16,
+                                    color: AppColors.primaryForest,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      'Detected YouTube Video (ID: $_previewVideoId)',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.primaryForest,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: AspectRatio(
+                                  aspectRatio: 16 / 9,
+                                  child: Image.network(
+                                    _previewThumbnailUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => Container(
+                                      color: Colors.grey.shade300,
+                                      child: const Center(
+                                        child: Text(
+                                          'Thumbnail unavailable',
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]
+                      // 2. Direct Video File Preview (MP4, WebM, etc.)
+                      else if (_type == 'video' &&
+                          contentUrl.isNotEmpty &&
+                          _previewThumbnailUrl == null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.forestSoft,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: AppColors.primaryForest.withValues(
+                                alpha: 0.3,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryForest,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.play_arrow_rounded,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Direct Video Stream / File Link',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.primaryForest,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      fileName ?? contentUrl,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]
+                      // 3. PDF Document Preview
+                      else if (_type == 'pdf' && contentUrl.isNotEmpty) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDC2626)
+                                .withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: const Color(0xFFDC2626)
+                                  .withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDC2626),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.picture_as_pdf_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'PDF Document Attached',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFFDC2626),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      fileName ?? contentUrl,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]
+                      // 4. Clinical Image Preview
+                      else if (_type == 'image' && contentUrl.isNotEmpty) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF7C3AED)
+                                .withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: const Color(0xFF7C3AED)
+                                  .withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.image_rounded,
+                                    size: 16,
+                                    color: Color(0xFF7C3AED),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      'Image Preview (${fileName ?? 'Direct Image'})',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF7C3AED),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: AspectRatio(
+                                  aspectRatio: 16 / 9,
+                                  child: Image.network(
+                                    contentUrl,
+                                    fit: BoxFit.contain,
+                                    loadingBuilder: (ctx, child, progress) {
+                                      if (progress == null) return child;
+                                      return Container(
+                                        color: Colors.grey.shade200,
+                                        child: const Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder: (_, _, _) => Container(
+                                      color: Colors.grey.shade200,
+                                      padding: const EdgeInsets.all(12),
+                                      child: const Center(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.broken_image_rounded,
+                                              color: Colors.grey,
+                                              size: 28,
+                                            ),
+                                            SizedBox(height: 4),
+                                            Text(
+                                              'Image preview will display once link is reachable',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]
+                      // 5. Generic File Preview
+                      else if (_type == 'file' && contentUrl.isNotEmpty) ...[
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2563EB)
+                                .withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: const Color(0xFF2563EB)
+                                  .withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF2563EB),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.attach_file_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'File Attachment Linked',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF2563EB),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      fileName ?? contentUrl,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ]
+                      // Informational Guide Banner
+                      else ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkSurface
+                                : AppColors.warmCream,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.divider,
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(
+                                Icons.info_outline_rounded,
+                                size: 16,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _getInfoTextForType(_type),
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 16),
 
-                    // Display Order
-                    TextFormField(
-                      controller: _orderController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Display Order *',
-                        prefixIcon: Icon(Icons.format_list_numbered_rounded),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
-                        if (int.tryParse(v) == null) return 'Must be a number';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Content URL / File Link
-                    TextFormField(
-                      controller: _contentUrlController,
-                      keyboardType: TextInputType.url,
-                      decoration: InputDecoration(
-                        labelText: _getUrlLabelForType(_type),
-                        hintText: _getUrlHintForType(_type),
-                        prefixIcon: Icon(_getTypeIcon(_type)),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.content_paste_rounded),
-                          tooltip: 'Paste link from clipboard',
-                          onPressed: _pasteFromClipboard,
-                        ),
-                      ),
-                      validator: (v) {
-                        if (['video', 'pdf', 'image', 'file'].contains(_type)) {
-                          if (v == null || v.trim().isEmpty) {
-                            return 'Please enter a URL or file link';
-                          }
-                          final uri = Uri.tryParse(v.trim());
-                          if (uri == null || !uri.hasScheme) {
-                            return 'Please enter a valid link (e.g. https://...)';
-                          }
-                        }
-                        return null;
-                      },
-                    ),
-
-                    // REAL-TIME PREVIEWS FOR ALL SUPPORTED FILE TYPES
-                    const SizedBox(height: 14),
-
-                    // 1. YouTube Video Preview
-                    if (_type == 'video' && _previewThumbnailUrl != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.forestSoft,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: AppColors.primaryForest.withValues(
-                              alpha: 0.3,
-                            ),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.check_circle_rounded,
-                                  size: 16,
-                                  color: AppColors.primaryForest,
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    'Detected YouTube Video (ID: $_previewVideoId)',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.primaryForest,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: AspectRatio(
-                                aspectRatio: 16 / 9,
-                                child: Image.network(
-                                  _previewThumbnailUrl!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => Container(
-                                    color: Colors.grey.shade300,
-                                    child: const Center(
-                                      child: Text(
-                                        'Thumbnail unavailable',
-                                        style: TextStyle(fontSize: 12),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]
-                    // 2. Direct Video File Preview (MP4, WebM, etc.)
-                    else if (_type == 'video' &&
-                        contentUrl.isNotEmpty &&
-                        _previewThumbnailUrl == null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.forestSoft,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: AppColors.primaryForest.withValues(
-                              alpha: 0.3,
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryForest,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.play_arrow_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Direct Video Stream / File Link',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.primaryForest,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    fileName ?? contentUrl,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]
-                    // 3. PDF Document Preview
-                    else if (_type == 'pdf' && contentUrl.isNotEmpty) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDC2626)
-                              .withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFFDC2626)
-                                .withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFDC2626),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.picture_as_pdf_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'PDF Document Attached',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFFDC2626),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    fileName ?? contentUrl,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]
-                    // 4. Clinical Image Preview
-                    else if (_type == 'image' && contentUrl.isNotEmpty) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF7C3AED)
-                              .withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFF7C3AED)
-                                .withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.image_rounded,
-                                  size: 16,
-                                  color: Color(0xFF7C3AED),
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    'Image Preview (${fileName ?? 'Direct Image'})',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF7C3AED),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: AspectRatio(
-                                aspectRatio: 16 / 9,
-                                child: Image.network(
-                                  contentUrl,
-                                  fit: BoxFit.contain,
-                                  loadingBuilder: (ctx, child, progress) {
-                                    if (progress == null) return child;
-                                    return Container(
-                                      color: Colors.grey.shade200,
-                                      child: const Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  errorBuilder: (_, _, _) => Container(
-                                    color: Colors.grey.shade200,
-                                    padding: const EdgeInsets.all(12),
-                                    child: const Center(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.broken_image_rounded,
-                                            color: Colors.grey,
-                                            size: 28,
-                                          ),
-                                          SizedBox(height: 4),
-                                          Text(
-                                            'Image preview will display once link is reachable',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.grey,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]
-                    // 5. Generic File Preview
-                    else if (_type == 'file' && contentUrl.isNotEmpty) ...[
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF2563EB)
-                              .withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFF2563EB)
-                                .withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF2563EB),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.attach_file_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'File Attachment Linked',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF2563EB),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    fileName ?? contentUrl,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ]
-                    // Informational Guide Banner
-                    else ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? AppColors.darkSurface
-                              : AppColors.warmCream,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isDark
-                                ? AppColors.darkBorder
-                                : AppColors.divider,
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.info_outline_rounded,
-                              size: 16,
-                              color: AppColors.textSecondary,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _getInfoTextForType(_type),
-                                style: const TextStyle(
-                                  fontSize: 11.5,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      const SizedBox(height: 24),
                     ],
-
-                    const SizedBox(height: 24),
-                  ],
+                  ),
                 ),
               ),
             ),

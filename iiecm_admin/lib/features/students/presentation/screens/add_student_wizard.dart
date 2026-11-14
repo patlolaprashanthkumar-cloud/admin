@@ -32,9 +32,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
   final _phoneController = TextEditingController();
   final _cityController = TextEditingController();
   String _educationLevel = "Bachelor's";
-  final _qualificationController = TextEditingController(
-    text: 'Emergency Medicine',
-  );
+  final _qualificationController = TextEditingController();
 
   // Step 2: Multi-Category Selection
   final Set<String> _selectedCategoryIds = {};
@@ -132,6 +130,8 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
           ? _cityController.text.trim()
           : null,
       subscriptionPlan: 'basic',
+      learningFormat: _learningFormat,
+      preferredSlot: _preferredSlot,
     );
 
     if (mounted) {
@@ -320,7 +320,9 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                               ),
                             ),
                           ),
-                          if (_submissionError!.contains('session has expired') ||
+                          if (_submissionError!.contains(
+                                'session has expired',
+                              ) ||
                               _submissionError!.contains('sign in again')) ...[
                             const SizedBox(width: 8),
                             TextButton(
@@ -909,8 +911,9 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                     }
                   },
                   child: AppCard(
-                    backgroundColor:
-                        isSelected ? AppColors.terracottaSoft : null,
+                    backgroundColor: isSelected
+                        ? AppColors.terracottaSoft
+                        : null,
                     borderSide: BorderSide(
                       color: isSelected
                           ? AppColors.accentTerracotta
@@ -928,8 +931,8 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                           onChanged: (_) {
                             setState(() {
                               _selectedInstructorId = id;
-                              _selectedInstructorName =
-                                  ins['full_name']?.toString();
+                              _selectedInstructorName = ins['full_name']
+                                  ?.toString();
                             });
                           },
                         ),
@@ -955,8 +958,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                         ),
                         if (isSelected)
                           IconButton(
-                            tooltip:
-                                'Remove selection (or double-click card)',
+                            tooltip: 'Remove selection (or double-click card)',
                             icon: const Icon(
                               Icons.close_rounded,
                               size: 18,

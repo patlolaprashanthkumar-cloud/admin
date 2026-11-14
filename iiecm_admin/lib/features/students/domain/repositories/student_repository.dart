@@ -17,6 +17,8 @@ abstract class StudentRepository {
     required List<String> courseIds,
     String? city,
     String subscriptionPlan = 'basic',
+    String? learningFormat,
+    String? preferredSlot,
   });
   Future<Student> updateStudent(
     String id, {

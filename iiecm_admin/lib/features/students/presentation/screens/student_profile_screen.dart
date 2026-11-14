@@ -28,6 +28,19 @@ class StudentProfileScreen extends ConsumerWidget {
     }
   }
 
+  String _formatLearningFormat(String format) {
+    switch (format.trim().toLowerCase()) {
+      case 'hybrid':
+        return 'Hybrid (Virtual Lecture + Clinical Onsite)';
+      case 'live':
+        return 'Live Virtual Synchronous';
+      case 'recorded':
+        return 'Asynchronous / Recorded LMS Modules';
+      default:
+        return format.trim();
+    }
+  }
+
   void _showManageCategoriesDialog(
     BuildContext context,
     WidgetRef ref,
@@ -238,6 +251,104 @@ class StudentProfileScreen extends ConsumerWidget {
                                       fontSize: 11,
                                     ),
                                   ),
+                                  if ((student.learningFormat != null &&
+                                          student.learningFormat!
+                                              .trim()
+                                              .isNotEmpty) ||
+                                      (student.preferredSlot != null &&
+                                          student.preferredSlot!
+                                              .trim()
+                                              .isNotEmpty)) ...[
+                                    const SizedBox(height: 6),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 4,
+                                      children: [
+                                        if (student.learningFormat != null &&
+                                            student.learningFormat!
+                                                .trim()
+                                                .isNotEmpty)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.forestSoft,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              border: Border.all(
+                                                color: AppColors.primaryForest
+                                                    .withValues(alpha: 0.25),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(
+                                                  Icons.school_outlined,
+                                                  size: 13,
+                                                  color:
+                                                      AppColors.primaryForest,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  _formatLearningFormat(
+                                                    student.learningFormat!,
+                                                  ),
+                                                  style: const TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        AppColors.primaryForest,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        if (student.preferredSlot != null &&
+                                            student.preferredSlot!
+                                                .trim()
+                                                .isNotEmpty)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.info.withValues(
+                                                alpha: 0.1,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                              border: Border.all(
+                                                color: AppColors.info
+                                                    .withValues(alpha: 0.25),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(
+                                                  Icons.access_time_rounded,
+                                                  size: 13,
+                                                  color: AppColors.info,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  student.preferredSlot!.trim(),
+                                                  style: const TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.info,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),

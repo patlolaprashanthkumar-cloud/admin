@@ -71,6 +71,39 @@ void main() {
       expect(assignment.isProject, isTrue);
     });
 
+    test('correctly identifies graded assignment when score is 0 but instructor provided feedback', () {
+      final assessmentJson = {
+        'id': 'ass-zero',
+        'title': 'Clinical Resuscitation Protocol',
+        'type': 'assignment',
+        'total_marks': 100,
+        'passing_marks': 50,
+      };
+
+      final submissionJson = {
+        'id': 'sub-zero',
+        'score': 0.0,
+        'percentage': 0.0,
+        'passed': false,
+        'completed_at': '2026-03-01T10:00:00Z',
+        'answers': {
+          'feedback': 'Protocol failed safety check. Please revise and resubmit.',
+          'submission_text': 'Draft attempt...',
+        },
+      };
+
+      final assignment = StudentAssignment.fromData(
+        assessmentJson: assessmentJson,
+        submissionJson: submissionJson,
+      );
+
+      expect(assignment.isSubmitted, isTrue);
+      expect(assignment.isGraded, isTrue);
+      expect(assignment.isPassed, isFalse);
+      expect(assignment.displayStatus, 'NEEDS REVISION');
+      expect(assignment.feedback, contains('Protocol failed safety check'));
+    });
+
     test('correctly detects overdue assignment when past deadline and not submitted', () {
       final pastDate = DateTime.now().subtract(const Duration(days: 3));
       final json = {

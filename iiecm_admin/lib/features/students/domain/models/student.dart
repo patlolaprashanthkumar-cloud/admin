@@ -15,6 +15,8 @@ class Student {
   final String subscriptionPlan;
   final String subscriptionStatus;
   final String accountStatus;
+  final String? learningFormat;
+  final String? preferredSlot;
   final DateTime createdAt;
   final List<CourseCategory> assignedCategories;
   final List<String> enrolledCourseIds;
@@ -34,6 +36,8 @@ class Student {
     this.subscriptionPlan = 'basic',
     this.subscriptionStatus = 'active',
     this.accountStatus = 'active',
+    this.learningFormat,
+    this.preferredSlot,
     required this.createdAt,
     this.assignedCategories = const [],
     this.enrolledCourseIds = const [],
@@ -59,6 +63,8 @@ class Student {
       subscriptionPlan: json['subscription_plan']?.toString() ?? 'basic',
       subscriptionStatus: json['subscription_status']?.toString() ?? 'active',
       accountStatus: json['account_status']?.toString() ?? 'active',
+      learningFormat: json['learning_format']?.toString(),
+      preferredSlot: json['preferred_slot']?.toString(),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
@@ -82,6 +88,8 @@ class Student {
       'subscription_plan': subscriptionPlan,
       'subscription_status': subscriptionStatus,
       'account_status': accountStatus,
+      if (learningFormat != null) 'learning_format': learningFormat,
+      if (preferredSlot != null) 'preferred_slot': preferredSlot,
     };
   }
 }

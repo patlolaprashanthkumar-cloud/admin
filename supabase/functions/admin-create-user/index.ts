@@ -22,6 +22,13 @@ const VERIFIED_PATHS = new Set<string>([
 
 const LOCAL_DEFAULT_REDIRECT = 'http://localhost:5173/reset-password';
 
+const ALLOWED_STUDENT_LEARNING_FORMATS = new Set(['hybrid', 'live', 'recorded']);
+const ALLOWED_STUDENT_PREFERRED_SLOTS = new Set([
+  'Morning Clinical Batch (08:00 - 10:00 IST)',
+  'Evening Executive Batch (18:00 - 20:00 IST)',
+  'Weekend Intensive (Saturday & Sunday)',
+]);
+
 interface RedirectValidationResult {
   valid: boolean;
   url?: string;
@@ -308,6 +315,8 @@ interface CreateUserPayload {
   educationLevel?: string;
   qualification?: string;
   preferredCategory?: string;
+  learningFormat?: string;
+  preferredSlot?: string;
   specialization?: string;
   experienceYears?: number;
   city?: string;
@@ -413,6 +422,62 @@ serve(async (req: Request) => {
         JSON.stringify({ error: 'Forbidden: Only Super Administrators can provision administrative accounts' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Validate student-specific scheduling & cohort attributes
+    let validatedLearningFormat: string | null = null;
+    let validatedPreferredSlot: string | null = null;
+
+    if (targetRole === 'student') {
+      if (payload.learningFormat !== undefined && payload.learningFormat !== null) {
+        if (typeof payload.learningFormat !== 'string') {
+          return new Response(
+            JSON.stringify({
+              error: 'Invalid learningFormat: must be a string.',
+              field: 'learningFormat',
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        const trimmedFormat = payload.learningFormat.trim();
+        if (trimmedFormat.length > 0) {
+          if (!ALLOWED_STUDENT_LEARNING_FORMATS.has(trimmedFormat)) {
+            return new Response(
+              JSON.stringify({
+                error: `Invalid learningFormat "${trimmedFormat}". Allowed values: hybrid, live, recorded.`,
+                field: 'learningFormat',
+              }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          validatedLearningFormat = trimmedFormat;
+        }
+      }
+
+      if (payload.preferredSlot !== undefined && payload.preferredSlot !== null) {
+        if (typeof payload.preferredSlot !== 'string') {
+          return new Response(
+            JSON.stringify({
+              error: 'Invalid preferredSlot: must be a string.',
+              field: 'preferredSlot',
+            }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        const trimmedSlot = payload.preferredSlot.trim();
+        if (trimmedSlot.length > 0) {
+          if (!ALLOWED_STUDENT_PREFERRED_SLOTS.has(trimmedSlot)) {
+            return new Response(
+              JSON.stringify({
+                error: `Invalid preferredSlot "${trimmedSlot}". Allowed values: Morning Clinical Batch (08:00 - 10:00 IST), Evening Executive Batch (18:00 - 20:00 IST), Weekend Intensive (Saturday & Sunday).`,
+                field: 'preferredSlot',
+              }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          validatedPreferredSlot = trimmedSlot;
+        }
+      }
     }
 
     // 4. Strict Server-Side Redirect URL Validation
@@ -658,14 +723,24 @@ serve(async (req: Request) => {
         }
 
         // Atomically link profile_id to existing student record
+        const studentUpdatePayload: Record<string, unknown> = {
+          profile_id: authUserId,
+          full_name: fullName,
+          phone: payload.phone?.trim() || existingStudent.phone,
+          updated_at: new Date().toISOString(),
+        };
+
+        if (validatedLearningFormat !== null) {
+          studentUpdatePayload.learning_format = validatedLearningFormat;
+        }
+
+        if (validatedPreferredSlot !== null) {
+          studentUpdatePayload.preferred_slot = validatedPreferredSlot;
+        }
+
         const { error: linkError } = await adminClient
           .from('students')
-          .update({
-            profile_id: authUserId,
-            full_name: fullName,
-            phone: payload.phone?.trim() || existingStudent.phone,
-            updated_at: new Date().toISOString(),
-          })
+          .update(studentUpdatePayload)
           .eq('id', existingStudent.id);
 
         if (linkError) {
@@ -695,6 +770,8 @@ serve(async (req: Request) => {
             education_level: payload.educationLevel || 'Not specified',
             qualification: payload.qualification || 'N/A',
             preferred_category: payload.preferredCategory || 'General',
+            learning_format: validatedLearningFormat,
+            preferred_slot: validatedPreferredSlot,
             account_status: 'active',
             subscription_plan: 'basic',
             subscription_status: 'active',

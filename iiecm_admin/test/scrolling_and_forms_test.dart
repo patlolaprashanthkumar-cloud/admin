@@ -198,6 +198,8 @@ class MockTestStudentRepo implements StudentRepository {
     required List<String> courseIds,
     String? city,
     String subscriptionPlan = 'basic',
+    String? learningFormat,
+    String? preferredSlot,
   }) async {
     final s = Student(
       id: 'std-new',
@@ -208,6 +210,8 @@ class MockTestStudentRepo implements StudentRepository {
       educationLevel: educationLevel,
       qualification: qualification,
       preferredCategory: 'Test',
+      learningFormat: learningFormat,
+      preferredSlot: preferredSlot,
       createdAt: DateTime.now(),
     );
     list.add(s);

@@ -233,7 +233,8 @@ class SupabaseFacultyRepository implements FacultyRepository {
       // Ensure the administrator has a fresh, valid authentication session before calling Edge Function.
       // If the session is missing, expired, or expiring within 60s, proactively refresh it.
       if (session == null ||
-          (session.expiresAt != null && session.expiresAt! <= (nowSeconds + 60))) {
+          (session.expiresAt != null &&
+              session.expiresAt! <= (nowSeconds + 60))) {
         try {
           final refreshResponse = await auth.refreshSession();
           session = refreshResponse.session ?? auth.currentSession;
@@ -247,8 +248,7 @@ class SupabaseFacultyRepository implements FacultyRepository {
 
       if (session == null) {
         throw const FacultyProvisioningException(
-          message:
-              'Your administrator session has expired or is invalid. Please sign out and sign in again to register faculty.',
+          message: 'Your administrator session has expired or is invalid. Please sign out and sign in again to register faculty.',
           statusCode: 401,
         );
       }
@@ -311,8 +311,7 @@ class SupabaseFacultyRepository implements FacultyRepository {
             responseData['error']?.toString() ??
             'Instructor provisioning failed (HTTP $statusCode)';
         if (statusCode == 401) {
-          errorMsg =
-              'Your administrator session has expired. Please sign out and sign in again to continue.';
+          errorMsg = 'Your administrator session has expired. Please sign out and sign in again to continue.';
         }
         final isPartial = responseData['partialFailure'] == true;
         throw FacultyProvisioningException(
@@ -346,8 +345,7 @@ class SupabaseFacultyRepository implements FacultyRepository {
         }
       }
       if (status == 401) {
-        errorMsg =
-            'Your administrator session has expired. Please sign out and sign in again to continue.';
+        errorMsg = 'Your administrator session has expired. Please sign out and sign in again to continue.';
       }
       throw FacultyProvisioningException(
         message: errorMsg,

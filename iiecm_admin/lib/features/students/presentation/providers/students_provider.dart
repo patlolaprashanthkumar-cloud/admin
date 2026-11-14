@@ -99,6 +99,8 @@ class StudentsNotifier extends StateNotifier<StudentsState> {
     required List<String> courseIds,
     String? city,
     String subscriptionPlan = 'basic',
+    String? learningFormat,
+    String? preferredSlot,
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
@@ -112,6 +114,8 @@ class StudentsNotifier extends StateNotifier<StudentsState> {
         courseIds: courseIds,
         city: city,
         subscriptionPlan: subscriptionPlan,
+        learningFormat: learningFormat,
+        preferredSlot: preferredSlot,
       );
       state = state.copyWith(
         students: [result.student, ...state.students],

@@ -19,7 +19,10 @@ class SupabaseDashboardRepository implements DashboardRepository {
 
     final studentRecordId = student.studentRecordId;
     if (studentRecordId.isEmpty) {
-      developer.log('Student record ID is empty, returning blank dashboard', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Student record ID is empty, returning blank dashboard',
+        name: 'SupabaseDashboardRepository',
+      );
       return StudentDashboardData(
         student: student,
         enrolledCourses: const [],
@@ -52,7 +55,10 @@ class SupabaseDashboardRepository implements DashboardRepository {
         }
       }
     } catch (e) {
-      developer.log('Error fetching course_enrollments: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching course_enrollments: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
 
     // 2. Fetch Course details for enrolled courses
@@ -60,7 +66,9 @@ class SupabaseDashboardRepository implements DashboardRepository {
       try {
         final List<dynamic> courseRows = await _client
             .from('courses')
-            .select('id, title, description, category_name, format, duration_weeks, instructor_id')
+            .select(
+              'id, title, description, category_name, format, duration_weeks, instructor_id',
+            )
             .inFilter('id', enrolledCourseIds)
             .timeout(const Duration(seconds: 10));
 
@@ -102,7 +110,10 @@ class SupabaseDashboardRepository implements DashboardRepository {
           );
         }
       } catch (e) {
-        developer.log('Error fetching courses: $e', name: 'SupabaseDashboardRepository');
+        developer.log(
+          'Error fetching courses: $e',
+          name: 'SupabaseDashboardRepository',
+        );
       }
     }
 
@@ -115,7 +126,9 @@ class SupabaseDashboardRepository implements DashboardRepository {
     LiveClassItem? nextScheduledSession;
     try {
       // Filter classes scheduled from 2 hours ago onwards
-      final threshold = DateTime.now().subtract(const Duration(hours: 2)).toIso8601String();
+      final threshold = DateTime.now()
+          .subtract(const Duration(hours: 2))
+          .toIso8601String();
       final List<dynamic> classRows = await _client
           .from('live_classes')
           .select('*')
@@ -149,13 +162,24 @@ class SupabaseDashboardRepository implements DashboardRepository {
         }
 
         if (matchingClass != null) {
-          nextScheduledSession = LiveClassItem.fromJson(
-            Map<String, dynamic>.from(matchingClass as Map),
-          );
+          final cMap = Map<String, dynamic>.from(matchingClass as Map);
+          final cid = cMap['course_id']?.toString() ?? '';
+          if (cid.isNotEmpty) {
+            for (final c in enrolledCourses) {
+              if (c.courseId == cid && c.categoryName.isNotEmpty) {
+                cMap['specialization'] = c.categoryName;
+                break;
+              }
+            }
+          }
+          nextScheduledSession = LiveClassItem.fromJson(cMap);
         }
       }
     } catch (e) {
-      developer.log('Error fetching live_classes: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching live_classes: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
 
     // 4. Fetch Completed Submissions & Assessment Results for this student
@@ -181,7 +205,8 @@ class SupabaseDashboardRepository implements DashboardRepository {
           completedAssessmentIds.add(aId);
         }
 
-        final pct = (r['percentage'] as num?)?.toDouble() ??
+        final pct =
+            (r['percentage'] as num?)?.toDouble() ??
             (((r['score'] as num?)?.toDouble() ?? 0.0) /
                 (((r['total_marks'] as num?)?.toDouble() ?? 100.0) > 0
                     ? ((r['total_marks'] as num?)?.toDouble() ?? 100.0)
@@ -211,7 +236,10 @@ class SupabaseDashboardRepository implements DashboardRepository {
         averageGrade = 'Evaluated';
       }
     } catch (e) {
-      developer.log('Error fetching assessment_results: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error fetching assessment_results: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
 
     // 5. Fetch Assessments & Assignments assigned to student's courses
@@ -260,7 +288,10 @@ class SupabaseDashboardRepository implements DashboardRepository {
         }
       }
     } catch (e) {
-      developer.log('Error calculating pending assessments/assignments: $e', name: 'SupabaseDashboardRepository');
+      developer.log(
+        'Error calculating pending assessments/assignments: $e',
+        name: 'SupabaseDashboardRepository',
+      );
     }
 
     return StudentDashboardData(

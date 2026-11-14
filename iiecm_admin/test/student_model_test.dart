@@ -60,6 +60,8 @@ class MockStudentRepository implements StudentRepository {
     required List<String> courseIds,
     String? city,
     String subscriptionPlan = 'basic',
+    String? learningFormat,
+    String? preferredSlot,
   }) async {
     final catModels = categoryIds
         .map(
@@ -90,6 +92,8 @@ class MockStudentRepository implements StudentRepository {
       city: city,
       country: 'India',
       subscriptionPlan: subscriptionPlan,
+      learningFormat: learningFormat,
+      preferredSlot: preferredSlot,
       createdAt: DateTime.now(),
       assignedCategories: catModels,
       enrolledCourseIds: courseIds,
@@ -345,6 +349,83 @@ void main() {
         expect(withoutProfile.toJson().containsKey('profile_id'), isFalse);
       },
     );
+
+    test('Student.fromJson parses learning_format and preferred_slot', () {
+      final json = {
+        'id': 'std-103',
+        'student_id': 'IIECM-STU-003',
+        'full_name': 'Dr. Rohit Sharma',
+        'email': 'rohit@example.com',
+        'learning_format': 'hybrid',
+        'preferred_slot': 'Morning Clinical Batch (08:00 - 10:00 IST)',
+      };
+
+      final student = Student.fromJson(json);
+
+      expect(student.learningFormat, 'hybrid');
+      expect(
+        student.preferredSlot,
+        'Morning Clinical Batch (08:00 - 10:00 IST)',
+      );
+    });
+
+    test(
+      'Student.fromJson handles NULL learning_format and preferred_slot',
+      () {
+        final json = {
+          'id': 'std-104',
+          'student_id': 'IIECM-STU-004',
+          'full_name': 'Dr. Anita Roy',
+          'email': 'anita@example.com',
+          'learning_format': null,
+          'preferred_slot': null,
+        };
+
+        final student = Student.fromJson(json);
+
+        expect(student.learningFormat, isNull);
+        expect(student.preferredSlot, isNull);
+      },
+    );
+
+    test('Student.toJson serializes learning_format and preferred_slot when present, omits when null', () {
+      final studentWithFormat = Student(
+        id: 's-fmt',
+        studentId: 'IIECM-FMT',
+        fullName: 'Format Student',
+        email: 'fmt@example.com',
+        phone: '1112223334',
+        educationLevel: 'Postgraduate',
+        qualification: 'MD',
+        preferredCategory: 'General',
+        learningFormat: 'live',
+        preferredSlot: 'Evening Executive Batch (18:00 - 20:00 IST)',
+        createdAt: DateTime(2026, 1, 1),
+      );
+
+      final jsonWith = studentWithFormat.toJson();
+      expect(jsonWith['learning_format'], 'live');
+      expect(
+        jsonWith['preferred_slot'],
+        'Evening Executive Batch (18:00 - 20:00 IST)',
+      );
+
+      final studentWithout = Student(
+        id: 's-no-fmt',
+        studentId: 'IIECM-NO-FMT',
+        fullName: 'No Format Student',
+        email: 'nofmt@example.com',
+        phone: '1112223335',
+        educationLevel: 'Postgraduate',
+        qualification: 'MD',
+        preferredCategory: 'General',
+        createdAt: DateTime(2026, 1, 1),
+      );
+
+      final jsonWithout = studentWithout.toJson();
+      expect(jsonWithout.containsKey('learning_format'), isFalse);
+      expect(jsonWithout.containsKey('preferred_slot'), isFalse);
+    });
 
     test('StudentRegistrationResult encapsulates provisioning metadata', () {
       final sampleStudent = Student(
@@ -624,6 +705,71 @@ void main() {
         expect(notifier.state.isLoading, isFalse);
       },
     );
+
+    test('registerStudent forwards learningFormat and preferredSlot through provider to repository', () async {
+      final notifier = StudentsNotifier(repo);
+      await notifier.loadStudents();
+
+      final created = await notifier.registerStudent(
+        fullName: 'Vikram Mehta',
+        email: 'vikram@hospital.org',
+        phone: '9999900010',
+        educationLevel: 'Fellow',
+        qualification: 'FACEM',
+        categoryIds: ['cat-a'],
+        courseIds: ['c-1'],
+        learningFormat: 'recorded',
+        preferredSlot: 'Weekend Intensive (Saturday & Sunday)',
+      );
+
+      expect(created, isNotNull);
+      expect(created!.student.fullName, 'Vikram Mehta');
+      expect(created.student.learningFormat, 'recorded');
+      expect(
+        created.student.preferredSlot,
+        'Weekend Intensive (Saturday & Sunday)',
+      );
+      expect(notifier.state.students.first.learningFormat, 'recorded');
+      expect(
+        notifier.state.students.first.preferredSlot,
+        'Weekend Intensive (Saturday & Sunday)',
+      );
+    });
+
+    test('Edge Function payload formatting trims non-empty values and omits null/empty', () {
+      Map<String, dynamic> buildPayload({
+        String? learningFormat,
+        String? preferredSlot,
+      }) {
+        return {
+          'email': 'test@example.com',
+          'fullName': 'Test User',
+          'role': 'student',
+          if (learningFormat != null && learningFormat.trim().isNotEmpty)
+            'learningFormat': learningFormat.trim(),
+          if (preferredSlot != null && preferredSlot.trim().isNotEmpty)
+            'preferredSlot': preferredSlot.trim(),
+        };
+      }
+
+      final withValues = buildPayload(
+        learningFormat: '  hybrid  ',
+        preferredSlot: '  Morning Clinical Batch (08:00 - 10:00 IST)  ',
+      );
+      expect(withValues['learningFormat'], 'hybrid');
+      expect(
+        withValues['preferredSlot'],
+        'Morning Clinical Batch (08:00 - 10:00 IST)',
+      );
+
+      final withNull = buildPayload(learningFormat: null, preferredSlot: null);
+      expect(withNull.containsKey('learningFormat'), isFalse);
+      expect(withNull.containsKey('preferredSlot'), isFalse);
+
+      final withEmpty = buildPayload(learningFormat: '   ', preferredSlot: '');
+      expect(withEmpty.containsKey('learningFormat'), isFalse);
+      expect(withEmpty.containsKey('preferredSlot'), isFalse);
+    });
   });
 }
 
@@ -642,6 +788,8 @@ class MockFailingStudentRepository extends MockStudentRepository {
     required List<String> courseIds,
     String? city,
     String subscriptionPlan = 'basic',
+    String? learningFormat,
+    String? preferredSlot,
   }) async {
     throw exceptionToThrow;
   }

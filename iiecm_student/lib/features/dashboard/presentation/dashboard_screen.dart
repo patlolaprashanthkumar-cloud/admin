@@ -10,6 +10,7 @@ import '../../../shared/widgets/app_card.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../domain/models/student_dashboard_data.dart';
 import 'providers/dashboard_provider.dart';
+import 'widgets/live_class_detail_dialog.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -53,7 +54,8 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final todayFormatted = DateFormat('EEEE, d MMMM yyyy').format(DateTime.now());
+    final todayFormatted = DateFormat('EEEE, d MMMM yyyy')
+        .format(DateTime.now());
 
     final authState = ref.watch(authNotifierProvider);
     final student = authState.student;
@@ -72,14 +74,18 @@ class DashboardScreen extends ConsumerWidget {
               'IIECM Student Portal',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
               ),
             ),
             Text(
               todayFormatted,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 11,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -107,221 +113,249 @@ class DashboardScreen extends ConsumerWidget {
           child: isLoading
               ? _buildLoadingState(theme, isDark)
               : hasError
-                  ? _buildErrorState(context, ref, theme, isDark, dashboardState.errorMessage)
-                  : ListView(
-                      padding: const EdgeInsets.all(AppConstants.spacingMd),
-                      children: [
-                        // 1. Authoritative Student Hero Welcome Card
-                        AppCard(
-                          backgroundColor: isDark ? AppColors.forestDark : AppColors.primaryForest,
-                          borderColor: isDark ? AppColors.forestLight : AppColors.forestDark,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+              ? _buildErrorState(
+                  context,
+                  ref,
+                  theme,
+                  isDark,
+                  dashboardState.errorMessage,
+                )
+              : ListView(
+                  padding: const EdgeInsets.all(AppConstants.spacingMd),
+                  children: [
+                    // 1. Authoritative Student Hero Welcome Card
+                    AppCard(
+                      backgroundColor: isDark
+                          ? AppColors.forestDark
+                          : AppColors.primaryForest,
+                      borderColor: isDark
+                          ? AppColors.forestLight
+                          : AppColors.forestDark,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 24,
-                                    backgroundColor: AppColors.forestSoft,
-                                    child: const Icon(
-                                      Icons.school_rounded,
-                                      color: AppColors.primaryForest,
-                                      size: 26,
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppConstants.spacingMd),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Welcome back, ${student?.firstName ?? 'Student'}',
-                                          style: theme.textTheme.titleLarge?.copyWith(
+                              CircleAvatar(
+                                radius: 24,
+                                backgroundColor: AppColors.forestSoft,
+                                child: const Icon(
+                                  Icons.school_rounded,
+                                  color: AppColors.primaryForest,
+                                  size: 26,
+                                ),
+                              ),
+                              const SizedBox(width: AppConstants.spacingMd),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Welcome back, ${student?.firstName ?? 'Student'}',
+                                      style: theme.textTheme.titleLarge
+                                          ?.copyWith(
                                             color: AppColors.white,
                                             fontWeight: FontWeight.w800,
                                           ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'ID: ${student?.studentId ?? 'STU-ENROLLED'} • ${student?.email ?? 'Active Student'}',
-                                          style: theme.textTheme.bodySmall?.copyWith(
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'ID: ${student?.studentId ?? 'STU-ENROLLED'} • ${student?.email ?? 'Active Student'}',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
                                             color: AppColors.forestSoft,
                                           ),
-                                        ),
-                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: AppConstants.spacingMd),
-                              const Divider(color: Color(0x33FFFFFF)),
-                              const SizedBox(height: AppConstants.spacingSm),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.verified_rounded,
-                                    color: AppColors.warmCream,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: AppConstants.spacingSm),
-                                  Expanded(
-                                    child: Text(
-                                      'Status: ${(student?.accountStatus ?? 'Active').toUpperCase()} • Plan: ${student?.subscriptionPlan ?? 'Enrolled Candidate'}',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: AppColors.white,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: AppConstants.spacingMd),
-
-                        // 2. Real Academic Summary Metrics Grid
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildMetricTile(
-                                context: context,
-                                title: 'My Courses',
-                                value: '${data?.totalEnrolledCourses ?? 0} Enrolled',
-                                subtitle: '${data?.inProgressCourses ?? 0} in Progress',
-                                icon: Icons.menu_book_rounded,
-                                color: AppColors.primaryForest,
-                                onTap: () => context.go('/courses'),
+                          const SizedBox(height: AppConstants.spacingMd),
+                          const Divider(color: Color(0x33FFFFFF)),
+                          const SizedBox(height: AppConstants.spacingSm),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.verified_rounded,
+                                color: AppColors.warmCream,
+                                size: 16,
                               ),
-                            ),
-                            const SizedBox(width: AppConstants.spacingSm),
-                            Expanded(
-                              child: _buildMetricTile(
-                                context: context,
-                                title: 'Assessments',
-                                value: '${data?.upcomingAssessmentsCount ?? 0} Due',
-                                subtitle: (data?.upcomingAssessmentsCount ?? 0) > 0 ? 'Upcoming Tests' : 'All Clear',
-                                icon: Icons.assignment_turned_in_outlined,
-                                color: AppColors.terracotta,
-                                onTap: () => context.go('/assessments'),
+                              const SizedBox(width: AppConstants.spacingSm),
+                              Expanded(
+                                child: Text(
+                                  'Status: ${(student?.accountStatus ?? 'Active').toUpperCase()} • Plan: ${student?.subscriptionPlan ?? 'Enrolled Candidate'}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppConstants.spacingSm),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildMetricTile(
-                                context: context,
-                                title: 'Results',
-                                value: data?.averageGrade ?? 'No Results',
-                                subtitle: (data?.evaluatedResultsCount ?? 0) > 0
-                                    ? '${data!.evaluatedResultsCount} Evaluated'
-                                    : 'Awaiting Tests',
-                                icon: Icons.workspace_premium_outlined,
-                                color: const Color(0xFF2E7D32),
-                                onTap: () => context.push('/results'),
-                              ),
-                            ),
-                            const SizedBox(width: AppConstants.spacingSm),
-                            Expanded(
-                              child: _buildMetricTile(
-                                context: context,
-                                title: 'Assignments',
-                                value: '${data?.pendingAssignmentsCount ?? 0} Due',
-                                subtitle: (data?.pendingAssignmentsCount ?? 0) > 0 ? 'Pending Tasks' : 'All Submitted',
-                                icon: Icons.task_alt_rounded,
-                                color: const Color(0xFF0288D1),
-                                onTap: () => context.push('/assignments'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppConstants.spacingLg),
-
-                        // 3. Continue Learning Spotlight
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Continue Learning',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () => context.go('/courses'),
-                              child: const Text('View All'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppConstants.spacingSm),
-                        if (data != null && data.hasEnrollments) ...[
-                          _buildPrimaryCourseCard(context, theme, isDark, data.primaryCourse!),
-                        ] else ...[
-                          _buildEmptyCourseCard(context, theme, isDark),
+                            ],
+                          ),
                         ],
-                        const SizedBox(height: AppConstants.spacingLg),
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingMd),
 
-                        // 4. Real Next Scheduled Live Session
-                        Text(
-                          'Next Scheduled Session',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
+                    // 2. Real Academic Summary Metrics Grid
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildMetricTile(
+                            context: context,
+                            title: 'My Courses',
+                            value:
+                                '${data?.totalEnrolledCourses ?? 0} Enrolled',
+                            subtitle:
+                                '${data?.inProgressCourses ?? 0} in Progress',
+                            icon: Icons.menu_book_rounded,
+                            color: AppColors.primaryForest,
+                            onTap: () => context.go('/courses'),
                           ),
                         ),
-                        const SizedBox(height: AppConstants.spacingSm),
-                        if (data?.nextScheduledSession != null) ...[
-                          _buildLiveClassCard(context, theme, isDark, data!.nextScheduledSession!),
-                        ] else ...[
-                          _buildEmptySessionCard(theme, isDark),
-                        ],
-                        const SizedBox(height: AppConstants.spacingLg),
-
-                        // 5. Quick Portals
-                        Text(
-                          'Quick Portals',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
+                        const SizedBox(width: AppConstants.spacingSm),
+                        Expanded(
+                          child: _buildMetricTile(
+                            context: context,
+                            title: 'Assessments',
+                            value: '${data?.upcomingAssessmentsCount ?? 0} Due',
+                            subtitle: (data?.upcomingAssessmentsCount ?? 0) > 0
+                                ? 'Upcoming Tests'
+                                : 'All Clear',
+                            icon: Icons.assignment_turned_in_outlined,
+                            color: AppColors.terracotta,
+                            onTap: () => context.go('/assessments'),
                           ),
                         ),
-                        const SizedBox(height: AppConstants.spacingSm),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildQuickActionCard(
-                                context: context,
-                                title: 'Assignments',
-                                icon: Icons.task_alt_rounded,
-                                onTap: () => context.push('/assignments'),
-                              ),
-                            ),
-                            const SizedBox(width: AppConstants.spacingSm),
-                            Expanded(
-                              child: _buildQuickActionCard(
-                                key: const Key('quick_action_results'),
-                                context: context,
-                                title: 'Results',
-                                icon: Icons.workspace_premium_rounded,
-                                onTap: () => context.push('/results'),
-                              ),
-                            ),
-                            const SizedBox(width: AppConstants.spacingSm),
-                            Expanded(
-                              child: _buildQuickActionCard(
-                                key: const Key('quick_action_payments'),
-                                context: context,
-                                title: 'Fee Status',
-                                icon: Icons.receipt_long_rounded,
-                                onTap: () => context.push('/payments'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppConstants.spacingLg),
                       ],
                     ),
+                    const SizedBox(height: AppConstants.spacingSm),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildMetricTile(
+                            context: context,
+                            title: 'Results',
+                            value: data?.averageGrade ?? 'No Results',
+                            subtitle: (data?.evaluatedResultsCount ?? 0) > 0
+                                ? '${data!.evaluatedResultsCount} Evaluated'
+                                : 'Awaiting Tests',
+                            icon: Icons.workspace_premium_outlined,
+                            color: const Color(0xFF2E7D32),
+                            onTap: () => context.push('/results'),
+                          ),
+                        ),
+                        const SizedBox(width: AppConstants.spacingSm),
+                        Expanded(
+                          child: _buildMetricTile(
+                            context: context,
+                            title: 'Assignments',
+                            value: '${data?.pendingAssignmentsCount ?? 0} Due',
+                            subtitle: (data?.pendingAssignmentsCount ?? 0) > 0
+                                ? 'Pending Tasks'
+                                : 'All Submitted',
+                            icon: Icons.task_alt_rounded,
+                            color: const Color(0xFF0288D1),
+                            onTap: () => context.push('/assignments'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    // 3. Continue Learning Spotlight
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Continue Learning',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => context.go('/courses'),
+                          child: const Text('View All'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.spacingSm),
+                    if (data != null && data.hasEnrollments) ...[
+                      _buildPrimaryCourseCard(
+                        context,
+                        theme,
+                        isDark,
+                        data.primaryCourse!,
+                      ),
+                    ] else ...[
+                      _buildEmptyCourseCard(context, theme, isDark),
+                    ],
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    // 4. Real Next Scheduled Live Session
+                    Text(
+                      'Next Scheduled Session',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingSm),
+                    if (data?.nextScheduledSession != null) ...[
+                      _buildLiveClassCard(
+                        context,
+                        theme,
+                        isDark,
+                        data!.nextScheduledSession!,
+                      ),
+                    ] else ...[
+                      _buildEmptySessionCard(theme, isDark),
+                    ],
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    // 5. Quick Portals
+                    Text(
+                      'Quick Portals',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingSm),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildQuickActionCard(
+                            context: context,
+                            title: 'Assignments',
+                            icon: Icons.task_alt_rounded,
+                            onTap: () => context.push('/assignments'),
+                          ),
+                        ),
+                        const SizedBox(width: AppConstants.spacingSm),
+                        Expanded(
+                          child: _buildQuickActionCard(
+                            key: const Key('quick_action_results'),
+                            context: context,
+                            title: 'Results',
+                            icon: Icons.workspace_premium_rounded,
+                            onTap: () => context.push('/results'),
+                          ),
+                        ),
+                        const SizedBox(width: AppConstants.spacingSm),
+                        Expanded(
+                          child: _buildQuickActionCard(
+                            key: const Key('quick_action_payments'),
+                            context: context,
+                            title: 'Fee Status',
+                            icon: Icons.receipt_long_rounded,
+                            onTap: () => context.push('/payments'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.spacingLg),
+                  ],
+                ),
         ),
       ),
     );
@@ -342,7 +376,10 @@ class DashboardScreen extends ConsumerWidget {
             children: [
               Flexible(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.forestSoft,
                     borderRadius: BorderRadius.circular(AppConstants.radiusSm),
@@ -392,7 +429,9 @@ class DashboardScreen extends ConsumerWidget {
           Text(
             '${course.format.toUpperCase()} • ${course.durationWeeks} Weeks${course.instructorName != null ? " • Mentor: ${course.instructorName}" : ""}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: AppConstants.spacingMd),
@@ -431,7 +470,9 @@ class DashboardScreen extends ConsumerWidget {
           Icon(
             Icons.school_outlined,
             size: 36,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
           const SizedBox(height: AppConstants.spacingSm),
           Text(
@@ -445,7 +486,9 @@ class DashboardScreen extends ConsumerWidget {
             'You are not currently enrolled in any academic curriculum. Please contact the IIECM Academic Registrar to assign your courses.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: AppConstants.spacingMd),
@@ -473,13 +516,16 @@ class DashboardScreen extends ConsumerWidget {
     final timeStr = DateFormat('h:mm a').format(session.scheduledAt);
 
     return AppCard(
+      onTap: () => LiveClassDetailDialog.show(context, session: session),
       child: Row(
         children: [
           Container(
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: session.isLive ? const Color(0xFFFFEBEE) : AppColors.terracottaSoft,
+              color: session.isLive
+                  ? const Color(0xFFFFEBEE)
+                  : AppColors.terracottaSoft,
               borderRadius: BorderRadius.circular(AppConstants.radiusMd),
             ),
             child: Column(
@@ -490,7 +536,9 @@ class DashboardScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
-                    color: session.isLive ? AppColors.error : AppColors.terracotta,
+                    color: session.isLive
+                        ? AppColors.error
+                        : AppColors.terracotta,
                   ),
                 ),
                 Text(
@@ -498,7 +546,9 @@ class DashboardScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: session.isLive ? AppColors.error : AppColors.terracotta,
+                    color: session.isLive
+                        ? AppColors.error
+                        : AppColors.terracotta,
                   ),
                 ),
               ],
@@ -519,7 +569,9 @@ class DashboardScreen extends ConsumerWidget {
                 Text(
                   '$timeStr IST • ${session.courseName}',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
                 Text(
@@ -546,13 +598,19 @@ class DashboardScreen extends ConsumerWidget {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.warmCream,
               borderRadius: BorderRadius.circular(AppConstants.radiusMd),
             ),
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.event_busy_outlined, color: AppColors.textMuted, size: 24),
+                Icon(
+                  Icons.event_busy_outlined,
+                  color: AppColors.textMuted,
+                  size: 24,
+                ),
               ],
             ),
           ),
@@ -571,7 +629,9 @@ class DashboardScreen extends ConsumerWidget {
                 Text(
                   'There are no live webinars or simulation classes scheduled at this time.',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -599,7 +659,9 @@ class DashboardScreen extends ConsumerWidget {
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryForest),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryForest,
+                  ),
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
@@ -614,7 +676,9 @@ class DashboardScreen extends ConsumerWidget {
                 'Synchronizing curriculum, schedules, and clinical assessments...',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -638,7 +702,11 @@ class DashboardScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(AppConstants.spacingLg),
           child: Column(
             children: [
-              const Icon(Icons.wifi_off_rounded, size: 40, color: AppColors.error),
+              const Icon(
+                Icons.wifi_off_rounded,
+                size: 40,
+                color: AppColors.error,
+              ),
               const SizedBox(height: AppConstants.spacingMd),
               Text(
                 'Unable to Load Student Dashboard',
@@ -652,7 +720,9 @@ class DashboardScreen extends ConsumerWidget {
                 error ?? 'A network or connectivity issue occurred while retrieving your academic data.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingLg),
@@ -660,7 +730,9 @@ class DashboardScreen extends ConsumerWidget {
                 label: 'Retry Connection',
                 icon: Icons.refresh_rounded,
                 isFullWidth: false,
-                onPressed: () => ref.read(dashboardNotifierProvider.notifier).loadDashboard(),
+                onPressed: () => ref
+                    .read(dashboardNotifierProvider.notifier)
+                    .loadDashboard(),
               ),
             ],
           ),
@@ -697,7 +769,9 @@ class DashboardScreen extends ConsumerWidget {
                   maxLines: 1,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ),

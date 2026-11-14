@@ -188,6 +188,8 @@ class SupabaseStudentRepository implements StudentRepository {
     required List<String> courseIds,
     String? city,
     String subscriptionPlan = 'basic',
+    String? learningFormat,
+    String? preferredSlot,
   }) async {
     final client = AppSupabase.client;
 
@@ -229,6 +231,10 @@ class SupabaseStudentRepository implements StudentRepository {
       'city': city?.trim().isNotEmpty == true ? city!.trim() : null,
       'country': 'India',
       'redirectTo': 'https://auth.iiecm.org/auth/callback',
+      if (learningFormat != null && learningFormat.trim().isNotEmpty)
+        'learningFormat': learningFormat.trim(),
+      if (preferredSlot != null && preferredSlot.trim().isNotEmpty)
+        'preferredSlot': preferredSlot.trim(),
     };
 
     int statusCode = 201;
@@ -242,7 +248,8 @@ class SupabaseStudentRepository implements StudentRepository {
       // Ensure the administrator has a fresh, valid authentication session before calling Edge Function.
       // If the session is missing, expired, or expiring within 60s, proactively refresh it.
       if (session == null ||
-          (session.expiresAt != null && session.expiresAt! <= (nowSeconds + 60))) {
+          (session.expiresAt != null &&
+              session.expiresAt! <= (nowSeconds + 60))) {
         try {
           final refreshResponse = await auth.refreshSession();
           session = refreshResponse.session ?? auth.currentSession;
@@ -256,8 +263,7 @@ class SupabaseStudentRepository implements StudentRepository {
 
       if (session == null) {
         throw const StudentProvisioningException(
-          message:
-              'Your administrator session has expired or is invalid. Please sign out and sign in again to add students.',
+          message: 'Your administrator session has expired or is invalid. Please sign out and sign in again to add students.',
           statusCode: 401,
         );
       }
@@ -320,8 +326,7 @@ class SupabaseStudentRepository implements StudentRepository {
             responseData['error']?.toString() ??
             'Student provisioning failed (HTTP $statusCode)';
         if (statusCode == 401) {
-          errorMsg =
-              'Your administrator session has expired. Please sign out and sign in again to continue.';
+          errorMsg = 'Your administrator session has expired. Please sign out and sign in again to continue.';
         }
         final isPartial = responseData['partialFailure'] == true;
         throw StudentProvisioningException(
@@ -355,8 +360,7 @@ class SupabaseStudentRepository implements StudentRepository {
         }
       }
       if (status == 401) {
-        errorMsg =
-            'Your administrator session has expired. Please sign out and sign in again to continue.';
+        errorMsg = 'Your administrator session has expired. Please sign out and sign in again to continue.';
       }
       throw StudentProvisioningException(
         message: errorMsg,
