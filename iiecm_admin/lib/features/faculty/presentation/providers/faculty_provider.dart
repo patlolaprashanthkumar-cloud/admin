@@ -144,19 +144,19 @@ class FacultyNotifier extends StateNotifier<FacultyState> {
     return result;
   }
 
-  Future<bool> createFaculty(
+  Future<FacultyRegistrationResult?> createFaculty(
     Faculty faculty, {
     List<String> categoryIds = const [],
     List<String> courseIds = const [],
   }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final created = await _repository.createFaculty(
+      final result = await _repository.createFaculty(
         faculty,
         categoryIds: categoryIds,
         courseIds: courseIds,
       );
-      final updatedList = [created, ...state.facultyList];
+      final updatedList = [result.faculty, ...state.facultyList];
       state = state.copyWith(
         facultyList: updatedList,
         filteredFaculty: _applyFilters(
@@ -167,13 +167,13 @@ class FacultyNotifier extends StateNotifier<FacultyState> {
         ),
         isLoading: false,
       );
-      return true;
+      return result;
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Failed to create faculty: $e',
-      );
-      return false;
+      final displayError = e is FacultyProvisioningException
+          ? e.message
+          : e.toString();
+      state = state.copyWith(isLoading: false, errorMessage: displayError);
+      return null;
     }
   }
 

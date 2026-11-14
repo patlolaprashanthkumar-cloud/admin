@@ -89,7 +89,7 @@ class StudentsNotifier extends StateNotifier<StudentsState> {
     state = state.copyWith(searchQuery: query);
   }
 
-  Future<Student?> registerStudent({
+  Future<StudentRegistrationResult?> registerStudent({
     required String fullName,
     required String email,
     required String phone,
@@ -100,8 +100,9 @@ class StudentsNotifier extends StateNotifier<StudentsState> {
     String? city,
     String subscriptionPlan = 'basic',
   }) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final created = await _repository.registerStudent(
+      final result = await _repository.registerStudent(
         fullName: fullName,
         email: email,
         phone: phone,
@@ -112,10 +113,16 @@ class StudentsNotifier extends StateNotifier<StudentsState> {
         city: city,
         subscriptionPlan: subscriptionPlan,
       );
-      state = state.copyWith(students: [created, ...state.students]);
-      return created;
+      state = state.copyWith(
+        students: [result.student, ...state.students],
+        isLoading: false,
+      );
+      return result;
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
+      final displayError = e is StudentProvisioningException
+          ? e.message
+          : e.toString();
+      state = state.copyWith(isLoading: false, errorMessage: displayError);
       return null;
     }
   }

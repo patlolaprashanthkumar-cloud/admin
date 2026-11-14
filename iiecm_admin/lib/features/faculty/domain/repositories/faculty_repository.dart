@@ -11,8 +11,8 @@ abstract class FacultyRepository {
   /// Fetch a single faculty member by ID with full relations
   Future<Faculty?> getFacultyById(String id);
 
-  /// Create a new faculty member with category mappings & course assignments
-  Future<Faculty> createFaculty(
+  /// Provision a new faculty member via admin-create-user Edge Function with category mappings & course assignments
+  Future<FacultyRegistrationResult> createFaculty(
     Faculty faculty, {
     List<String> categoryIds = const [],
     List<String> courseIds = const [],

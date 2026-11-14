@@ -7,7 +7,7 @@ abstract class StudentRepository {
     String? status,
   });
   Future<Student?> getStudentById(String id);
-  Future<Student> registerStudent({
+  Future<StudentRegistrationResult> registerStudent({
     required String fullName,
     required String email,
     required String phone,

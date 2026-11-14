@@ -50,7 +50,8 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
   late TextEditingController _contentUrlController;
   late TextEditingController _orderController;
 
-  late String _type; // 'video', 'pdf', 'image', 'file', 'reading', 'quiz', 'assignment'
+  late String
+  _type; // 'video', 'pdf', 'image', 'file', 'reading', 'quiz', 'assignment'
   String? _previewThumbnailUrl;
   String? _previewVideoId;
   bool _isSubmitting = false;
@@ -442,19 +443,39 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          _buildTypeChip('video', 'Video', Icons.videocam_rounded),
+                          _buildTypeChip(
+                            'video',
+                            'Video',
+                            Icons.videocam_rounded,
+                          ),
                           const SizedBox(width: 8),
-                          _buildTypeChip('pdf', 'PDF Doc', Icons.picture_as_pdf_rounded),
+                          _buildTypeChip(
+                            'pdf',
+                            'PDF Doc',
+                            Icons.picture_as_pdf_rounded,
+                          ),
                           const SizedBox(width: 8),
                           _buildTypeChip('image', 'Image', Icons.image_rounded),
                           const SizedBox(width: 8),
-                          _buildTypeChip('file', 'File', Icons.attach_file_rounded),
+                          _buildTypeChip(
+                            'file',
+                            'File',
+                            Icons.attach_file_rounded,
+                          ),
                           const SizedBox(width: 8),
-                          _buildTypeChip('reading', 'Reading', Icons.menu_book_rounded),
+                          _buildTypeChip(
+                            'reading',
+                            'Reading',
+                            Icons.menu_book_rounded,
+                          ),
                           const SizedBox(width: 8),
                           _buildTypeChip('quiz', 'Quiz', Icons.quiz_outlined),
                           const SizedBox(width: 8),
-                          _buildTypeChip('assignment', 'Task', Icons.assignment_outlined),
+                          _buildTypeChip(
+                            'assignment',
+                            'Task',
+                            Icons.assignment_outlined,
+                          ),
                         ],
                       ),
                     ),
@@ -480,7 +501,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         Expanded(
                           flex: 3,
                           child: DropdownButtonFormField<String>(
-                            value: _type,
+                            initialValue: _type,
                             decoration: const InputDecoration(
                               labelText: 'Activity Type',
                               prefixIcon: Icon(Icons.category_outlined),
@@ -603,7 +624,9 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                           color: AppColors.forestSoft,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: AppColors.primaryForest.withValues(alpha: 0.3),
+                            color: AppColors.primaryForest.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                         ),
                         child: Column(
@@ -663,7 +686,9 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                           color: AppColors.forestSoft,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: AppColors.primaryForest.withValues(alpha: 0.3),
+                            color: AppColors.primaryForest.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                         ),
                         child: Row(
@@ -716,10 +741,12 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFDC2626).withValues(alpha: 0.08),
+                          color: const Color(0xFFDC2626)
+                              .withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFFDC2626).withValues(alpha: 0.3),
+                            color: const Color(0xFFDC2626)
+                                .withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -772,10 +799,12 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF7C3AED).withValues(alpha: 0.08),
+                          color: const Color(0xFF7C3AED)
+                              .withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFF7C3AED).withValues(alpha: 0.3),
+                            color: const Color(0xFF7C3AED)
+                                .withValues(alpha: 0.3),
                           ),
                         ),
                         child: Column(
@@ -857,10 +886,12 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2563EB).withValues(alpha: 0.08),
+                          color: const Color(0xFF2563EB)
+                              .withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+                            color: const Color(0xFF2563EB)
+                                .withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -997,7 +1028,9 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                   ),
                                 ),
                               )
-                            : Text(isEditing ? 'Save Changes' : 'Add to Module'),
+                            : Text(
+                                isEditing ? 'Save Changes' : 'Add to Module',
+                              ),
                       ),
                     ),
                   ],
@@ -1032,11 +1065,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 15,
-              color: isSelected ? Colors.white : color,
-            ),
+            Icon(icon, size: 15, color: isSelected ? Colors.white : color),
             const SizedBox(width: 6),
             Text(
               label,

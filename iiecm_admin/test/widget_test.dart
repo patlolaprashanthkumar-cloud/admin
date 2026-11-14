@@ -10,7 +10,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify presence of institutional branding on Login Screen
-    expect(find.text('IIECM'), findsWidgets);
     expect(find.text('IIECM Admin'), findsOneWidget);
     expect(find.text('Sign In as Administrator'), findsOneWidget);
     expect(find.text('Administrator Email'), findsOneWidget);

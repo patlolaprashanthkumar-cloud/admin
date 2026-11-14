@@ -5,7 +5,8 @@ class CourseLesson {
   final String moduleId;
   final String title;
   final int durationMinutes;
-  final String type; // 'video', 'pdf', 'image', 'file', 'reading', 'quiz', 'assignment'
+  final String
+  type; // 'video', 'pdf', 'image', 'file', 'reading', 'quiz', 'assignment'
   final int orderIndex;
   final String? contentUrl;
   final DateTime createdAt;

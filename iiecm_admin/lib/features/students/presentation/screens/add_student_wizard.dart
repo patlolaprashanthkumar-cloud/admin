@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/app_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/network/supabase_client.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_card.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../categories/domain/models/course_category.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../../courses/domain/models/course.dart';
@@ -118,7 +120,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
 
     final notifier = ref.read(studentsNotifierProvider.notifier);
 
-    final newStudent = await notifier.registerStudent(
+    final result = await notifier.registerStudent(
       fullName: _nameController.text.trim(),
       email: _emailController.text.trim(),
       phone: _phoneController.text.trim(),
@@ -134,20 +136,40 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
 
     if (mounted) {
       setState(() => _isSubmitting = false);
-      if (newStudent != null) {
+      if (result != null) {
+        String feedbackMessage;
+        Color snackColor = AppColors.primaryForest;
+
+        if (result.hasAssignmentWarning) {
+          snackColor = AppColors.warning;
+          feedbackMessage =
+              'Account created for ${result.student.fullName}, but assignment warning: ${result.assignmentWarning}';
+        } else if (result.isExistingUser) {
+          snackColor = AppColors.info;
+          feedbackMessage =
+              'Existing account recognized for ${result.student.fullName}. Profile re-linked and password activation link dispatched!';
+        } else if (result.invitationSent) {
+          snackColor = AppColors.success;
+          feedbackMessage =
+              'Student ${result.student.fullName} provisioned! Setup invitation sent to ${result.student.email}.';
+        } else {
+          snackColor = AppColors.warning;
+          feedbackMessage =
+              'Student ${result.student.fullName} provisioned, but invitation email dispatch could not be confirmed.';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.primaryForest,
-            content: Text(
-              'Student ${newStudent.fullName} registered successfully!',
-            ),
+            backgroundColor: snackColor,
+            duration: const Duration(seconds: 4),
+            content: Text(feedbackMessage),
           ),
         );
         context.pop();
       } else {
+        final serverErr = ref.read(studentsNotifierProvider).errorMessage;
         setState(() {
-          _submissionError =
-              'Failed to register student. Ensure email is unique.';
+          _submissionError = serverErr ?? 'Failed to register student. Please verify the information and retry.';
         });
       }
     }
@@ -281,12 +303,51 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: AppColors.error),
                       ),
-                      child: Text(
-                        _submissionError!,
-                        style: const TextStyle(
-                          color: AppColors.error,
-                          fontSize: 12,
-                        ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: AppColors.error,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _submissionError!,
+                              style: const TextStyle(
+                                color: AppColors.error,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          if (_submissionError!.contains('session has expired') ||
+                              _submissionError!.contains('sign in again')) ...[
+                            const SizedBox(width: 8),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.error,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                              ),
+                              onPressed: () {
+                                ref
+                                    .read(authNotifierProvider.notifier)
+                                    .logout();
+                                context.go(AppRoutes.login);
+                              },
+                              child: const Text(
+                                'Sign In',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ),
@@ -300,14 +361,17 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                   constraints: const BoxConstraints(
                     maxWidth: AppConstants.maxContentWidth,
                   ),
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                    child: _buildStepContent(
-                      activeCategories: activeCategories,
-                      availableCourses: availableCourses,
+                  child: ScrollConfiguration(
+                    behavior: const _NoScrollbarBehavior(),
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                      child: _buildStepContent(
+                        activeCategories: activeCategories,
+                        availableCourses: availableCourses,
+                      ),
                     ),
                   ),
                 ),
@@ -790,9 +854,35 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Assign Primary Faculty Advisor',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Assign Primary Faculty Advisor',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                ),
+                if (_selectedInstructorId != null)
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.accentTerracotta,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _selectedInstructorId = null;
+                        _selectedInstructorName = null;
+                      });
+                    },
+                    icon: const Icon(Icons.close_rounded, size: 14),
+                    label: const Text(
+                      'Clear Selection',
+                      style: TextStyle(fontSize: 11),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 10),
             ...instructors.map((ins) {
@@ -800,34 +890,86 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
               final isSelected = _selectedInstructorId == id;
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: AppCard(
-                  backgroundColor: isSelected ? AppColors.terracottaSoft : null,
-                  borderSide: BorderSide(
-                    color: isSelected
-                        ? AppColors.accentTerracotta
-                        : AppColors.borderNeutral,
-                  ),
-                  // ignore: deprecated_member_use
-                  child: RadioListTile<String>(
-                    value: id,
-                    // ignore: deprecated_member_use
-                    groupValue: _selectedInstructorId,
-                    activeColor: AppColors.accentTerracotta,
-                    contentPadding: EdgeInsets.zero,
-                    // ignore: deprecated_member_use
-                    onChanged: (val) {
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    // Single tap: select this instructor
+                    setState(() {
+                      _selectedInstructorId = id;
+                      _selectedInstructorName = ins['full_name']?.toString();
+                    });
+                  },
+                  onDoubleTap: () {
+                    // Double-click/double-tap removes selection as requested
+                    if (isSelected) {
                       setState(() {
-                        _selectedInstructorId = val;
-                        _selectedInstructorName = ins['full_name']?.toString();
+                        _selectedInstructorId = null;
+                        _selectedInstructorName = null;
                       });
-                    },
-                    title: Text(
-                      ins['full_name']?.toString() ?? 'Faculty',
-                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    }
+                  },
+                  child: AppCard(
+                    backgroundColor:
+                        isSelected ? AppColors.terracottaSoft : null,
+                    borderSide: BorderSide(
+                      color: isSelected
+                          ? AppColors.accentTerracotta
+                          : AppColors.borderNeutral,
                     ),
-                    subtitle: Text(
-                      ins['specialization']?.toString() ?? '',
-                      style: const TextStyle(fontSize: 11),
+                    child: Row(
+                      children: [
+                        // ignore: deprecated_member_use
+                        Radio<String>(
+                          value: id,
+                          // ignore: deprecated_member_use
+                          groupValue: _selectedInstructorId,
+                          activeColor: AppColors.accentTerracotta,
+                          // ignore: deprecated_member_use
+                          onChanged: (_) {
+                            setState(() {
+                              _selectedInstructorId = id;
+                              _selectedInstructorName =
+                                  ins['full_name']?.toString();
+                            });
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                ins['full_name']?.toString() ?? 'Faculty',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (ins['specialization'] != null &&
+                                  ins['specialization'].toString().isNotEmpty)
+                                Text(
+                                  ins['specialization'].toString(),
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (isSelected)
+                          IconButton(
+                            tooltip:
+                                'Remove selection (or double-click card)',
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              size: 18,
+                              color: AppColors.accentTerracotta,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _selectedInstructorId = null;
+                                _selectedInstructorName = null;
+                              });
+                            },
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -840,7 +982,25 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
   }
 
   Widget _buildStep5Timetable() {
-    return AppCard(
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark
+        ? theme.colorScheme.surfaceContainerLow
+        : Colors.white;
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -850,6 +1010,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
           ),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: _learningFormat,
             items: const [
               DropdownMenuItem(
@@ -876,6 +1037,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
           ),
           const SizedBox(height: 6),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: _preferredSlot,
             items: const [
               DropdownMenuItem(
@@ -1041,5 +1203,19 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
         ),
       ],
     );
+  }
+}
+
+/// Custom scroll behavior that suppresses scrollbar painting across all desktop and mobile platforms
+class _NoScrollbarBehavior extends MaterialScrollBehavior {
+  const _NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child;
   }
 }

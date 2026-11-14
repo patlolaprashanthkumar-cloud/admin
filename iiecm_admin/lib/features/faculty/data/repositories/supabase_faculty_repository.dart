@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:developer' as developer;
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/network/supabase_client.dart';
 import '../../../categories/domain/models/course_category.dart';
@@ -195,53 +198,291 @@ class SupabaseFacultyRepository implements FacultyRepository {
   }
 
   @override
-  Future<Faculty> createFaculty(
+  Future<FacultyRegistrationResult> createFaculty(
     Faculty faculty, {
     List<String> categoryIds = const [],
     List<String> courseIds = const [],
   }) async {
     final client = AppSupabase.client;
 
+    // 1. Prepare request payload matching CreateUserPayload for instructor role
+    final edgePayload = {
+      'email': faculty.email.trim().toLowerCase(),
+      'fullName': faculty.fullName.trim(),
+      'role': 'instructor',
+      'phone': faculty.phone.trim().isNotEmpty ? faculty.phone.trim() : null,
+      if (faculty.id.isNotEmpty) 'entityId': faculty.id,
+      'qualification': faculty.qualifications.trim().isNotEmpty
+          ? faculty.qualifications.trim()
+          : 'N/A',
+      'specialization': faculty.specialization.trim().isNotEmpty
+          ? faculty.specialization.trim()
+          : 'General',
+      'experienceYears': faculty.experienceYears,
+      'redirectTo': 'https://auth.iiecm.org/auth/callback',
+    };
+
+    int statusCode = 201;
+    Map<String, dynamic> responseData = {};
+
     try {
-      final payload = faculty.toJson();
-      final List<dynamic> inserted = await client
-          .from('instructors')
-          .insert(payload)
-          .select('*');
+      final auth = client.auth;
+      var session = auth.currentSession;
+      final nowSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-      if (inserted.isEmpty) {
-        throw Exception('Failed to insert faculty record.');
-      }
-
-      final newInst = inserted.first as Map<String, dynamic>;
-      final newId = newInst['id'].toString();
-
-      // 1. Insert category associations
-      if (categoryIds.isNotEmpty) {
-        final jPayload = categoryIds
-            .map((catId) => {'instructor_id': newId, 'category_id': catId})
-            .toList();
-        await client.from('instructor_categories').insert(jPayload);
-      }
-
-      // 2. Link courses to this instructor
-      if (courseIds.isNotEmpty) {
-        for (final cId in courseIds) {
-          await client
-              .from('courses')
-              .update({'instructor_id': newId})
-              .eq('id', cId);
+      // Ensure the administrator has a fresh, valid authentication session before calling Edge Function.
+      // If the session is missing, expired, or expiring within 60s, proactively refresh it.
+      if (session == null ||
+          (session.expiresAt != null && session.expiresAt! <= (nowSeconds + 60))) {
+        try {
+          final refreshResponse = await auth.refreshSession();
+          session = refreshResponse.session ?? auth.currentSession;
+        } catch (e) {
+          developer.log(
+            'Proactive admin session refresh failed: $e',
+            name: 'SupabaseFacultyRepository',
+          );
         }
       }
 
-      return (await getFacultyById(newId)) ?? Faculty.fromJson(newInst);
-    } catch (e) {
-      developer.log(
-        'Error in createFaculty: $e',
-        name: 'SupabaseFacultyRepository',
+      if (session == null) {
+        throw const FacultyProvisioningException(
+          message:
+              'Your administrator session has expired or is invalid. Please sign out and sign in again to register faculty.',
+          statusCode: 401,
+        );
+      }
+
+      // Explicitly pass Authorization header with the fresh bearer token
+      Map<String, String> invokeHeaders = {
+        'Authorization': 'Bearer ${session.accessToken}',
+      };
+
+      FunctionResponse response;
+      try {
+        response = await client.functions.invoke(
+          'admin-create-user',
+          headers: invokeHeaders,
+          body: edgePayload,
+        );
+      } on FunctionException catch (fe) {
+        if (fe.status == 401) {
+          developer.log(
+            'Received 401 FunctionException. Attempting session refresh and retry...',
+            name: 'SupabaseFacultyRepository',
+          );
+          try {
+            final refreshResponse = await auth.refreshSession();
+            final newSession = refreshResponse.session ?? auth.currentSession;
+            if (newSession != null) {
+              session = newSession;
+              invokeHeaders = {
+                'Authorization': 'Bearer ${newSession.accessToken}',
+              };
+              response = await client.functions.invoke(
+                'admin-create-user',
+                headers: invokeHeaders,
+                body: edgePayload,
+              );
+            } else {
+              rethrow;
+            }
+          } catch (_) {
+            rethrow;
+          }
+        } else {
+          rethrow;
+        }
+      }
+
+      statusCode = response.status;
+      if (response.data is Map) {
+        responseData = Map<String, dynamic>.from(response.data as Map);
+      } else if (response.data is String) {
+        try {
+          responseData = Map<String, dynamic>.from(
+            jsonDecode(response.data as String) as Map,
+          );
+        } catch (_) {}
+      }
+
+      if (statusCode != 200 && statusCode != 201) {
+        String errorMsg =
+            responseData['error']?.toString() ??
+            'Instructor provisioning failed (HTTP $statusCode)';
+        if (statusCode == 401) {
+          errorMsg =
+              'Your administrator session has expired. Please sign out and sign in again to continue.';
+        }
+        final isPartial = responseData['partialFailure'] == true;
+        throw FacultyProvisioningException(
+          message: errorMsg,
+          statusCode: statusCode,
+          isPartialFailure: isPartial,
+        );
+      }
+    } on FunctionException catch (fe) {
+      final status = fe.status;
+      String errorMsg = fe.reasonPhrase ?? 'Edge Function invocation failed';
+      bool isPartial = false;
+      if (fe.details is Map) {
+        final detailsMap = Map<String, dynamic>.from(fe.details as Map);
+        if (detailsMap['error'] != null) {
+          errorMsg = detailsMap['error'].toString();
+        }
+        if (detailsMap['partialFailure'] == true) {
+          isPartial = true;
+        }
+      } else if (fe.details is String) {
+        try {
+          final parsed = jsonDecode(fe.details as String);
+          if (parsed is Map && parsed['error'] != null) {
+            errorMsg = parsed['error'].toString();
+          }
+        } catch (_) {
+          if ((fe.details as String).isNotEmpty) {
+            errorMsg = fe.details as String;
+          }
+        }
+      }
+      if (status == 401) {
+        errorMsg =
+            'Your administrator session has expired. Please sign out and sign in again to continue.';
+      }
+      throw FacultyProvisioningException(
+        message: errorMsg,
+        statusCode: status,
+        isPartialFailure: isPartial,
       );
-      rethrow;
+    } catch (e) {
+      if (e is FacultyProvisioningException) rethrow;
+      throw FacultyProvisioningException(
+        message:
+            'Network error or unable to reach provisioning service: ${e.toString()}',
+        statusCode: 0,
+      );
     }
+
+    // 2. Extract and validate linkedEntityId
+    final linkedEntityId = responseData['linkedEntityId']?.toString();
+    if (linkedEntityId == null || linkedEntityId.isEmpty) {
+      throw const FacultyProvisioningException(
+        message: 'Edge Function succeeded, but no linked instructor entity ID was returned.',
+        statusCode: 500,
+        isPartialFailure: true,
+      );
+    }
+
+    // 3. Preserve bio if provided (since Edge Function CreateUserPayload does not include bio)
+    bool assignmentFailed = false;
+    String? assignmentError;
+
+    if (faculty.bio != null && faculty.bio!.trim().isNotEmpty) {
+      try {
+        await client
+            .from('instructors')
+            .update({'bio': faculty.bio!.trim()})
+            .eq('id', linkedEntityId);
+      } catch (e) {
+        assignmentFailed = true;
+        assignmentError = 'Instructor bio could not be saved: $e';
+        developer.log(
+          'Warning: Failed to preserve instructor bio: $e',
+          name: 'SupabaseFacultyRepository',
+        );
+      }
+    }
+
+    // 4. Perform junction table category and course assignments
+    if (categoryIds.isNotEmpty) {
+      final jPayload = categoryIds
+          .map(
+            (catId) => {'instructor_id': linkedEntityId, 'category_id': catId},
+          )
+          .toList();
+      try {
+        await client.from('instructor_categories').insert(jPayload);
+      } catch (e) {
+        assignmentFailed = true;
+        final catMsg = 'Category assignments incomplete: $e';
+        assignmentError = assignmentError != null
+            ? '$assignmentError; $catMsg'
+            : catMsg;
+        developer.log(
+          'Error inserting instructor_categories: $e',
+          name: 'SupabaseFacultyRepository',
+        );
+      }
+    }
+
+    if (courseIds.isNotEmpty) {
+      try {
+        for (final cId in courseIds) {
+          await client
+              .from('courses')
+              .update({'instructor_id': linkedEntityId})
+              .eq('id', cId);
+        }
+      } catch (e) {
+        assignmentFailed = true;
+        final crsMsg = 'Course assignments incomplete: $e';
+        assignmentError = assignmentError != null
+            ? '$assignmentError; $crsMsg'
+            : crsMsg;
+        developer.log(
+          'Error updating course instructor: $e',
+          name: 'SupabaseFacultyRepository',
+        );
+      }
+    }
+
+    // 5. Retrieve full resulting Faculty entity and validate profile relationship
+    final resultingFaculty = await getFacultyById(linkedEntityId);
+    if (resultingFaculty == null) {
+      throw const FacultyProvisioningException(
+        message: 'Instructor account was provisioned, but the database record could not be retrieved.',
+        statusCode: 500,
+        isPartialFailure: true,
+      );
+    }
+
+    if (resultingFaculty.profileId == null ||
+        resultingFaculty.profileId!.trim().isEmpty) {
+      throw const FacultyProvisioningException(
+        message: 'Instructor record was provisioned, but authentication profile relationship is missing.',
+        statusCode: 500,
+        isPartialFailure: true,
+      );
+    }
+
+    final returnedUserId = responseData['userId']?.toString();
+    if (returnedUserId != null &&
+        returnedUserId.isNotEmpty &&
+        resultingFaculty.profileId != returnedUserId) {
+      throw const FacultyProvisioningException(
+        message: 'Instructor provisioning integrity failure: linked profile does not match authentication user identity.',
+        statusCode: 500,
+        isPartialFailure: true,
+      );
+    }
+
+    final isExisting = statusCode == 200;
+    final inviteSent = responseData['invitationSent'] == true;
+    final message =
+        responseData['message']?.toString() ??
+        (isExisting
+            ? 'Existing account recognized and linked to instructor profile.'
+            : 'Account successfully provisioned.');
+
+    return FacultyRegistrationResult(
+      faculty: resultingFaculty,
+      statusCode: statusCode,
+      isExistingUser: isExisting,
+      invitationSent: inviteSent,
+      message: message,
+      hasAssignmentWarning: assignmentFailed,
+      assignmentWarning: assignmentError,
+    );
   }
 
   @override

@@ -39,7 +39,9 @@ class AppLoadingScreen extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.25),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.25,
+                          ),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),

@@ -2,6 +2,7 @@ import '../../../categories/domain/models/course_category.dart';
 
 class Student {
   final String id;
+  final String? profileId;
   final String studentId;
   final String fullName;
   final String email;
@@ -20,6 +21,7 @@ class Student {
 
   const Student({
     required this.id,
+    this.profileId,
     required this.studentId,
     required this.fullName,
     required this.email,
@@ -44,6 +46,7 @@ class Student {
   }) {
     return Student(
       id: json['id']?.toString() ?? '',
+      profileId: json['profile_id']?.toString(),
       studentId: json['student_id']?.toString() ?? 'N/A',
       fullName: json['full_name']?.toString() ?? '',
       email: json['email']?.toString() ?? '',
@@ -66,6 +69,7 @@ class Student {
 
   Map<String, dynamic> toJson() {
     return {
+      if (profileId != null) 'profile_id': profileId,
       'student_id': studentId,
       'full_name': fullName,
       'email': email,
@@ -80,6 +84,48 @@ class Student {
       'account_status': accountStatus,
     };
   }
+}
+
+/// Represents the complete outcome of student provisioning via admin-create-user Edge Function
+class StudentRegistrationResult {
+  final Student student;
+  final int statusCode; // 201 (new account) or 200 (existing account re-linked)
+  final bool isExistingUser;
+  final bool invitationSent;
+  final String message;
+  final bool hasAssignmentWarning;
+  final String? assignmentWarning;
+
+  const StudentRegistrationResult({
+    required this.student,
+    this.statusCode = 201,
+    this.isExistingUser = false,
+    this.invitationSent = true,
+    required this.message,
+    this.hasAssignmentWarning = false,
+    this.assignmentWarning,
+  });
+}
+
+/// Explicit domain exception representing failure during Edge Function student provisioning
+class StudentProvisioningException implements Exception {
+  final String message;
+  final int statusCode;
+  final bool isPartialFailure;
+
+  const StudentProvisioningException({
+    required this.message,
+    this.statusCode = 500,
+    this.isPartialFailure = false,
+  });
+
+  bool get isConflict => statusCode == 409;
+  bool get isInvitationFailure => statusCode == 502;
+  bool get isConfigurationError => statusCode == 500 && !isPartialFailure;
+  bool get isNetworkError => statusCode == 0;
+
+  @override
+  String toString() => message;
 }
 
 class StudentCategoryLmsGroup {

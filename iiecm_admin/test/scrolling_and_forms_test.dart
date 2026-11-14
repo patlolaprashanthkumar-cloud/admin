@@ -188,7 +188,7 @@ class MockTestStudentRepo implements StudentRepository {
   @override
   Future<Student?> getStudentById(String id) async => list.first;
   @override
-  Future<Student> registerStudent({
+  Future<StudentRegistrationResult> registerStudent({
     required String fullName,
     required String email,
     required String phone,
@@ -211,7 +211,13 @@ class MockTestStudentRepo implements StudentRepository {
       createdAt: DateTime.now(),
     );
     list.add(s);
-    return s;
+    return StudentRegistrationResult(
+      student: s,
+      statusCode: 201,
+      isExistingUser: false,
+      invitationSent: true,
+      message: 'Student registered successfully',
+    );
   }
 
   @override

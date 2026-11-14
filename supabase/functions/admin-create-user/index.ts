@@ -104,7 +104,8 @@ function getProductionConfiguredDestination(role: ProvisionRole): string | null 
   const siteUrl = Deno.env.get('SITE_URL');
   if (siteUrl && siteUrl.trim().length > 0) return siteUrl.trim();
 
-  return null;
+  // Production institutional fallback URL
+  return 'https://auth.iiecm.org/auth/callback';
 }
 
 /**
@@ -339,12 +340,22 @@ serve(async (req: Request) => {
       });
     }
 
-    const callerClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY') ?? serviceRoleKey, {
-      global: { headers: { Authorization: authHeader } },
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Bearer token is required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const { data: { user: callerUser }, error: callerAuthError } = await callerClient.auth.getUser();
+    // Authorize caller by verifying JWT token
+    const { data: { user: callerUser }, error: callerAuthError } = await adminClient.auth.getUser(token);
     if (callerAuthError || !callerUser) {
+      console.error('Caller authentication failed:', callerAuthError?.message || callerAuthError);
       return new Response(JSON.stringify({ error: 'Unauthorized: Invalid or expired authentication session' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -352,8 +363,6 @@ serve(async (req: Request) => {
     }
 
     // 2. Authorize caller via public.profiles
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
-
     const { data: callerProfile, error: profileError } = await adminClient
       .from('profiles')
       .select('id, role, full_name, email')
@@ -433,10 +442,11 @@ serve(async (req: Request) => {
     let authUserId: string | null = null;
     let isExistingAuthUser = false;
 
+    // Check public.profiles first
     const { data: existingProfile } = await adminClient
       .from('profiles')
       .select('id, role, full_name, email')
-      .eq('email', normalizedEmail)
+      .ilike('email', normalizedEmail)
       .maybeSingle();
 
     if (existingProfile) {
@@ -454,6 +464,33 @@ serve(async (req: Request) => {
       }
     }
 
+    // Also proactively check auth.users directly via Admin API to catch users without a profile
+    if (!isExistingAuthUser) {
+      try {
+        const { data: userList } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+        const matchedUser = userList?.users?.find(
+          (u) => u.email?.toLowerCase() === normalizedEmail
+        );
+        if (matchedUser) {
+          authUserId = matchedUser.id;
+          isExistingAuthUser = true;
+          console.log(`Matched existing auth.users record: ${authUserId} for ${normalizedEmail}`);
+
+          const existingRole = matchedUser.user_metadata?.role;
+          if (existingRole && existingRole !== targetRole) {
+            return new Response(
+              JSON.stringify({
+                error: `Conflict: An account with email "${normalizedEmail}" already exists with role "${existingRole}". Cross-role assignment to "${targetRole}" is not permitted.`,
+              }),
+              { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+        }
+      } catch (listErr) {
+        console.warn('Notice: Proactive listUsers check failed:', listErr);
+      }
+    }
+
     // 6. Create Auth account & dispatch secure password setup email
     let invitationSent = false;
 
@@ -463,6 +500,7 @@ serve(async (req: Request) => {
         normalizedEmail,
         {
           data: {
+            email: normalizedEmail,
             full_name: fullName,
             role: targetRole,
             phone: payload.phone?.trim() || null,
@@ -472,27 +510,60 @@ serve(async (req: Request) => {
       );
 
       if (inviteError || !inviteData?.user) {
-        // Handle case where user existed in auth.users without a profiles entry
-        if (inviteError?.message?.toLowerCase().includes('already') || inviteError?.status === 422) {
-          const { data: userList } = await adminClient.auth.admin.listUsers();
-          const matchedUser = userList?.users?.find(
+        console.warn('inviteUserByEmail notice/error:', inviteError?.message, 'status:', inviteError?.status);
+
+        // Check whether user already exists in auth.users (covers "Database error saving new user", "already registered", HTTP 422, HTTP 500)
+        let resolvedUser = null;
+        try {
+          const { data: userList } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+          resolvedUser = userList?.users?.find(
             (u) => u.email?.toLowerCase() === normalizedEmail
           );
+        } catch (_) {}
 
-          if (matchedUser) {
-            authUserId = matchedUser.id;
-            isExistingAuthUser = true;
-          } else {
-            return new Response(
-              JSON.stringify({ error: `Auth service reported conflict but user could not be located: ${inviteError.message}` }),
-              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            );
+        if (resolvedUser) {
+          authUserId = resolvedUser.id;
+          isExistingAuthUser = true;
+          console.log(`Recovered existing auth user ${authUserId} after inviteUserByEmail.`);
+
+          // Dispatch password reset email for this existing user
+          const { error: resetError } = await adminClient.auth.resetPasswordForEmail(normalizedEmail, {
+            redirectTo: sanitizedRedirectTo,
+          });
+          if (!resetError) {
+            invitationSent = true;
           }
         } else {
-          return new Response(
-            JSON.stringify({ error: `Failed to dispatch invitation email: ${inviteError?.message || 'Unknown auth error'}` }),
-            { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
+          // Attempt fallback: admin.createUser
+          console.log(`Attempting fallback admin.createUser for ${normalizedEmail}`);
+          const { data: createData, error: createError } = await adminClient.auth.admin.createUser({
+            email: normalizedEmail,
+            email_confirm: false,
+            user_metadata: {
+              email: normalizedEmail,
+              full_name: fullName,
+              role: targetRole,
+              phone: payload.phone?.trim() || null,
+            },
+          });
+
+          if (createData?.user) {
+            authUserId = createData.user.id;
+            const { error: resetError } = await adminClient.auth.resetPasswordForEmail(normalizedEmail, {
+              redirectTo: sanitizedRedirectTo,
+            });
+            if (!resetError) {
+              invitationSent = true;
+            }
+          } else {
+            console.error('All user creation attempts failed:', inviteError?.message, createError?.message);
+            return new Response(
+              JSON.stringify({
+                error: `Failed to dispatch invitation email: ${inviteError?.message || createError?.message || 'Database error saving new user'}`,
+              }),
+              { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
         }
       } else {
         authUserId = inviteData.user.id;

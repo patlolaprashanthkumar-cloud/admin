@@ -173,3 +173,45 @@ class Faculty {
     );
   }
 }
+
+/// Represents the complete outcome of faculty/instructor provisioning via admin-create-user Edge Function
+class FacultyRegistrationResult {
+  final Faculty faculty;
+  final int statusCode; // 201 (new account) or 200 (existing account re-linked)
+  final bool isExistingUser;
+  final bool invitationSent;
+  final String message;
+  final bool hasAssignmentWarning;
+  final String? assignmentWarning;
+
+  const FacultyRegistrationResult({
+    required this.faculty,
+    this.statusCode = 201,
+    this.isExistingUser = false,
+    this.invitationSent = true,
+    required this.message,
+    this.hasAssignmentWarning = false,
+    this.assignmentWarning,
+  });
+}
+
+/// Explicit domain exception representing failure during Edge Function instructor provisioning
+class FacultyProvisioningException implements Exception {
+  final String message;
+  final int statusCode;
+  final bool isPartialFailure;
+
+  const FacultyProvisioningException({
+    required this.message,
+    this.statusCode = 500,
+    this.isPartialFailure = false,
+  });
+
+  bool get isConflict => statusCode == 409;
+  bool get isInvitationFailure => statusCode == 502;
+  bool get isConfigurationError => statusCode == 500 && !isPartialFailure;
+  bool get isNetworkError => statusCode == 0;
+
+  @override
+  String toString() => message;
+}

@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math';
+
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/network/supabase_client.dart';
 import '../../../categories/domain/models/course_category.dart';
@@ -175,7 +178,7 @@ class SupabaseStudentRepository implements StudentRepository {
   }
 
   @override
-  Future<Student> registerStudent({
+  Future<StudentRegistrationResult> registerStudent({
     required String fullName,
     required String email,
     required String phone,
@@ -188,7 +191,8 @@ class SupabaseStudentRepository implements StudentRepository {
   }) async {
     final client = AppSupabase.client;
 
-    // 1. Resolve first category name for backward-compatibility with preferred_category column
+    // 1. Resolve first category name for backward-compatibility
+    // with preferred_category column
     String primaryCategoryName = 'General';
     if (categoryIds.isNotEmpty) {
       try {
@@ -203,80 +207,288 @@ class SupabaseStudentRepository implements StudentRepository {
       } catch (_) {}
     }
 
-    // Generate unique student ID (e.g. IIECM2026xxxx)
+    // Generate unique institutional student ID
     final randomSuffix = (1000 + Random().nextInt(9000)).toString();
     final studentIdCode = 'IIECM${DateTime.now().year}$randomSuffix';
 
-    // 2. Insert student record
-    final studentPayload = {
-      'student_id': studentIdCode,
-      'full_name': fullName.trim(),
+    // 2. Prepare request payload for admin-create-user Edge Function
+    final edgePayload = {
       'email': email.trim().toLowerCase(),
-      'phone': phone.trim(),
-      'education_level': educationLevel.trim(),
-      'qualification': qualification.trim(),
-      'preferred_category': primaryCategoryName,
-      'subscription_plan': subscriptionPlan,
-      'subscription_status': 'active',
-      'account_status': 'active',
+      'fullName': fullName.trim(),
+      'role': 'student',
+      'phone': phone.trim().isNotEmpty ? phone.trim() : null,
+      'studentId': studentIdCode,
+      'studentIdCode': studentIdCode,
+      'educationLevel': educationLevel.trim().isNotEmpty
+          ? educationLevel.trim()
+          : 'Not specified',
+      'qualification': qualification.trim().isNotEmpty
+          ? qualification.trim()
+          : 'N/A',
+      'preferredCategory': primaryCategoryName,
       'city': city?.trim().isNotEmpty == true ? city!.trim() : null,
       'country': 'India',
+      'redirectTo': 'https://auth.iiecm.org/auth/callback',
     };
 
+    int statusCode = 201;
+    Map<String, dynamic> responseData = {};
+
     try {
-      final studentRow = await client
+      final auth = client.auth;
+      var session = auth.currentSession;
+      final nowSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      // Ensure the administrator has a fresh, valid authentication session before calling Edge Function.
+      // If the session is missing, expired, or expiring within 60s, proactively refresh it.
+      if (session == null ||
+          (session.expiresAt != null && session.expiresAt! <= (nowSeconds + 60))) {
+        try {
+          final refreshResponse = await auth.refreshSession();
+          session = refreshResponse.session ?? auth.currentSession;
+        } catch (e) {
+          developer.log(
+            'Proactive admin session refresh failed: $e',
+            name: 'SupabaseStudentRepository',
+          );
+        }
+      }
+
+      if (session == null) {
+        throw const StudentProvisioningException(
+          message:
+              'Your administrator session has expired or is invalid. Please sign out and sign in again to add students.',
+          statusCode: 401,
+        );
+      }
+
+      // Explicitly pass Authorization header with the fresh bearer token
+      Map<String, String> invokeHeaders = {
+        'Authorization': 'Bearer ${session.accessToken}',
+      };
+
+      FunctionResponse response;
+      try {
+        response = await client.functions.invoke(
+          'admin-create-user',
+          headers: invokeHeaders,
+          body: edgePayload,
+        );
+      } on FunctionException catch (fe) {
+        if (fe.status == 401) {
+          developer.log(
+            'Received 401 FunctionException. Attempting session refresh and retry...',
+            name: 'SupabaseStudentRepository',
+          );
+          try {
+            final refreshResponse = await auth.refreshSession();
+            final newSession = refreshResponse.session ?? auth.currentSession;
+            if (newSession != null) {
+              session = newSession;
+              invokeHeaders = {
+                'Authorization': 'Bearer ${newSession.accessToken}',
+              };
+              response = await client.functions.invoke(
+                'admin-create-user',
+                headers: invokeHeaders,
+                body: edgePayload,
+              );
+            } else {
+              rethrow;
+            }
+          } catch (_) {
+            rethrow;
+          }
+        } else {
+          rethrow;
+        }
+      }
+
+      statusCode = response.status;
+      if (response.data is Map) {
+        responseData = Map<String, dynamic>.from(response.data as Map);
+      } else if (response.data is String) {
+        try {
+          responseData = Map<String, dynamic>.from(
+            jsonDecode(response.data as String) as Map,
+          );
+        } catch (_) {}
+      }
+
+      if (statusCode != 200 && statusCode != 201) {
+        String errorMsg =
+            responseData['error']?.toString() ??
+            'Student provisioning failed (HTTP $statusCode)';
+        if (statusCode == 401) {
+          errorMsg =
+              'Your administrator session has expired. Please sign out and sign in again to continue.';
+        }
+        final isPartial = responseData['partialFailure'] == true;
+        throw StudentProvisioningException(
+          message: errorMsg,
+          statusCode: statusCode,
+          isPartialFailure: isPartial,
+        );
+      }
+    } on FunctionException catch (fe) {
+      final status = fe.status;
+      String errorMsg = fe.reasonPhrase ?? 'Edge Function invocation failed';
+      bool isPartial = false;
+      if (fe.details is Map) {
+        final detailsMap = Map<String, dynamic>.from(fe.details as Map);
+        if (detailsMap['error'] != null) {
+          errorMsg = detailsMap['error'].toString();
+        }
+        if (detailsMap['partialFailure'] == true) {
+          isPartial = true;
+        }
+      } else if (fe.details is String) {
+        try {
+          final parsed = jsonDecode(fe.details as String);
+          if (parsed is Map && parsed['error'] != null) {
+            errorMsg = parsed['error'].toString();
+          }
+        } catch (_) {
+          if ((fe.details as String).isNotEmpty) {
+            errorMsg = fe.details as String;
+          }
+        }
+      }
+      if (status == 401) {
+        errorMsg =
+            'Your administrator session has expired. Please sign out and sign in again to continue.';
+      }
+      throw StudentProvisioningException(
+        message: errorMsg,
+        statusCode: status,
+        isPartialFailure: isPartial,
+      );
+    } catch (e) {
+      if (e is StudentProvisioningException) rethrow;
+      throw StudentProvisioningException(
+        message:
+            'Network error or unable to reach provisioning service: ${e.toString()}',
+        statusCode: 0,
+      );
+    }
+
+    // 3. Extract linkedEntityId returned by admin-create-user
+    final linkedEntityId = responseData['linkedEntityId']?.toString();
+    if (linkedEntityId == null || linkedEntityId.isEmpty) {
+      throw const StudentProvisioningException(
+        message: 'Edge Function succeeded, but no linked student entity ID was returned.',
+        statusCode: 500,
+        isPartialFailure: true,
+      );
+    }
+
+    // 4. Retrieve resulting student record created or linked by Edge Function
+    Map<String, dynamic>? studentRow;
+    try {
+      studentRow = await client
           .from('students')
-          .insert(studentPayload)
-          .select()
-          .single();
-      final createdStudentId = studentRow['id'].toString();
-
-      // 3. Insert into student_categories junction table (MULTI-CATEGORY SUPPORT)
-      if (categoryIds.isNotEmpty) {
-        final catInserts = categoryIds
-            .map((cid) => {'student_id': createdStudentId, 'category_id': cid})
-            .toList();
-
-        try {
-          await client.from('student_categories').insert(catInserts);
-        } catch (e) {
-          developer.log(
-            'Error inserting student_categories: $e',
-            name: 'SupabaseStudentRepository',
-          );
-        }
-      }
-
-      // 4. Insert into course_enrollments
-      if (courseIds.isNotEmpty) {
-        final enrollInserts = courseIds
-            .map(
-              (cid) => {
-                'student_id': createdStudentId,
-                'course_id': cid,
-                'status': 'active',
-              },
-            )
-            .toList();
-
-        try {
-          await client.from('course_enrollments').insert(enrollInserts);
-        } catch (e) {
-          developer.log(
-            'Error inserting course_enrollments: $e',
-            name: 'SupabaseStudentRepository',
-          );
-        }
-      }
-
-      return Student.fromJson(studentRow, enrolledCourseIds: courseIds);
+          .select('*')
+          .eq('id', linkedEntityId)
+          .maybeSingle();
     } catch (e) {
       developer.log(
-        'Error registering student: $e',
+        'Warning: Failed to fetch student row after provisioning: $e',
         name: 'SupabaseStudentRepository',
       );
-      rethrow;
     }
+
+    if (studentRow == null) {
+      throw StudentProvisioningException(
+        message:
+            'Student account was provisioned, but the database record ($linkedEntityId) could not be retrieved.',
+        statusCode: 500,
+        isPartialFailure: true,
+      );
+    }
+
+    // 5. Perform junction table category and course enrollment assignments
+    bool assignmentFailed = false;
+    String? assignmentError;
+
+    if (categoryIds.isNotEmpty) {
+      final catInserts = categoryIds
+          .map((cid) => {'student_id': linkedEntityId, 'category_id': cid})
+          .toList();
+
+      try {
+        await client.from('student_categories').insert(catInserts);
+      } catch (e) {
+        assignmentFailed = true;
+        assignmentError = 'Category assignments incomplete: $e';
+        developer.log(
+          'Error inserting student_categories: $e',
+          name: 'SupabaseStudentRepository',
+        );
+      }
+    }
+
+    if (courseIds.isNotEmpty) {
+      final enrollInserts = courseIds
+          .map(
+            (cid) => {
+              'student_id': linkedEntityId,
+              'course_id': cid,
+              'status': 'active',
+            },
+          )
+          .toList();
+
+      try {
+        await client.from('course_enrollments').insert(enrollInserts);
+      } catch (e) {
+        assignmentFailed = true;
+        assignmentError = assignmentError != null
+            ? '$assignmentError; Course enrollments incomplete: $e'
+            : 'Course enrollments incomplete: $e';
+        developer.log(
+          'Error inserting course_enrollments: $e',
+          name: 'SupabaseStudentRepository',
+        );
+      }
+    }
+
+    // 6. Resolve category models for the returned Student instance
+    final List<CourseCategory> assignedCats = [];
+    if (categoryIds.isNotEmpty) {
+      try {
+        final catRows = await client
+            .from('course_categories')
+            .select('*')
+            .inFilter('id', categoryIds);
+        for (final c in catRows) {
+          assignedCats.add(CourseCategory.fromJson(c));
+        }
+      } catch (_) {}
+    }
+
+    final student = Student.fromJson(
+      studentRow,
+      assignedCategories: assignedCats,
+      enrolledCourseIds: courseIds,
+    );
+
+    final isExisting = statusCode == 200;
+    final inviteSent = responseData['invitationSent'] == true;
+    final message =
+        responseData['message']?.toString() ??
+        (isExisting
+            ? 'Existing account recognized and re-linked.'
+            : 'Account successfully provisioned.');
+
+    return StudentRegistrationResult(
+      student: student,
+      statusCode: statusCode,
+      isExistingUser: isExisting,
+      invitationSent: inviteSent,
+      message: message,
+      hasAssignmentWarning: assignmentFailed,
+      assignmentWarning: assignmentError,
+    );
   }
 
   @override

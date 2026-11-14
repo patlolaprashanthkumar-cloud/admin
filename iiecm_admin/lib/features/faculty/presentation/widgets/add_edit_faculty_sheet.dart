@@ -43,6 +43,7 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
   final Set<String> _selectedCourseIds = {};
 
   bool _isSubmitting = false;
+  String? _submissionError;
 
   bool get isEditing => widget.faculty != null;
 
@@ -86,7 +87,10 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isSubmitting = true;
+      _submissionError = null;
+    });
 
     try {
       final notifier = ref.read(facultyNotifierProvider.notifier);
@@ -108,45 +112,99 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
         createdAt: widget.faculty?.createdAt ?? DateTime.now(),
       );
 
-      bool success;
       if (isEditing) {
-        success = await notifier.updateFaculty(
+        final success = await notifier.updateFaculty(
           facultyData,
           categoryIds: _selectedCategoryIds.toList(),
           courseIds: _selectedCourseIds.toList(),
         );
-      } else {
-        success = await notifier.createFaculty(
-          facultyData,
-          categoryIds: _selectedCategoryIds.toList(),
-          courseIds: _selectedCourseIds.toList(),
-        );
-      }
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      if (success) {
-        Navigator.of(context).pop(true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              isEditing
-                  ? 'Faculty updated successfully'
-                  : 'Faculty registered successfully',
+        if (success) {
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Faculty updated successfully'),
+              backgroundColor: AppColors.primaryForest,
             ),
-            backgroundColor: AppColors.primaryForest,
-          ),
-        );
+          );
+        } else {
+          final serverErr = ref.read(facultyNotifierProvider).errorMessage;
+          setState(() {
+            _submissionError = serverErr ?? 'Failed to update faculty profile.';
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(_submissionError!),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(notifier.errorMessage ?? 'Operation failed'),
-            backgroundColor: AppColors.error,
-          ),
+        final result = await notifier.createFaculty(
+          facultyData,
+          categoryIds: _selectedCategoryIds.toList(),
+          courseIds: _selectedCourseIds.toList(),
         );
+
+        if (!mounted) return;
+
+        if (result != null) {
+          String feedbackMessage;
+          Color snackColor = AppColors.primaryForest;
+
+          if (result.hasAssignmentWarning) {
+            snackColor = AppColors.warning;
+            feedbackMessage =
+                'Instructor account provisioned for ${result.faculty.fullName}, but assignment warning: ${result.assignmentWarning}';
+          } else if (result.isExistingUser) {
+            if (result.invitationSent) {
+              snackColor = AppColors.info;
+              feedbackMessage =
+                  'Existing account recognized for ${result.faculty.fullName}. Profile linked and password activation link dispatched!';
+            } else {
+              snackColor = AppColors.warning;
+              feedbackMessage =
+                  'Existing account recognized and linked for ${result.faculty.fullName}, but password activation email dispatch could not be confirmed.';
+            }
+          } else if (result.invitationSent) {
+            snackColor = AppColors.success;
+            feedbackMessage =
+                'Faculty member ${result.faculty.fullName} provisioned! Setup invitation sent to ${result.faculty.email}.';
+          } else {
+            snackColor = AppColors.warning;
+            feedbackMessage =
+                'Faculty member ${result.faculty.fullName} provisioned, but setup invitation email dispatch could not be confirmed.';
+          }
+
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: snackColor,
+              duration: const Duration(seconds: 4),
+              content: Text(feedbackMessage),
+            ),
+          );
+        } else {
+          final serverErr = ref.read(facultyNotifierProvider).errorMessage;
+          setState(() {
+            _submissionError = serverErr ?? 'Failed to register faculty member. Please verify the information and retry.';
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(_submissionError!),
+              backgroundColor: AppColors.error,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
+        setState(() {
+          _submissionError = 'Error: $e';
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
@@ -276,6 +334,41 @@ class _AddEditFacultySheetState extends ConsumerState<AddEditFacultySheet> {
                     vertical: 16,
                   ),
                   children: [
+                    if (_submissionError != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.error.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              color: AppColors.error,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _submissionError!,
+                                style: const TextStyle(
+                                  color: AppColors.error,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
                     // Full Name
                     TextFormField(
                       controller: _nameController,

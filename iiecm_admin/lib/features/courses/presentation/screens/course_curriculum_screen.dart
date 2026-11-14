@@ -79,7 +79,10 @@ class _CourseCurriculumScreenState
             children: [
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     const Icon(
@@ -170,7 +173,9 @@ class _CourseCurriculumScreenState
                         ),
                       ),
                       onPressed: () {
-                        Clipboard.setData(ClipboardData(text: lesson.contentUrl!));
+                        Clipboard.setData(
+                          ClipboardData(text: lesson.contentUrl!),
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Image link copied to clipboard'),
@@ -179,7 +184,10 @@ class _CourseCurriculumScreenState
                         );
                       },
                       icon: const Icon(Icons.copy_rounded, size: 14),
-                      label: const Text('Copy Link', style: TextStyle(fontSize: 11)),
+                      label: const Text(
+                        'Copy Link',
+                        style: TextStyle(fontSize: 11),
+                      ),
                     ),
                   ],
                 ),
@@ -193,7 +201,8 @@ class _CourseCurriculumScreenState
 
   void _showContentDetailsDialog(CourseLesson lesson) {
     final typeColor = _getTypeColor(lesson.type);
-    final hasUrl = lesson.contentUrl != null && lesson.contentUrl!.trim().isNotEmpty;
+    final hasUrl =
+        lesson.contentUrl != null && lesson.contentUrl!.trim().isNotEmpty;
 
     showModalBottomSheet(
       context: context,
@@ -234,7 +243,11 @@ class _CourseCurriculumScreenState
                       color: typeColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Icon(_getTypeIcon(lesson), color: typeColor, size: 24),
+                    child: Icon(
+                      _getTypeIcon(lesson),
+                      color: typeColor,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -309,7 +322,9 @@ class _CourseCurriculumScreenState
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkBackground : AppColors.warmCream,
+                    color: isDark
+                        ? AppColors.darkBackground
+                        : AppColors.warmCream,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isDark ? AppColors.darkBorder : AppColors.divider,
@@ -335,7 +350,9 @@ class _CourseCurriculumScreenState
                         icon: const Icon(Icons.copy_rounded, size: 16),
                         tooltip: 'Copy link',
                         onPressed: () {
-                          Clipboard.setData(ClipboardData(text: lesson.contentUrl!));
+                          Clipboard.setData(
+                            ClipboardData(text: lesson.contentUrl!),
+                          );
                           Navigator.of(ctx).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -377,7 +394,9 @@ class _CourseCurriculumScreenState
                           foregroundColor: Colors.white,
                         ),
                         onPressed: () {
-                          Clipboard.setData(ClipboardData(text: lesson.contentUrl!));
+                          Clipboard.setData(
+                            ClipboardData(text: lesson.contentUrl!),
+                          );
                           Navigator.of(ctx).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -598,11 +617,7 @@ class _CourseCurriculumScreenState
         color: typeColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Icon(
-        _getTypeIcon(lesson),
-        color: typeColor,
-        size: 22,
-      ),
+      child: Icon(_getTypeIcon(lesson), color: typeColor, size: 22),
     );
   }
 
@@ -1053,7 +1068,9 @@ class _CourseCurriculumScreenState
                                       const SizedBox(height: 8),
                                   itemBuilder: (context, lIdx) {
                                     final lesson = mod.lessons[lIdx];
-                                    final typeColor = _getTypeColor(lesson.type);
+                                    final typeColor = _getTypeColor(
+                                      lesson.type,
+                                    );
 
                                     return InkWell(
                                       borderRadius: BorderRadius.circular(
@@ -1100,7 +1117,8 @@ class _CourseCurriculumScreenState
                                                     lesson.title,
                                                     style: const TextStyle(
                                                       fontSize: 13,
-                                                      fontWeight: FontWeight.w700,
+                                                      fontWeight:
+                                                          FontWeight.w700,
                                                     ),
                                                   ),
                                                   const SizedBox(height: 4),
@@ -1108,7 +1126,8 @@ class _CourseCurriculumScreenState
                                                     spacing: 6,
                                                     runSpacing: 4,
                                                     crossAxisAlignment:
-                                                        WrapCrossAlignment.center,
+                                                        WrapCrossAlignment
+                                                            .center,
                                                     children: [
                                                       Container(
                                                         padding:
@@ -1127,7 +1146,8 @@ class _CourseCurriculumScreenState
                                                               ),
                                                         ),
                                                         child: Text(
-                                                          lesson.typeDisplayLabel
+                                                          lesson
+                                                              .typeDisplayLabel
                                                               .toUpperCase(),
                                                           style: TextStyle(
                                                             fontSize: 9,
@@ -1137,14 +1157,16 @@ class _CourseCurriculumScreenState
                                                           ),
                                                         ),
                                                       ),
-                                                      if (lesson.durationMinutes >
+                                                      if (lesson
+                                                              .durationMinutes >
                                                           0) ...[
                                                         Row(
                                                           mainAxisSize:
                                                               MainAxisSize.min,
                                                           children: [
                                                             const Icon(
-                                                              Icons.timer_outlined,
+                                                              Icons
+                                                                  .timer_outlined,
                                                               size: 11,
                                                               color: AppColors
                                                                   .textSecondary,
@@ -1154,8 +1176,7 @@ class _CourseCurriculumScreenState
                                                             ),
                                                             Text(
                                                               '${lesson.durationMinutes}m',
-                                                              style:
-                                                                  const TextStyle(
+                                                              style: const TextStyle(
                                                                 fontSize: 10.5,
                                                                 color: AppColors
                                                                     .textSecondary,
@@ -1166,7 +1187,8 @@ class _CourseCurriculumScreenState
                                                       ],
                                                       if (lesson.contentUrl !=
                                                               null &&
-                                                          lesson.contentUrl!
+                                                          lesson
+                                                              .contentUrl!
                                                               .isNotEmpty) ...[
                                                         Row(
                                                           mainAxisSize:
@@ -1175,9 +1197,9 @@ class _CourseCurriculumScreenState
                                                             Icon(
                                                               lesson.isImage
                                                                   ? Icons
-                                                                      .zoom_in_rounded
+                                                                        .zoom_in_rounded
                                                                   : Icons
-                                                                      .link_rounded,
+                                                                        .link_rounded,
                                                               size: 11,
                                                               color: typeColor,
                                                             ),
@@ -1188,7 +1210,7 @@ class _CourseCurriculumScreenState
                                                               lesson.isImage
                                                                   ? 'Preview'
                                                                   : (lesson.fileName ??
-                                                                      'Link'),
+                                                                        'Link'),
                                                               maxLines: 1,
                                                               overflow:
                                                                   TextOverflow
@@ -1198,7 +1220,8 @@ class _CourseCurriculumScreenState
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .w600,
-                                                                color: typeColor,
+                                                                color:
+                                                                    typeColor,
                                                               ),
                                                             ),
                                                           ],
@@ -1218,25 +1241,33 @@ class _CourseCurriculumScreenState
                                               onSelected: (val) {
                                                 if (val == 'view') {
                                                   if (lesson.isImage) {
-                                                    _showImagePreviewDialog(lesson);
+                                                    _showImagePreviewDialog(
+                                                      lesson,
+                                                    );
                                                   } else {
-                                                    _showContentDetailsDialog(lesson);
+                                                    _showContentDetailsDialog(
+                                                      lesson,
+                                                    );
                                                   }
                                                 } else if (val == 'copy_link') {
-                                                  if (lesson.contentUrl != null) {
+                                                  if (lesson.contentUrl !=
+                                                      null) {
                                                     Clipboard.setData(
                                                       ClipboardData(
-                                                        text: lesson.contentUrl!,
+                                                        text:
+                                                            lesson.contentUrl!,
                                                       ),
                                                     );
-                                                    ScaffoldMessenger.of(context)
-                                                        .showSnackBar(
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
                                                       const SnackBar(
                                                         content: Text(
                                                           'Link copied to clipboard',
                                                         ),
-                                                        duration:
-                                                            Duration(seconds: 1),
+                                                        duration: Duration(
+                                                          seconds: 1,
+                                                        ),
                                                       ),
                                                     );
                                                   }
@@ -1258,19 +1289,25 @@ class _CourseCurriculumScreenState
                                               },
                                               itemBuilder: (ctx) => [
                                                 if (lesson.contentUrl != null &&
-                                                    lesson.contentUrl!.isNotEmpty) ...[
+                                                    lesson
+                                                        .contentUrl!
+                                                        .isNotEmpty) ...[
                                                   PopupMenuItem(
                                                     value: 'view',
                                                     child: Row(
                                                       children: [
                                                         Icon(
                                                           lesson.isImage
-                                                              ? Icons.zoom_in_rounded
-                                                              : Icons.visibility_outlined,
+                                                              ? Icons
+                                                                    .zoom_in_rounded
+                                                              : Icons
+                                                                    .visibility_outlined,
                                                           size: 16,
                                                           color: typeColor,
                                                         ),
-                                                        const SizedBox(width: 8),
+                                                        const SizedBox(
+                                                          width: 8,
+                                                        ),
                                                         Text(
                                                           lesson.isImage
                                                               ? 'View Full Image'
@@ -1311,7 +1348,8 @@ class _CourseCurriculumScreenState
                                                   child: Row(
                                                     children: [
                                                       Icon(
-                                                        Icons.delete_outline_rounded,
+                                                        Icons
+                                                            .delete_outline_rounded,
                                                         size: 16,
                                                         color: AppColors.error,
                                                       ),
@@ -1319,7 +1357,8 @@ class _CourseCurriculumScreenState
                                                       Text(
                                                         'Delete Item',
                                                         style: TextStyle(
-                                                          color: AppColors.error,
+                                                          color:
+                                                              AppColors.error,
                                                         ),
                                                       ),
                                                     ],

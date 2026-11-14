@@ -1,46 +1,252 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import 'providers/auth_provider.dart';
+import 'providers/auth_state.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _studentIdController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
-    _studentIdController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleSignIn() async {
+  Future<void> _handleSignIn() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    // Dismiss keyboard
+    FocusScope.of(context).unfocus();
 
-    // Simulated local transition for Phase 1 foundation UI
-    await Future.delayed(const Duration(milliseconds: 600));
+    final success = await ref.read(authNotifierProvider.notifier).login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
 
+    // If successful, router redirect guard will automatically navigate to '/'
     if (!mounted) return;
-    setState(() => _isLoading = false);
 
-    // Navigate to the main student shell dashboard
-    context.go('/');
+    if (!success) {
+      final authState = ref.read(authNotifierProvider);
+      final error = authState.errorMessage;
+      if (error != null && error.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text(error)),
+              ],
+            ),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showForgotPasswordSheet() {
+    final resetEmailController = TextEditingController(text: _emailController.text.trim());
+    bool isSending = false;
+    String? resetError;
+    String? resetSuccess;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            final theme = Theme.of(ctx);
+            final isDark = theme.brightness == Brightness.dark;
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppColors.darkSurface : AppColors.white,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppConstants.radiusXl),
+                  ),
+                ),
+                padding: const EdgeInsets.all(AppConstants.spacingLg),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.border,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusFull),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingMd),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.forestSoft,
+                            borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          ),
+                          child: const Icon(Icons.lock_reset_rounded, color: AppColors.primaryForest),
+                        ),
+                        const SizedBox(width: AppConstants.spacingSm),
+                        Expanded(
+                          child: Text(
+                            'Reset Student Password',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.spacingSm),
+                    Text(
+                      'Enter your registered student email address. We will send a secure password reset link pointing to the IIECM Authentication Portal (auth.iiecm.org).',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingMd),
+
+                    if (resetSuccess != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(AppConstants.spacingSm),
+                        decoration: BoxDecoration(
+                          color: AppColors.forestSoft,
+                          borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                          border: Border.all(color: AppColors.primaryForest.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle_rounded, color: AppColors.primaryForest, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                resetSuccess!,
+                                style: const TextStyle(color: AppColors.primaryForest, fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingMd),
+                    ],
+
+                    if (resetError != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(AppConstants.spacingSm),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFDE8E8),
+                          borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                resetError!,
+                                style: const TextStyle(color: AppColors.error, fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingMd),
+                    ],
+
+                    TextFormField(
+                      controller: resetEmailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'Registered Student Email',
+                        hintText: 'e.g. student@iiecm.org',
+                        prefixIcon: Icon(Icons.email_outlined, size: 20),
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    AppButton(
+                      label: isSending ? 'Sending Link...' : 'Send Password Reset Link',
+                      isLoading: isSending,
+                      icon: Icons.send_rounded,
+                      onPressed: isSending
+                          ? null
+                          : () async {
+                              final email = resetEmailController.text.trim();
+                              if (email.isEmpty || !email.contains('@')) {
+                                setModalState(() {
+                                  resetError = 'Please enter a valid registered email address.';
+                                });
+                                return;
+                              }
+
+                              setModalState(() {
+                                isSending = true;
+                                resetError = null;
+                                resetSuccess = null;
+                              });
+
+                              try {
+                                await ref.read(authNotifierProvider.notifier).sendPasswordReset(email);
+                                setModalState(() {
+                                  isSending = false;
+                                  resetSuccess = 'Password reset instructions have been dispatched to $email.';
+                                });
+                              } catch (e) {
+                                setModalState(() {
+                                  isSending = false;
+                                  resetError = e.toString();
+                                });
+                              }
+                            },
+                    ),
+                    const SizedBox(height: AppConstants.spacingSm),
+                    AppButton(
+                      label: 'Back to Sign In',
+                      variant: AppButtonVariant.outline,
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                    ),
+                    const SizedBox(height: AppConstants.spacingSm),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showHelpSheet() {
@@ -85,17 +291,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Icon(Icons.help_outline_rounded, color: AppColors.primaryForest),
                   ),
                   const SizedBox(width: AppConstants.spacingSm),
-                  Text(
-                    'Student Credential Support',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: Text(
+                      'Student Credential Support',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: AppConstants.spacingMd),
               Text(
-                'Student accounts are provisioned by the IIECM Academic Registrar upon enrollment.\n\nIf you have forgotten your password or Student ID, please contact the Registrar Office or your batch mentor with your registration receipt.',
+                'Student accounts are provisioned by the IIECM Academic Registrar upon enrollment.\n\n'
+                '• Use the email address registered during your student enrollment.\n'
+                '• If you recently received an invitation email, click the link to set your password at auth.iiecm.org first.\n'
+                '• If you require assistance, contact the Registrar Office at registrar@iiecm.org.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                   height: 1.5,
@@ -119,6 +330,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final authState = ref.watch(authNotifierProvider);
+    final isLoading = authState.isLoading;
 
     return Scaffold(
       body: SafeArea(
@@ -145,7 +358,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: isDark ? AppColors.forestDark : AppColors.forestSoft,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isDark ? AppColors.forestLight : AppColors.primaryForest.withValues(alpha: 0.2),
+                            color: isDark
+                                ? AppColors.forestLight
+                                : AppColors.primaryForest.withValues(alpha: 0.2),
                             width: 2,
                           ),
                         ),
@@ -179,14 +394,109 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: AppConstants.spacingSm),
                     Text(
-                      'Sign in with your Student ID or registered email to access your enrolled courses and assessments.',
+                      'Sign in with your registered student email address to access your courses, timetable, and clinical assessments.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                         fontSize: 13,
                       ),
                     ),
-                    const SizedBox(height: AppConstants.spacingXl),
+                    const SizedBox(height: AppConstants.spacingLg),
+
+                    // Backend Configuration Warning Banner
+                    if (authState.isUnconfigured) ...[
+                      Container(
+                        padding: const EdgeInsets.all(AppConstants.spacingMd),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFFBEB),
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          border: Border.all(color: const Color(0xFFFDE68A)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 20),
+                            const SizedBox(width: AppConstants.spacingSm),
+                            Expanded(
+                              child: Text(
+                                'Supabase is not configured. Run the app with: flutter run --dart-define-from-file=.env.json',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: const Color(0xFF92400E),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingMd),
+                    ],
+
+                    // Verification Error / Retry Alert Banner
+                    if (authState.status == AuthStatus.verificationError) ...[
+                      Container(
+                        padding: const EdgeInsets.all(AppConstants.spacingMd),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          border: Border.all(color: const Color(0xFFFECACA)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.wifi_off_rounded, color: AppColors.error, size: 20),
+                                const SizedBox(width: AppConstants.spacingSm),
+                                Expanded(
+                                  child: Text(
+                                    authState.errorMessage ?? 'Network error connecting to student database.',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: AppColors.error,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppConstants.spacingSm),
+                            AppButton(
+                              label: 'Retry Connection',
+                              icon: Icons.refresh_rounded,
+                              variant: AppButtonVariant.outline,
+                              onPressed: () => ref.read(authNotifierProvider.notifier).retryVerification(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingMd),
+                    ] else if (authState.errorMessage != null && !authState.isUnconfigured) ...[
+                      // Error message banner
+                      Container(
+                        padding: const EdgeInsets.all(AppConstants.spacingMd),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          border: Border.all(color: const Color(0xFFFECACA)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
+                            const SizedBox(width: AppConstants.spacingSm),
+                            Expanded(
+                              child: Text(
+                                authState.errorMessage!,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.error,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppConstants.spacingMd),
+                    ],
 
                     // Card Form Container
                     AppCard(
@@ -194,9 +504,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Student ID / Email Field
+                          // Registered Email Field
                           Text(
-                            'Student ID or Email',
+                            'Registered Email',
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
@@ -204,16 +514,20 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: AppConstants.spacingSm),
                           TextFormField(
-                            controller: _studentIdController,
+                            controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
                             decoration: const InputDecoration(
-                              hintText: 'e.g. STU-2026-089 or student@iiecm.org',
-                              prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
+                              hintText: 'e.g. student@iiecm.org',
+                              prefixIcon: Icon(Icons.email_outlined, size: 20),
                             ),
                             validator: (val) {
                               if (val == null || val.trim().isEmpty) {
-                                return 'Please enter your Student ID or Email';
+                                return 'Please enter your registered student email';
+                              }
+                              final trimmed = val.trim();
+                              if (!trimmed.contains('@') || !trimmed.contains('.')) {
+                                return 'Please enter a valid email address';
                               }
                               return null;
                             },
@@ -235,7 +549,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _handleSignIn(),
                             decoration: InputDecoration(
-                              hintText: 'Enter your account password',
+                              hintText: 'Enter your student portal password',
                               prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -289,7 +603,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               ),
                               TextButton(
-                                onPressed: _showHelpSheet,
+                                onPressed: _showForgotPasswordSheet,
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   minimumSize: Size.zero,
@@ -309,20 +623,34 @@ class _LoginScreenState extends State<LoginScreen> {
 
                           // Sign In Button
                           AppButton(
-                            label: 'Sign In to Portal',
+                            label: 'Sign In to Student Portal',
                             icon: Icons.login_rounded,
-                            isLoading: _isLoading,
-                            onPressed: _handleSignIn,
+                            isLoading: isLoading,
+                            onPressed: isLoading ? null : _handleSignIn,
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: AppConstants.spacingLg),
+                    const SizedBox(height: AppConstants.spacingMd),
+
+                    // Help & Enrollment Guidance Button
+                    Center(
+                      child: TextButton.icon(
+                        onPressed: _showHelpSheet,
+                        icon: const Icon(Icons.help_outline_rounded, size: 16),
+                        label: const Text('New Student or Need Help?'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.spacingSm),
 
                     // Academic Security Banner
                     Center(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(
                             Icons.verified_user_outlined,
@@ -330,11 +658,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: AppColors.textMuted,
                           ),
                           const SizedBox(width: AppConstants.spacingXs),
-                          Text(
-                            'Authorized Student & Candidate Access Only',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontSize: 11,
-                              color: AppColors.textMuted,
+                          Flexible(
+                            child: Text(
+                              'Authorized Student & Candidate Access Only',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 11,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ),
                         ],
@@ -350,4 +681,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

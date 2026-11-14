@@ -50,7 +50,7 @@ class MockStudentRepository implements StudentRepository {
   }
 
   @override
-  Future<Student> registerStudent({
+  Future<StudentRegistrationResult> registerStudent({
     required String fullName,
     required String email,
     required String phone,
@@ -77,6 +77,7 @@ class MockStudentRepository implements StudentRepository {
 
     final newStudent = Student(
       id: 'student-${store.length + 1}',
+      profileId: 'profile-${store.length + 1}',
       studentId: 'IIECM-${store.length + 100}',
       fullName: fullName,
       email: email,
@@ -94,7 +95,13 @@ class MockStudentRepository implements StudentRepository {
       enrolledCourseIds: courseIds,
     );
     store.add(newStudent);
-    return newStudent;
+    return StudentRegistrationResult(
+      student: newStudent,
+      statusCode: 201,
+      isExistingUser: false,
+      invitationSent: true,
+      message: 'Account successfully provisioned. Invitation email dispatched with password setup link.',
+    );
   }
 
   @override
@@ -292,6 +299,7 @@ void main() {
       () {
         final student = Student(
           id: 'temp-id',
+          profileId: 'prof-uuid-123',
           studentId: 'IIECM-STU-099',
           fullName: 'Dr. John Doe',
           email: 'john@iiecm.com',
@@ -306,11 +314,115 @@ void main() {
 
         final json = student.toJson();
 
+        expect(json['profile_id'], 'prof-uuid-123');
         expect(json['student_id'], 'IIECM-STU-099');
         expect(json['full_name'], 'Dr. John Doe');
         expect(json['email'], 'john@iiecm.com');
         expect(json['city'], 'Mumbai');
         expect(json['preferred_category'], 'Pediatric Emergency');
+      },
+    );
+
+    test(
+      'Student.fromJson deserializes profile_id and handles null profile_id',
+      () {
+        final withProfile = Student.fromJson({
+          'id': 'std-1',
+          'profile_id': 'profile-abc-789',
+          'student_id': 'IIECM-1',
+          'full_name': 'Dr. Test',
+          'email': 'test@iiecm.org',
+        });
+        expect(withProfile.profileId, 'profile-abc-789');
+
+        final withoutProfile = Student.fromJson({
+          'id': 'std-2',
+          'student_id': 'IIECM-2',
+          'full_name': 'Dr. Test 2',
+          'email': 'test2@iiecm.org',
+        });
+        expect(withoutProfile.profileId, isNull);
+        expect(withoutProfile.toJson().containsKey('profile_id'), isFalse);
+      },
+    );
+
+    test('StudentRegistrationResult encapsulates provisioning metadata', () {
+      final sampleStudent = Student(
+        id: 's-1',
+        profileId: 'p-1',
+        studentId: 'IIECM-001',
+        fullName: 'Jane Doe',
+        email: 'jane@example.com',
+        phone: '1234567890',
+        educationLevel: 'Graduate',
+        qualification: 'BSc',
+        preferredCategory: 'General',
+        createdAt: DateTime.now(),
+      );
+
+      final result201 = StudentRegistrationResult(
+        student: sampleStudent,
+        statusCode: 201,
+        isExistingUser: false,
+        invitationSent: true,
+        message: 'Account provisioned successfully.',
+      );
+      expect(result201.statusCode, 201);
+      expect(result201.isExistingUser, isFalse);
+      expect(result201.invitationSent, isTrue);
+      expect(result201.hasAssignmentWarning, isFalse);
+
+      final resultWarning = StudentRegistrationResult(
+        student: sampleStudent,
+        statusCode: 201,
+        isExistingUser: false,
+        invitationSent: true,
+        message: 'Account provisioned.',
+        hasAssignmentWarning: true,
+        assignmentWarning: 'Course enrollment failed: Table locked',
+      );
+      expect(resultWarning.hasAssignmentWarning, isTrue);
+      expect(resultWarning.assignmentWarning, contains('Table locked'));
+    });
+
+    test(
+      'StudentProvisioningException helper getters classify status codes',
+      () {
+        const conflictEx = StudentProvisioningException(
+          message: 'Conflict: User already registered',
+          statusCode: 409,
+        );
+        expect(conflictEx.isConflict, isTrue);
+        expect(conflictEx.isInvitationFailure, isFalse);
+        expect(conflictEx.isConfigurationError, isFalse);
+        expect(conflictEx.isNetworkError, isFalse);
+
+        const inviteEx = StudentProvisioningException(
+          message: 'Invitation failed',
+          statusCode: 502,
+        );
+        expect(inviteEx.isInvitationFailure, isTrue);
+
+        const partialEx = StudentProvisioningException(
+          message: 'Auth user created, but student record insertion failed',
+          statusCode: 500,
+          isPartialFailure: true,
+        );
+        expect(partialEx.isPartialFailure, isTrue);
+        expect(partialEx.isConfigurationError, isFalse);
+
+        const configEx = StudentProvisioningException(
+          message: 'Backend misconfigured',
+          statusCode: 500,
+          isPartialFailure: false,
+        );
+        expect(configEx.isConfigurationError, isTrue);
+
+        const netEx = StudentProvisioningException(
+          message: 'Network unreachable',
+          statusCode: 0,
+        );
+        expect(netEx.isNetworkError, isTrue);
       },
     );
 
@@ -473,12 +585,66 @@ void main() {
         );
 
         expect(created, isNotNull);
-        expect(created!.fullName, 'Kavita Joshi');
-        expect(created.assignedCategories.length, 2);
+        expect(created!.student.fullName, 'Kavita Joshi');
+        expect(created.student.assignedCategories.length, 2);
+        expect(created.statusCode, 201);
+        expect(created.isExistingUser, isFalse);
+        expect(created.invitationSent, isTrue);
         expect(notifier.state.students.length, 3);
       },
     );
+
+    test(
+      'StudentsNotifier surfaces StudentProvisioningException error message',
+      () async {
+        final failingRepo = MockFailingStudentRepository(
+          const StudentProvisioningException(
+            message: 'An account with this email address already exists.',
+            statusCode: 409,
+          ),
+        );
+        final notifier = StudentsNotifier(failingRepo);
+        await notifier.loadStudents();
+
+        final result = await notifier.registerStudent(
+          fullName: 'Duplicate User',
+          email: 'duplicate@hospital.org',
+          phone: '9999900099',
+          educationLevel: 'Resident',
+          qualification: 'MBBS',
+          categoryIds: ['cat-a'],
+          courseIds: [],
+        );
+
+        expect(result, isNull);
+        expect(
+          notifier.state.errorMessage,
+          'An account with this email address already exists.',
+        );
+        expect(notifier.state.isLoading, isFalse);
+      },
+    );
   });
+}
+
+class MockFailingStudentRepository extends MockStudentRepository {
+  final StudentProvisioningException exceptionToThrow;
+  MockFailingStudentRepository(this.exceptionToThrow);
+
+  @override
+  Future<StudentRegistrationResult> registerStudent({
+    required String fullName,
+    required String email,
+    required String phone,
+    required String educationLevel,
+    required String qualification,
+    required List<String> categoryIds,
+    required List<String> courseIds,
+    String? city,
+    String subscriptionPlan = 'basic',
+  }) async {
+    throw exceptionToThrow;
+  }
 }
 
 extension on StudentsState {

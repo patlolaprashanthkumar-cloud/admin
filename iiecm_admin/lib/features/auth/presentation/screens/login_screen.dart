@@ -76,7 +76,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // Institutional Emblem & Brand Mark
                     Center(
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusMedium,
+                        ),
                         child: Image.asset(
                           'assets/images/app_logo.png',
                           width: 88,
@@ -120,11 +122,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   'IIECM',
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 2.2,
-                                  ),
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 2.2,
+                                      ),
                                 ),
                               ],
                             ),

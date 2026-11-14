@@ -40,6 +40,8 @@ export function SetPasswordPage() {
   useEffect(() => {
     let isMounted = true;
     let isAuthorized = false;
+    let activeSubscription: { unsubscribe: () => void } | null = null;
+    let activeTimeout: ReturnType<typeof setTimeout> | null = null;
 
     async function verifySessionAndFlow() {
       // 1. Guard against unconfigured Supabase client
@@ -72,6 +74,14 @@ export function SetPasswordPage() {
       ) {
         if (!isMounted || isAuthorized) return;
         isAuthorized = true;
+        if (activeTimeout) {
+          clearTimeout(activeTimeout);
+          activeTimeout = null;
+        }
+        if (activeSubscription) {
+          activeSubscription.unsubscribe();
+          activeSubscription = null;
+        }
         recordVerifiedFlow(flow, session.user.id);
         setFlowType(flow);
         setUserInfo({
@@ -135,16 +145,25 @@ export function SetPasswordPage() {
         }
       );
 
+      // Ensure subscription is unsubscribed immediately if effect unmounted during registration
+      if (!isMounted || isAuthorized) {
+        subscription.unsubscribe();
+        return;
+      }
+
+      activeSubscription = subscription;
+
       // 5. Check if session was already established with verified flow
       try {
         const { data: { session } } = await supabase.auth.getSession();
+
+        if (!isMounted) return;
 
         if (session?.user && !isAuthorized) {
           // Check if session was verified by AuthCallbackPage during this tab session
           const currentVerified = getVerifiedFlow();
           if (currentVerified && currentVerified.userId === session.user.id) {
             grantAccess(session, currentVerified.flowType);
-            subscription.unsubscribe();
             return;
           }
 
@@ -156,7 +175,6 @@ export function SetPasswordPage() {
           ) {
             const flow = inspection.rawHashType === 'recovery' ? 'recovery' : 'invite';
             grantAccess(session, flow);
-            subscription.unsubscribe();
             return;
           }
 
@@ -164,11 +182,16 @@ export function SetPasswordPage() {
           // We do NOT call grantAccess!
         }
 
+        if (!isMounted || isAuthorized) return;
+
         // 6. Safety timer (5 seconds) to wait for detectSessionInUrl parsing on cellular networks
-        setTimeout(() => {
+        activeTimeout = setTimeout(() => {
           if (!isMounted) return;
           if (!isAuthorized) {
-            subscription.unsubscribe();
+            if (activeSubscription) {
+              activeSubscription.unsubscribe();
+              activeSubscription = null;
+            }
             navigate('/invalid-link?code=no_active_flow', { replace: true });
           } else {
             setIsVerifying(false);
@@ -176,7 +199,10 @@ export function SetPasswordPage() {
         }, 5000);
       } catch {
         if (!isMounted || isAuthorized) return;
-        subscription.unsubscribe();
+        if (activeSubscription) {
+          activeSubscription.unsubscribe();
+          activeSubscription = null;
+        }
         navigate('/invalid-link?code=no_active_flow', { replace: true });
       }
     }
@@ -185,6 +211,14 @@ export function SetPasswordPage() {
 
     return () => {
       isMounted = false;
+      if (activeTimeout) {
+        clearTimeout(activeTimeout);
+        activeTimeout = null;
+      }
+      if (activeSubscription) {
+        activeSubscription.unsubscribe();
+        activeSubscription = null;
+      }
     };
   }, [navigate]);
 
