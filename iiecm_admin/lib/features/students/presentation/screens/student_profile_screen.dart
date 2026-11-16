@@ -31,11 +31,13 @@ class StudentProfileScreen extends ConsumerWidget {
   String _formatLearningFormat(String format) {
     switch (format.trim().toLowerCase()) {
       case 'hybrid':
-        return 'Hybrid (Virtual Lecture + Clinical Onsite)';
+        return 'Online + Offline Classes';
       case 'live':
-        return 'Live Virtual Synchronous';
+        return 'Live Online Classes';
       case 'recorded':
-        return 'Asynchronous / Recorded LMS Modules';
+        return 'Recorded Classes';
+      case 'live_recorded':
+        return 'Live + Recorded Classes';
       default:
         return format.trim();
     }

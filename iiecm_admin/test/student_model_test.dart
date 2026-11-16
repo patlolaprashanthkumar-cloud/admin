@@ -369,6 +369,25 @@ void main() {
       );
     });
 
+    test('Student.fromJson parses live_recorded learning_format', () {
+      final json = {
+        'id': 'std-105',
+        'student_id': 'IIECM-STU-005',
+        'full_name': 'Dr. Neha Verma',
+        'email': 'neha@example.com',
+        'learning_format': 'live_recorded',
+        'preferred_slot': 'Weekend Intensive (Saturday & Sunday)',
+      };
+
+      final student = Student.fromJson(json);
+
+      expect(student.learningFormat, 'live_recorded');
+      expect(
+        student.preferredSlot,
+        'Weekend Intensive (Saturday & Sunday)',
+      );
+    });
+
     test(
       'Student.fromJson handles NULL learning_format and preferred_slot',
       () {
@@ -408,6 +427,27 @@ void main() {
       expect(
         jsonWith['preferred_slot'],
         'Evening Executive Batch (18:00 - 20:00 IST)',
+      );
+
+      final studentWithLiveRecorded = Student(
+        id: 's-fmt-lr',
+        studentId: 'IIECM-FMT-LR',
+        fullName: 'Live Recorded Student',
+        email: 'lr@example.com',
+        phone: '1112223336',
+        educationLevel: 'Postgraduate',
+        qualification: 'MS',
+        preferredCategory: 'General',
+        learningFormat: 'live_recorded',
+        preferredSlot: 'Morning Clinical Batch (08:00 - 10:00 IST)',
+        createdAt: DateTime(2026, 1, 1),
+      );
+
+      final jsonLR = studentWithLiveRecorded.toJson();
+      expect(jsonLR['learning_format'], 'live_recorded');
+      expect(
+        jsonLR['preferred_slot'],
+        'Morning Clinical Batch (08:00 - 10:00 IST)',
       );
 
       final studentWithout = Student(
@@ -734,6 +774,27 @@ void main() {
         notifier.state.students.first.preferredSlot,
         'Weekend Intensive (Saturday & Sunday)',
       );
+
+      final createdLR = await notifier.registerStudent(
+        fullName: 'Siddharth Sen',
+        email: 'siddharth@hospital.org',
+        phone: '9999900011',
+        educationLevel: 'Consultant',
+        qualification: 'MD EM',
+        categoryIds: ['cat-a'],
+        courseIds: ['c-1'],
+        learningFormat: 'live_recorded',
+        preferredSlot: 'Evening Executive Batch (18:00 - 20:00 IST)',
+      );
+
+      expect(createdLR, isNotNull);
+      expect(createdLR!.student.fullName, 'Siddharth Sen');
+      expect(createdLR.student.learningFormat, 'live_recorded');
+      expect(
+        createdLR.student.preferredSlot,
+        'Evening Executive Batch (18:00 - 20:00 IST)',
+      );
+      expect(notifier.state.students.first.learningFormat, 'live_recorded');
     });
 
     test('Edge Function payload formatting trims non-empty values and omits null/empty', () {
@@ -760,6 +821,16 @@ void main() {
       expect(
         withValues['preferredSlot'],
         'Morning Clinical Batch (08:00 - 10:00 IST)',
+      );
+
+      final withLiveRecorded = buildPayload(
+        learningFormat: '  live_recorded  ',
+        preferredSlot: '  Weekend Intensive (Saturday & Sunday)  ',
+      );
+      expect(withLiveRecorded['learningFormat'], 'live_recorded');
+      expect(
+        withLiveRecorded['preferredSlot'],
+        'Weekend Intensive (Saturday & Sunday)',
       );
 
       final withNull = buildPayload(learningFormat: null, preferredSlot: null);

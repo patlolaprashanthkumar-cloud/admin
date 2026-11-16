@@ -93,6 +93,21 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
     }
   }
 
+  String _formatLearningFormatLabel(String format) {
+    switch (format.trim().toLowerCase()) {
+      case 'hybrid':
+        return 'Online + Offline Classes';
+      case 'live':
+        return 'Live Online Classes';
+      case 'recorded':
+        return 'Recorded Classes';
+      case 'live_recorded':
+        return 'Live + Recorded Classes';
+      default:
+        return format;
+    }
+  }
+
   bool _validateCurrentStep() {
     if (_currentStep == 0) {
       return _formKeyStep1.currentState?.validate() ?? false;
@@ -807,29 +822,32 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                       : AppColors.borderNeutral,
                   width: isEnrolled ? 1.8 : 1.0,
                 ),
-                child: CheckboxListTile(
-                  value: isEnrolled,
-                  activeColor: AppColors.primaryForest,
-                  contentPadding: EdgeInsets.zero,
-                  onChanged: (val) {
-                    setState(() {
-                      if (val == true) {
-                        _selectedCourseIds.add(course.id);
-                      } else {
-                        _selectedCourseIds.remove(course.id);
-                      }
-                    });
-                  },
-                  title: Text(
-                    course.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13.5,
+                child: Material(
+                  color: Colors.transparent,
+                  child: CheckboxListTile(
+                    value: isEnrolled,
+                    activeColor: AppColors.primaryForest,
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (val) {
+                      setState(() {
+                        if (val == true) {
+                          _selectedCourseIds.add(course.id);
+                        } else {
+                          _selectedCourseIds.remove(course.id);
+                        }
+                      });
+                    },
+                    title: Text(
+                      course.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                      ),
                     ),
-                  ),
-                  subtitle: Text(
-                    '${course.categoryName} · ${course.durationWeeks} weeks · ${CurrencyFormatter.format(course.fee)}',
-                    style: const TextStyle(fontSize: 11),
+                    subtitle: Text(
+                      '${course.categoryName} · ${course.durationWeeks} weeks · ${CurrencyFormatter.format(course.fee)}',
+                      style: const TextStyle(fontSize: 11),
+                    ),
                   ),
                 ),
               ),
@@ -990,75 +1008,82 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
         ? theme.colorScheme.surfaceContainerLow
         : Colors.white;
 
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Delivery & Cohort Format',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            isExpanded: true,
-            initialValue: _learningFormat,
-            items: const [
-              DropdownMenuItem(
-                value: 'hybrid',
-                child: Text('Hybrid (Virtual Lecture + Clinical Onsite)'),
-              ),
-              DropdownMenuItem(
-                value: 'live',
-                child: Text('Live Virtual Synchronous'),
-              ),
-              DropdownMenuItem(
-                value: 'recorded',
-                child: Text('Asynchronous / Recorded LMS Modules'),
-              ),
-            ],
-            onChanged: (val) =>
-                setState(() => _learningFormat = val ?? 'hybrid'),
-          ),
-          const SizedBox(height: 16),
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Class Format & Schedule',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 6),
+            DropdownButtonFormField<String>(
+              isExpanded: true,
+              initialValue: _learningFormat,
+              items: const [
+                DropdownMenuItem(
+                  value: 'hybrid',
+                  child: Text('Online + Offline Classes'),
+                ),
+                DropdownMenuItem(
+                  value: 'live',
+                  child: Text('Live Online Classes'),
+                ),
+                DropdownMenuItem(
+                  value: 'recorded',
+                  child: Text('Recorded Classes'),
+                ),
+                DropdownMenuItem(
+                  value: 'live_recorded',
+                  child: Text('Live + Recorded Classes'),
+                ),
+              ],
+              onChanged: (val) =>
+                  setState(() => _learningFormat = val ?? 'hybrid'),
+            ),
+            const SizedBox(height: 16),
 
-          const Text(
-            'Preferred Timetable Slot',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            isExpanded: true,
-            initialValue: _preferredSlot,
-            items: const [
-              DropdownMenuItem(
-                value: 'Morning Clinical Batch (08:00 - 10:00 IST)',
-                child: Text('Morning Batch (08:00 - 10:00 IST)'),
-              ),
-              DropdownMenuItem(
-                value: 'Evening Executive Batch (18:00 - 20:00 IST)',
-                child: Text('Evening Batch (18:00 - 20:00 IST)'),
-              ),
-              DropdownMenuItem(
-                value: 'Weekend Intensive (Saturday & Sunday)',
-                child: Text('Weekend Intensive (Sat & Sun)'),
-              ),
-            ],
-            onChanged: (val) =>
-                setState(() => _preferredSlot = val ?? _preferredSlot),
-          ),
-        ],
+            const Text(
+              'Preferred Timetable Slot',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 6),
+            DropdownButtonFormField<String>(
+              isExpanded: true,
+              initialValue: _preferredSlot,
+              items: const [
+                DropdownMenuItem(
+                  value: 'Morning Clinical Batch (08:00 - 10:00 IST)',
+                  child: Text('Morning Batch (08:00 - 10:00 IST)'),
+                ),
+                DropdownMenuItem(
+                  value: 'Evening Executive Batch (18:00 - 20:00 IST)',
+                  child: Text('Evening Batch (18:00 - 20:00 IST)'),
+                ),
+                DropdownMenuItem(
+                  value: 'Weekend Intensive (Saturday & Sunday)',
+                  child: Text('Weekend Intensive (Sat & Sun)'),
+                ),
+              ],
+              onChanged: (val) =>
+                  setState(() => _preferredSlot = val ?? _preferredSlot),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1185,7 +1210,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
               const Divider(height: 1),
               const SizedBox(height: 10),
 
-              if (_selectedInstructorName != null)
+              if (_selectedInstructorName != null) ...[
                 Text(
                   'Faculty Advisor: $_selectedInstructorName',
                   style: const TextStyle(
@@ -1193,8 +1218,17 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                     fontSize: 12,
                   ),
                 ),
+                const SizedBox(height: 10),
+                const Divider(height: 1),
+                const SizedBox(height: 10),
+              ],
+              const Text(
+                'Class Format & Schedule',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              ),
+              const SizedBox(height: 4),
               Text(
-                'Format: $_learningFormat · $_preferredSlot',
+                'Format: ${_formatLearningFormatLabel(_learningFormat)} · $_preferredSlot',
                 style: const TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 11,

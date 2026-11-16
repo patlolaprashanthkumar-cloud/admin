@@ -22,7 +22,7 @@ const VERIFIED_PATHS = new Set<string>([
 
 const LOCAL_DEFAULT_REDIRECT = 'http://localhost:5173/reset-password';
 
-const ALLOWED_STUDENT_LEARNING_FORMATS = new Set(['hybrid', 'live', 'recorded']);
+const ALLOWED_STUDENT_LEARNING_FORMATS = new Set(['hybrid', 'live', 'recorded', 'live_recorded']);
 const ALLOWED_STUDENT_PREFERRED_SLOTS = new Set([
   'Morning Clinical Batch (08:00 - 10:00 IST)',
   'Evening Executive Batch (18:00 - 20:00 IST)',
@@ -444,7 +444,7 @@ serve(async (req: Request) => {
           if (!ALLOWED_STUDENT_LEARNING_FORMATS.has(trimmedFormat)) {
             return new Response(
               JSON.stringify({
-                error: `Invalid learningFormat "${trimmedFormat}". Allowed values: hybrid, live, recorded.`,
+                error: `Invalid learningFormat "${trimmedFormat}". Allowed values: hybrid, live, recorded, live_recorded.`,
                 field: 'learningFormat',
               }),
               { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
