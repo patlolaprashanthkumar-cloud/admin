@@ -102,6 +102,15 @@ function parseCurrentUrlParams(): UrlInspectionResult {
   };
 }
 
+function normalizePathname(path: string): string {
+  const trimmed = path.trim().replace(/\/+$/, '');
+  return trimmed.length > 0 ? trimmed : '/';
+}
+
+// In-memory fallback to bridge verified flow state across SPA navigation in the same tab,
+// even if sessionStorage is blocked, restricted, or throws in strict private browsing.
+let memoryVerifiedFlow: { flowType: AuthFlowType; userId?: string; timestamp: number } | null = null;
+
 // Synchronously capture parameters on module load before Supabase client or React Router strips them
 let capturedInitialPathname = '';
 let capturedInitialParams: UrlInspectionResult | null = null;
@@ -121,13 +130,17 @@ try {
 export function inspectUrlAuthParams(): UrlInspectionResult {
   const current = parseCurrentUrlParams();
   if (current.hasError || current.rawAccessToken || current.hasPkceCode || current.hasTokenHash) {
+    if (typeof window !== 'undefined') {
+      capturedInitialPathname = window.location.pathname;
+      capturedInitialParams = current;
+    }
     return current;
   }
   // Fallback to synchronously captured landing parameters on the same route
   if (
     capturedInitialParams &&
     typeof window !== 'undefined' &&
-    window.location.pathname === capturedInitialPathname &&
+    normalizePathname(window.location.pathname) === normalizePathname(capturedInitialPathname) &&
     (capturedInitialParams.hasError ||
       capturedInitialParams.rawAccessToken ||
       capturedInitialParams.hasPkceCode ||
@@ -139,21 +152,20 @@ export function inspectUrlAuthParams(): UrlInspectionResult {
 }
 
 /**
- * Persists verified flow type into sessionStorage for navigation coordination within the tab.
- * Note: sessionStorage is only navigation state; cryptographic verification is handled by Supabase.
+ * Persists verified flow type into sessionStorage and memory for navigation coordination within the tab.
+ * Note: Storage is only navigation state; cryptographic verification is handled by Supabase.
  */
 export function recordVerifiedFlow(flowType: AuthFlowType, userId?: string): void {
+  const payload = {
+    flowType,
+    userId: userId || undefined,
+    timestamp: Date.now(),
+  };
+  memoryVerifiedFlow = payload;
   try {
-    sessionStorage.setItem(
-      FLOW_STORAGE_KEY,
-      JSON.stringify({
-        flowType,
-        userId: userId || null,
-        timestamp: Date.now(),
-      })
-    );
+    sessionStorage.setItem(FLOW_STORAGE_KEY, JSON.stringify(payload));
   } catch {
-    // SessionStorage may be restricted in private browsing mode
+    // SessionStorage may be restricted in private browsing mode; memoryVerifiedFlow serves as fallback
   }
 }
 
@@ -163,27 +175,68 @@ export function recordVerifiedFlow(flowType: AuthFlowType, userId?: string): voi
 export function getVerifiedFlow(): { flowType: AuthFlowType; userId?: string } | null {
   try {
     const raw = sessionStorage.getItem(FLOW_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (Date.now() - parsed.timestamp > 30 * 60 * 1000) {
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Date.now() - parsed.timestamp <= 30 * 60 * 1000) {
+        return { flowType: parsed.flowType, userId: parsed.userId || undefined };
+      }
       clearVerifiedFlow();
       return null;
     }
-    return { flowType: parsed.flowType, userId: parsed.userId || undefined };
+  } catch {
+    // Fall back to in-memory verified flow
+  }
+
+  if (memoryVerifiedFlow && Date.now() - memoryVerifiedFlow.timestamp <= 30 * 60 * 1000) {
+    return { flowType: memoryVerifiedFlow.flowType, userId: memoryVerifiedFlow.userId };
+  }
+
+  return null;
+}
+
+/**
+ * Clears the verified flow from sessionStorage and memory.
+ */
+export function clearVerifiedFlow(): void {
+  memoryVerifiedFlow = null;
+  try {
+    sessionStorage.removeItem(FLOW_STORAGE_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+/**
+ * Safely extracts the subject (user id) claim from an unverified JWT string without throwing.
+ * Used strictly for session correlation — cryptographic verification is performed by Supabase.
+ */
+export function extractJwtUserId(token?: string): string | null {
+  if (!token) return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = atob(base64);
+    const payload = JSON.parse(json);
+    return typeof payload.sub === 'string' && payload.sub.length > 0 ? payload.sub : null;
   } catch {
     return null;
   }
 }
 
 /**
- * Clears the verified flow from sessionStorage.
+ * Checks whether an authenticated session matches an unverified raw access token from the URL.
+ * Matches if the access tokens are identical OR if the token's subject matches session.user.id.
  */
-export function clearVerifiedFlow(): void {
-  try {
-    sessionStorage.removeItem(FLOW_STORAGE_KEY);
-  } catch {
-    // Ignore storage errors
-  }
+export function isSessionMatchingToken(
+  session: { access_token?: string; user?: { id: string } } | null | undefined,
+  rawToken?: string
+): boolean {
+  if (!session || !rawToken) return false;
+  if (session.access_token && session.access_token === rawToken) return true;
+  const tokenUserId = extractJwtUserId(rawToken);
+  if (tokenUserId && session.user?.id && session.user.id === tokenUserId) return true;
+  return false;
 }
 
 /**

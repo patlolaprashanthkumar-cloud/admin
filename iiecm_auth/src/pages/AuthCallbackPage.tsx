@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import { supabase, isSupabaseConfigured, initialPkceState } from '@/lib/supabase';
-import { inspectUrlAuthParams, recordVerifiedFlow, ALLOWED_OTP_TYPES, type AllowedOtpType } from '@/lib/authFlow';
+import {
+  inspectUrlAuthParams,
+  recordVerifiedFlow,
+  ALLOWED_OTP_TYPES,
+  type AllowedOtpType,
+  type AuthFlowType,
+  isSessionMatchingToken,
+} from '@/lib/authFlow';
 
 interface InFlightOtpVerification {
   tokenHash: string;
@@ -14,6 +21,17 @@ interface InFlightOtpVerification {
 }
 
 let inFlightOtpVerification: InFlightOtpVerification | null = null;
+
+interface InFlightImplicitVerification {
+  token: string;
+  promise: Promise<{
+    session: any;
+    error: any;
+  }>;
+}
+
+let inFlightImplicitVerification: InFlightImplicitVerification | null = null;
+let activeNavigatedToken: string | null = null;
 
 export function AuthCallbackPage() {
   const navigate = useNavigate();
@@ -210,80 +228,104 @@ export function AuthCallbackPage() {
         // 6. Handle implicit flow landing on callback (#access_token=...&type=invite|recovery)
         if (inspection.rawAccessToken && inspection.rawHashType) {
           const rawToken = inspection.rawAccessToken;
-          const targetFlow = inspection.rawHashType === 'recovery' ? 'recovery' : 'invite';
+          const targetFlow: AuthFlowType = inspection.rawHashType === 'recovery' ? 'recovery' : 'invite';
 
           if (isMounted) setStatusMessage('Verifying security session...');
 
-          // Check if detectSessionInUrl already processed this EXACT token
-          const { data: { session: existingSession } } = await supabase.auth.getSession();
-
-          // Immediately check lifecycle after async call
-          if (!isMounted || isHandled) return;
-
-          if (existingSession && existingSession.access_token === rawToken) {
-            isHandled = true;
-            recordVerifiedFlow(targetFlow, existingSession.user.id);
-            navigate('/reset-password', { replace: true });
+          // Prevent duplicate navigation across React Strict Mode re-mounts
+          if (activeNavigatedToken === rawToken) {
             return;
           }
 
-          // Before registering an auth-state subscription, ensure current effect is still active
+          const completeImplicitFlow = (validSession: { user: { id: string } }, flow: AuthFlowType) => {
+            if (activeNavigatedToken === rawToken) return;
+            activeNavigatedToken = rawToken;
+            isHandled = true;
+            if (activeTimeout) {
+              clearTimeout(activeTimeout);
+              activeTimeout = null;
+            }
+            if (activeSubscription) {
+              activeSubscription.unsubscribe();
+              activeSubscription = null;
+            }
+            recordVerifiedFlow(flow, validSession.user.id);
+            navigate('/reset-password', { replace: true });
+          };
+
+          // Deduplicate getSession / initialization across React Strict Mode mounts
+          if (!inFlightImplicitVerification || inFlightImplicitVerification.token !== rawToken) {
+            const rawPromise = (async () => {
+              try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                return { session, error };
+              } catch (err) {
+                return { session: null, error: err };
+              }
+            })();
+
+            inFlightImplicitVerification = {
+              token: rawToken,
+              promise: rawPromise,
+            };
+
+            rawPromise.finally(() => {
+              setTimeout(() => {
+                if (inFlightImplicitVerification?.token === rawToken) {
+                  inFlightImplicitVerification = null;
+                }
+              }, 15000);
+            });
+          }
+
+          // Await shared resolution promise
+          const { session: existingSession } = await inFlightImplicitVerification.promise;
+
+          if (activeNavigatedToken === rawToken) return;
+
+          // If session is already resolved and matches the URL token payload
+          if (existingSession && isSessionMatchingToken(existingSession, rawToken)) {
+            completeImplicitFlow(existingSession, targetFlow);
+            return;
+          }
+
+          // If effect was unmounted during await, stop here; remounted effect will handle
           if (!isMounted || isHandled) return;
 
-          // Otherwise listen for the SIGNED_IN or PASSWORD_RECOVERY event triggered by token verification
+          // Event-driven listener for in-flight URL session detection
+          // Listen safely to SIGNED_IN, PASSWORD_RECOVERY, and INITIAL_SESSION
           const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (event, session) => {
-              if (!isMounted || isHandled) return;
+              if (activeNavigatedToken === rawToken || !isMounted || isHandled) return;
 
-              // Strictly ignore INITIAL_SESSION from localStorage
-              if (event === 'INITIAL_SESSION') return;
-
-              if (event === 'PASSWORD_RECOVERY' && session && session.access_token === rawToken) {
-                isHandled = true;
-                if (activeTimeout) {
-                  clearTimeout(activeTimeout);
-                  activeTimeout = null;
-                }
-                subscription.unsubscribe();
-                activeSubscription = null;
-                recordVerifiedFlow('recovery', session.user.id);
-                navigate('/reset-password', { replace: true });
-                return;
-              }
-
-              if (event === 'SIGNED_IN' && session && session.access_token === rawToken) {
-                isHandled = true;
-                if (activeTimeout) {
-                  clearTimeout(activeTimeout);
-                  activeTimeout = null;
-                }
-                subscription.unsubscribe();
-                activeSubscription = null;
-                recordVerifiedFlow(targetFlow, session.user.id);
-                navigate('/reset-password', { replace: true });
-                return;
+              if (
+                (event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY' || event === 'INITIAL_SESSION') &&
+                session &&
+                isSessionMatchingToken(session, rawToken)
+              ) {
+                const resolvedFlow: AuthFlowType = event === 'PASSWORD_RECOVERY' ? 'recovery' : targetFlow;
+                completeImplicitFlow(session, resolvedFlow);
               }
             }
           );
 
-          // Ensure subscription is not retained if effect was cleaned up concurrently
-          if (!isMounted || isHandled) {
+          if (!isMounted || isHandled || activeNavigatedToken === rawToken) {
             subscription.unsubscribe();
             return;
           }
 
           activeSubscription = subscription;
 
-          // Safety timeout (5 seconds)
+          // Safety timeout (8 seconds) to allow mobile/cellular networks time to complete verification
           activeTimeout = setTimeout(() => {
-            if (!isMounted || isHandled) return;
+            if (activeNavigatedToken === rawToken || !isMounted || isHandled) return;
             isHandled = true;
             if (activeSubscription) {
               activeSubscription.unsubscribe();
               activeSubscription = null;
             }
             navigate('/invalid-link?code=no_active_flow', { replace: true });
-          }, 5000);
+          }, 8000);
           return;
         }
 

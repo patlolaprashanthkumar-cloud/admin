@@ -9,6 +9,7 @@ import {
   clearVerifiedFlow,
   isSessionExpiredError,
   sanitizeUpdatePasswordError,
+  isSessionMatchingToken,
   type AuthFlowType,
 } from '@/lib/authFlow';
 
@@ -105,9 +106,9 @@ export function SetPasswordPage() {
       // 4. Reliable event-driven auth listener
       // Cryptographically authorized ONLY via:
       // a) Native PASSWORD_RECOVERY event
-      // b) SIGNED_IN where session.access_token matches the URL hash's raw access_token
-      // c) Active session matching an existing flow verified by AuthCallbackPage (verified.userId === session.user.id)
-      // STRICTLY REJECT INITIAL_SESSION: Stored sessions in localStorage cannot authorize invitation acceptance
+      // b) Active session matching an existing flow verified by AuthCallbackPage (verified.userId === session.user.id)
+      // c) Session matching the URL hash's raw access token (exact or token subject match)
+      // STRICTLY REJECT UNVERIFIED: Stored sessions in localStorage cannot authorize invitation acceptance
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         (event, session) => {
           if (!isMounted || isAuthorized) return;
@@ -118,27 +119,25 @@ export function SetPasswordPage() {
             return;
           }
 
-          // Strictly ignore INITIAL_SESSION — existing localStorage session must NOT authorize invitation
-          if (event === 'INITIAL_SESSION') {
-            return;
-          }
-
-          // Invitation Sign-In with verified hash token from the URL
-          if (event === 'SIGNED_IN' && session?.user) {
-            // Check if this SIGNED_IN event corresponds to the raw access_token from the URL hash
-            if (
-              inspection.rawAccessToken &&
-              session.access_token === inspection.rawAccessToken
-            ) {
-              const flow = inspection.rawHashType === 'recovery' ? 'recovery' : 'invite';
-              grantAccess(session, flow);
-              return;
-            }
-
-            // Or check if this session matches a tab flow already verified by AuthCallbackPage
+          // Invitation or Recovery Sign-In / Initial Session
+          if (
+            (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') &&
+            session?.user
+          ) {
+            // Check if this session matches a tab flow already verified by AuthCallbackPage
             const currentVerified = getVerifiedFlow();
             if (currentVerified && currentVerified.userId === session.user.id) {
               grantAccess(session, currentVerified.flowType);
+              return;
+            }
+
+            // Or check if this session corresponds to the raw access_token from the URL hash
+            if (
+              inspection.rawAccessToken &&
+              isSessionMatchingToken(session, inspection.rawAccessToken)
+            ) {
+              const flow = inspection.rawHashType === 'recovery' ? 'recovery' : 'invite';
+              grantAccess(session, flow);
               return;
             }
           }
@@ -167,11 +166,11 @@ export function SetPasswordPage() {
             return;
           }
 
-          // Check if session access_token matches the raw token from the URL hash
+          // Check if session matches the raw token from the URL hash
           // (meaning detectSessionInUrl already verified it before or during mount)
           if (
             inspection.rawAccessToken &&
-            session.access_token === inspection.rawAccessToken
+            isSessionMatchingToken(session, inspection.rawAccessToken)
           ) {
             const flow = inspection.rawHashType === 'recovery' ? 'recovery' : 'invite';
             grantAccess(session, flow);
@@ -184,7 +183,7 @@ export function SetPasswordPage() {
 
         if (!isMounted || isAuthorized) return;
 
-        // 6. Safety timer (5 seconds) to wait for detectSessionInUrl parsing on cellular networks
+        // 6. Safety timer (8 seconds) to wait for detectSessionInUrl parsing on cellular networks
         activeTimeout = setTimeout(() => {
           if (!isMounted) return;
           if (!isAuthorized) {
@@ -196,7 +195,7 @@ export function SetPasswordPage() {
           } else {
             setIsVerifying(false);
           }
-        }, 5000);
+        }, 8000);
       } catch {
         if (!isMounted || isAuthorized) return;
         if (activeSubscription) {
