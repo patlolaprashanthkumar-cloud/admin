@@ -45,10 +45,17 @@ class AssignmentCard extends StatelessWidget {
                   runSpacing: 4,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.forestSoft,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
                       ),
                       child: Text(
                         assignment.courseTitle.toUpperCase(),
@@ -64,12 +71,21 @@ class AssignmentCard extends StatelessWidget {
                     ),
                     if (assignment.isProject)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkBackground : AppColors.warmCream,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                          color: isDark
+                              ? AppColors.darkBackground
+                              : AppColors.warmCream,
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusSm,
+                          ),
                           border: Border.all(
-                            color: isDark ? AppColors.darkBorder : AppColors.border,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.border,
                           ),
                         ),
                         child: const Text(
@@ -90,9 +106,7 @@ class AssignmentCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
-                  border: Border.all(
-                    color: statusColor.withValues(alpha: 0.3),
-                  ),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -136,7 +150,9 @@ class AssignmentCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
                 height: 1.35,
               ),
             ),
@@ -158,17 +174,23 @@ class AssignmentCard extends StatelessWidget {
                     size: 13,
                     color: assignment.isOverdue
                         ? AppColors.error
-                        : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                        : (isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary),
                   ),
                   const SizedBox(width: 5),
                   Text(
                     'Due: $deadlineFormatted',
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: assignment.isOverdue ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: assignment.isOverdue
+                          ? FontWeight.w700
+                          : FontWeight.w500,
                       color: assignment.isOverdue
                           ? AppColors.error
-                          : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                          : (isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary),
                     ),
                   ),
                 ],
@@ -240,7 +262,9 @@ class AssignmentCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               AppButton(
-                label: assignment.isSubmitted ? 'View Submission' : 'Open Assignment',
+                label: assignment.isSubmitted
+                    ? 'View Submission'
+                    : 'Open Assignment',
                 icon: assignment.isSubmitted
                     ? Icons.visibility_outlined
                     : Icons.assignment_turned_in_outlined,
@@ -286,4 +310,3 @@ class AssignmentCard extends StatelessWidget {
     return Icons.pending_actions_rounded;
   }
 }
-

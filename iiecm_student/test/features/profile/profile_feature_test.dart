@@ -81,69 +81,85 @@ void main() {
       fakeRepo = FakeProfileRepository();
     });
 
-    testWidgets('StudentProfileScreen renders student details and action buttons', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+    testWidgets(
+      'StudentProfileScreen renders student details and action buttons',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            authNotifierProvider.overrideWith(
-              (ref) => AuthNotifier(ref.watch(authRepositoryProvider))
-                ..state = const AuthState.authenticated(mockStudent),
-            ),
-            profileRepositoryProvider.overrideWithValue(fakeRepo),
-          ],
-          child: const MaterialApp(
-            home: StudentProfileScreen(),
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              authNotifierProvider.overrideWith(
+                (ref) =>
+                    AuthNotifier(ref.watch(authRepositoryProvider))
+                      ..state = const AuthState.authenticated(mockStudent),
+              ),
+              profileRepositoryProvider.overrideWithValue(fakeRepo),
+            ],
+            child: const MaterialApp(home: StudentProfileScreen()),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Student Dossier & Profile'), findsOneWidget);
-      expect(find.text('Dr. Anita Roy'), findsOneWidget);
-      expect(find.text('IIECM-2026-STU-001'), findsNWidgets(2));
-      expect(find.text('anita.roy@iiecm.org'), findsOneWidget);
-      expect(find.text('+91 9876543210'), findsOneWidget);
-      expect(find.text('Change Password'), findsOneWidget);
-      expect(find.text('Sign Out of Student Portal'), findsOneWidget);
-    });
+        expect(find.text('Student Dossier & Profile'), findsOneWidget);
+        expect(find.text('Dr. Anita Roy'), findsOneWidget);
+        expect(find.text('IIECM-2026-STU-001'), findsNWidgets(2));
+        expect(find.text('anita.roy@iiecm.org'), findsOneWidget);
+        expect(find.text('+91 9876543210'), findsOneWidget);
+        expect(find.text('Change Password'), findsOneWidget);
+        expect(find.text('Sign Out of Student Portal'), findsOneWidget);
+      },
+    );
 
-    testWidgets('EditProfileDialog pre-fills data and locks student ID and email', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+    testWidgets(
+      'EditProfileDialog pre-fills data and locks student ID and email',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            authNotifierProvider.overrideWith(
-              (ref) => AuthNotifier(ref.watch(authRepositoryProvider))
-                ..state = const AuthState.authenticated(mockStudent),
-            ),
-            profileRepositoryProvider.overrideWithValue(fakeRepo),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: EditProfileDialog(student: mockStudent),
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              authNotifierProvider.overrideWith(
+                (ref) =>
+                    AuthNotifier(ref.watch(authRepositoryProvider))
+                      ..state = const AuthState.authenticated(mockStudent),
+              ),
+              profileRepositoryProvider.overrideWithValue(fakeRepo),
+            ],
+            child: const MaterialApp(
+              home: Scaffold(body: EditProfileDialog(student: mockStudent)),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Edit Contact & Profile'), findsOneWidget);
-      expect(find.text('IIECM-2026-STU-001'), findsOneWidget);
-      expect(find.text('anita.roy@iiecm.org'), findsOneWidget);
-      expect(find.text('Institutional Student ID (Registry Locked)'), findsOneWidget);
-      expect(find.text('Institutional Registered Email (Locked)'), findsOneWidget);
+        expect(find.text('Edit Contact & Profile'), findsOneWidget);
+        expect(find.text('IIECM-2026-STU-001'), findsOneWidget);
+        expect(find.text('anita.roy@iiecm.org'), findsOneWidget);
+        expect(
+          find.text('Institutional Student ID (Registry Locked)'),
+          findsOneWidget,
+        );
+        expect(
+          find.text('Institutional Registered Email (Locked)'),
+          findsOneWidget,
+        );
 
-      // Verify editable text field values
-      expect(find.widgetWithText(TextFormField, 'Dr. Anita Roy'), findsOneWidget);
-      expect(find.widgetWithText(TextFormField, '+91 9876543210'), findsOneWidget);
-    });
+        // Verify editable text field values
+        expect(
+          find.widgetWithText(TextFormField, 'Dr. Anita Roy'),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(TextFormField, '+91 9876543210'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('EditProfileDialog validates input fields', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
@@ -154,15 +170,14 @@ void main() {
         ProviderScope(
           overrides: [
             authNotifierProvider.overrideWith(
-              (ref) => AuthNotifier(ref.watch(authRepositoryProvider))
-                ..state = const AuthState.authenticated(mockStudent),
+              (ref) =>
+                  AuthNotifier(ref.watch(authRepositoryProvider))
+                    ..state = const AuthState.authenticated(mockStudent),
             ),
             profileRepositoryProvider.overrideWithValue(fakeRepo),
           ],
           child: const MaterialApp(
-            home: Scaffold(
-              body: EditProfileDialog(student: mockStudent),
-            ),
+            home: Scaffold(body: EditProfileDialog(student: mockStudent)),
           ),
         ),
       );
@@ -180,54 +195,55 @@ void main() {
       expect(find.text('Please enter your full legal name.'), findsOneWidget);
     });
 
-    testWidgets('ChangePasswordDialog validates length and confirmation match', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+    testWidgets(
+      'ChangePasswordDialog validates length and confirmation match',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            profileRepositoryProvider.overrideWithValue(fakeRepo),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: ChangePasswordDialog(),
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [profileRepositoryProvider.overrideWithValue(fakeRepo)],
+            child: const MaterialApp(
+              home: Scaffold(body: ChangePasswordDialog()),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Update Account Password'), findsOneWidget);
+        expect(find.text('Update Account Password'), findsOneWidget);
 
-      // Tap update without input
-      await tester.tap(find.text('Update Password'));
-      await tester.pumpAndSettle();
+        // Tap update without input
+        await tester.tap(find.text('Update Password'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Please enter a new password.'), findsOneWidget);
+        expect(find.text('Please enter a new password.'), findsOneWidget);
 
-      // Enter short password
-      final passwordFields = find.byType(TextFormField);
-      await tester.enterText(passwordFields.at(0), '123');
-      await tester.enterText(passwordFields.at(1), '123456');
-      await tester.pumpAndSettle();
+        // Enter short password
+        final passwordFields = find.byType(TextFormField);
+        await tester.enterText(passwordFields.at(0), '123');
+        await tester.enterText(passwordFields.at(1), '123456');
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Update Password'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Update Password'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Password must be at least 6 characters.'), findsOneWidget);
+        expect(
+          find.text('Password must be at least 6 characters.'),
+          findsOneWidget,
+        );
 
-      // Enter mismatched confirmation
-      await tester.enterText(passwordFields.at(0), 'secret123');
-      await tester.enterText(passwordFields.at(1), 'mismatch456');
-      await tester.pumpAndSettle();
+        // Enter mismatched confirmation
+        await tester.enterText(passwordFields.at(0), 'secret123');
+        await tester.enterText(passwordFields.at(1), 'mismatch456');
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Update Password'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Update Password'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Passwords do not match.'), findsOneWidget);
-    });
+        expect(find.text('Passwords do not match.'), findsOneWidget);
+      },
+    );
   });
 }
-

@@ -29,14 +29,18 @@ class AppLoadingScreen extends StatelessWidget {
                   color: isDark ? AppColors.forestDark : AppColors.forestSoft,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isDark ? AppColors.forestLight : AppColors.primaryForest.withValues(alpha: 0.25),
+                    color: isDark
+                        ? AppColors.forestLight
+                        : AppColors.primaryForest.withValues(alpha: 0.25),
                     width: 2,
                   ),
                 ),
                 child: Icon(
                   Icons.school_rounded,
                   size: 42,
-                  color: isDark ? AppColors.forestLight : AppColors.primaryForest,
+                  color: isDark
+                      ? AppColors.forestLight
+                      : AppColors.primaryForest,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingLg),
@@ -62,7 +66,9 @@ class AppLoadingScreen extends StatelessWidget {
                 height: 28,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryForest),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryForest,
+                  ),
                 ),
               ),
               if (message != null) ...[
@@ -70,7 +76,9 @@ class AppLoadingScreen extends StatelessWidget {
                 Text(
                   message!,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -81,4 +89,3 @@ class AppLoadingScreen extends StatelessWidget {
     );
   }
 }
-

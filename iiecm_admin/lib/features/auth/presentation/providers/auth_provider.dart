@@ -31,6 +31,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> _initialize() async {
+    // If Supabase backend is still initializing, wait for it
+    if (!AppSupabase.isInitialized) {
+      try {
+        await AppSupabase.initialize().timeout(const Duration(seconds: 8));
+      } catch (_) {}
+    }
+
     if (!AppSupabase.isInitialized) {
       state = const AuthState.unconfigured();
       return;

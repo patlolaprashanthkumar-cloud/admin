@@ -75,7 +75,9 @@ class CourseLesson {
       case 'file':
       case 'document':
       case 'attachment':
-        return fileExtension != null ? '${fileExtension!.toUpperCase()} File' : 'Document Attachment';
+        return fileExtension != null
+            ? '${fileExtension!.toUpperCase()} File'
+            : 'Document Attachment';
       case 'reading':
         return 'Clinical Protocol';
       case 'quiz':
@@ -121,4 +123,3 @@ class CourseLesson {
     );
   }
 }
-

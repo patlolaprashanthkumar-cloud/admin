@@ -11,4 +11,3 @@ abstract class PaymentsRepository {
     required String studentRecordId,
   });
 }
-

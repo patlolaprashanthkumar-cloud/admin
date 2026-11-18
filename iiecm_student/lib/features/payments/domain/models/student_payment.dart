@@ -104,7 +104,10 @@ class StudentPayment {
         return paymentMethod
             .replaceAll('_', ' ')
             .split(' ')
-            .map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '')
+            .map(
+              (w) =>
+                  w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '',
+            )
             .join(' ');
     }
   }
@@ -131,7 +134,9 @@ class StudentPayment {
     Map<String, dynamic>? payload;
     if (json['raw_provider_payload'] != null) {
       if (json['raw_provider_payload'] is Map) {
-        payload = Map<String, dynamic>.from(json['raw_provider_payload'] as Map);
+        payload = Map<String, dynamic>.from(
+          json['raw_provider_payload'] as Map,
+        );
       } else if (json['raw_provider_payload'] is String) {
         try {
           payload = jsonDecode(json['raw_provider_payload'] as String);
@@ -187,4 +192,3 @@ class StudentPayment {
     );
   }
 }
-

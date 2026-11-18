@@ -8,7 +8,8 @@ void main() {
       final json = {
         'id': 'ass-1',
         'title': 'Emergency Triage & Airway Synthesis',
-        'description': 'Submit clinical protocol write-up for trauma resuscitation.',
+        'description':
+            'Submit clinical protocol write-up for trauma resuscitation.',
         'type': 'assignment',
         'total_marks': 100,
         'passing_marks': 50,
@@ -51,8 +52,10 @@ void main() {
         'passed': true,
         'completed_at': '2026-02-10T14:30:00Z',
         'answers': {
-          'feedback': 'Excellent clinical rationale provided for needle decompression.',
-          'submission_text': 'Case analysis summary and diagnostic rationale...',
+          'feedback':
+              'Excellent clinical rationale provided for needle decompression.',
+          'submission_text':
+              'Case analysis summary and diagnostic rationale...',
         },
       };
 
@@ -87,7 +90,8 @@ void main() {
         'passed': false,
         'completed_at': '2026-03-01T10:00:00Z',
         'answers': {
-          'feedback': 'Protocol failed safety check. Please revise and resubmit.',
+          'feedback':
+              'Protocol failed safety check. Please revise and resubmit.',
           'submission_text': 'Draft attempt...',
         },
       };
@@ -197,4 +201,3 @@ void main() {
     });
   });
 }
-

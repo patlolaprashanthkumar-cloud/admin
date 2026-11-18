@@ -18,17 +18,17 @@ final coursesRepositoryProvider = Provider<CoursesRepository>((ref) {
 /// StateNotifierProvider managing the enrolled courses list for the active student
 final enrolledCoursesNotifierProvider =
     StateNotifierProvider<EnrolledCoursesNotifier, CoursesListState>((ref) {
-  final repo = ref.watch(coursesRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  return EnrolledCoursesNotifier(repo, authState.student);
-});
+      final repo = ref.watch(coursesRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      return EnrolledCoursesNotifier(repo, authState.student);
+    });
 
 class EnrolledCoursesNotifier extends StateNotifier<CoursesListState> {
   final CoursesRepository _repository;
   final StudentProfile? _student;
 
   EnrolledCoursesNotifier(this._repository, this._student)
-      : super(const CoursesListState()) {
+    : super(const CoursesListState()) {
     if (_student != null) {
       loadCourses();
     }
@@ -47,8 +47,9 @@ class EnrolledCoursesNotifier extends StateNotifier<CoursesListState> {
     state = state.copyWith(status: CoursesListStatus.loading);
 
     try {
-      final courses =
-          await _repository.getEnrolledCourses(_student.studentRecordId);
+      final courses = await _repository.getEnrolledCourses(
+        _student.studentRecordId,
+      );
       state = state.copyWith(
         status: CoursesListStatus.loaded,
         courses: courses,
@@ -90,24 +91,25 @@ class EnrolledCoursesNotifier extends StateNotifier<CoursesListState> {
 }
 
 /// Family StateNotifierProvider managing the details and curriculum of a specific course
-final courseDetailProvider = StateNotifierProvider.family<CourseDetailNotifier,
-    CourseDetailState, String>((ref, courseId) {
-  final repo = ref.watch(coursesRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  final studentRecordId = authState.student?.studentRecordId ?? '';
-  return CourseDetailNotifier(repo, courseId, studentRecordId);
-});
+final courseDetailProvider =
+    StateNotifierProvider.family<
+      CourseDetailNotifier,
+      CourseDetailState,
+      String
+    >((ref, courseId) {
+      final repo = ref.watch(coursesRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      final studentRecordId = authState.student?.studentRecordId ?? '';
+      return CourseDetailNotifier(repo, courseId, studentRecordId);
+    });
 
 class CourseDetailNotifier extends StateNotifier<CourseDetailState> {
   final CoursesRepository _repository;
   final String _courseId;
   final String _studentRecordId;
 
-  CourseDetailNotifier(
-    this._repository,
-    this._courseId,
-    this._studentRecordId,
-  ) : super(const CourseDetailState()) {
+  CourseDetailNotifier(this._repository, this._courseId, this._studentRecordId)
+    : super(const CourseDetailState()) {
     loadCourseDetails();
   }
 
@@ -125,12 +127,15 @@ class CourseDetailNotifier extends StateNotifier<CourseDetailState> {
 
     try {
       // 1. Fetch course details with enrollment status
-      final StudentCourse? course =
-          await _repository.getCourseDetails(_courseId, _studentRecordId);
+      final StudentCourse? course = await _repository.getCourseDetails(
+        _courseId,
+        _studentRecordId,
+      );
 
       // 2. Fetch all modules and ordered lessons
-      final List<CourseModule> modules =
-          await _repository.getCourseModules(_courseId);
+      final List<CourseModule> modules = await _repository.getCourseModules(
+        _courseId,
+      );
 
       state = state.copyWith(
         status: CourseDetailStatus.loaded,
@@ -147,8 +152,7 @@ class CourseDetailNotifier extends StateNotifier<CourseDetailState> {
       );
       state = state.copyWith(
         status: CourseDetailStatus.error,
-        errorMessage:
-            'Unable to load curriculum modules. Please check your connection and retry.',
+        errorMessage: 'Unable to load curriculum modules. Please check your connection and retry.',
       );
     }
   }
@@ -158,4 +162,3 @@ class CourseDetailNotifier extends StateNotifier<CourseDetailState> {
     await loadCourseDetails();
   }
 }
-

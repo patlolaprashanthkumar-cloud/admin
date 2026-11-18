@@ -20,7 +20,7 @@ abstract class AssessmentsRepository {
   Future<AssessmentAttemptResult?> submitAssessmentAttempt({
     required String assessmentId,
     required String studentRecordId,
-    required Map<String, String> selectedAnswers, // questionId -> selectedOptionId
+    required Map<String, String>
+    selectedAnswers, // questionId -> selectedOptionId
   });
 }
-

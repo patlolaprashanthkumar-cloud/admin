@@ -21,9 +21,5 @@ void main() async {
   // Initialize Supabase backend layer with environment configuration
   await AppSupabase.initialize();
 
-  runApp(
-    const ProviderScope(
-      child: IIECMStudentApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: IIECMStudentApp()));
 }

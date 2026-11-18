@@ -31,7 +31,8 @@ import 'package:iiecm_student/features/results/domain/models/student_result.dart
 import 'package:iiecm_student/features/results/domain/repositories/results_repository.dart';
 import 'package:iiecm_student/features/results/presentation/providers/results_provider.dart';
 
-class MockAuthNotifier extends StateNotifier<AuthState> implements AuthNotifier {
+class MockAuthNotifier extends StateNotifier<AuthState>
+    implements AuthNotifier {
   MockAuthNotifier(super.state);
 
   @override
@@ -83,7 +84,10 @@ class FakeCoursesRepository implements CoursesRepository {
   }
 
   @override
-  Future<StudentCourse?> getCourseDetails(String courseId, String studentRecordId) async {
+  Future<StudentCourse?> getCourseDetails(
+    String courseId,
+    String studentRecordId,
+  ) async {
     return StudentCourse(
       id: courseId,
       title: 'Advanced Emergency Protocols',
@@ -125,7 +129,9 @@ class FakeCoursesRepository implements CoursesRepository {
 
 class FakeAssessmentsRepository implements AssessmentsRepository {
   @override
-  Future<List<StudentAssessment>> getStudentAssessments(String studentRecordId) async {
+  Future<List<StudentAssessment>> getStudentAssessments(
+    String studentRecordId,
+  ) async {
     return [
       StudentAssessment(
         id: 'exam-1',
@@ -157,7 +163,9 @@ class FakeAssessmentsRepository implements AssessmentsRepository {
   }
 
   @override
-  Future<List<StudentQuestion>> getAssessmentQuestions(String assessmentId) async {
+  Future<List<StudentQuestion>> getAssessmentQuestions(
+    String assessmentId,
+  ) async {
     return [
       const StudentQuestion(
         id: 'q1',
@@ -193,7 +201,9 @@ class FakeAssessmentsRepository implements AssessmentsRepository {
 
 class FakeAssignmentsRepository implements AssignmentsRepository {
   @override
-  Future<List<StudentAssignment>> getStudentAssignments(String studentRecordId) async {
+  Future<List<StudentAssignment>> getStudentAssignments(
+    String studentRecordId,
+  ) async {
     return [
       StudentAssignment(
         id: 'ass-1',
@@ -269,7 +279,9 @@ class FakeResultsRepository implements ResultsRepository {
 
 class FakePaymentsRepository implements PaymentsRepository {
   @override
-  Future<List<StudentPayment>> getStudentPayments(String studentRecordId) async {
+  Future<List<StudentPayment>> getStudentPayments(
+    String studentRecordId,
+  ) async {
     return [
       StudentPayment(
         id: 'p1',
@@ -305,7 +317,9 @@ class FakePaymentsRepository implements PaymentsRepository {
 }
 
 void main() {
-  testWidgets('Unauthenticated user is redirected to LoginScreen', (WidgetTester tester) async {
+  testWidgets('Unauthenticated user is redirected to LoginScreen', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -329,7 +343,9 @@ void main() {
     expect(find.text('Password'), findsOneWidget);
   });
 
-  testWidgets('Authenticated student accesses Dashboard and Navigation Shell', (WidgetTester tester) async {
+  testWidgets('Authenticated student accesses Dashboard and Navigation Shell', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -349,14 +365,23 @@ void main() {
       ProviderScope(
         overrides: [
           authNotifierProvider.overrideWith(
-            (ref) => MockAuthNotifier(const AuthState.authenticated(testStudent)),
+            (ref) =>
+                MockAuthNotifier(const AuthState.authenticated(testStudent)),
           ),
-          dashboardRepositoryProvider.overrideWithValue(FakeDashboardRepository()),
+          dashboardRepositoryProvider.overrideWithValue(
+            FakeDashboardRepository(),
+          ),
           coursesRepositoryProvider.overrideWithValue(FakeCoursesRepository()),
-          assessmentsRepositoryProvider.overrideWithValue(FakeAssessmentsRepository()),
-          assignmentsRepositoryProvider.overrideWithValue(FakeAssignmentsRepository()),
+          assessmentsRepositoryProvider.overrideWithValue(
+            FakeAssessmentsRepository(),
+          ),
+          assignmentsRepositoryProvider.overrideWithValue(
+            FakeAssignmentsRepository(),
+          ),
           resultsRepositoryProvider.overrideWithValue(FakeResultsRepository()),
-          paymentsRepositoryProvider.overrideWithValue(FakePaymentsRepository()),
+          paymentsRepositoryProvider.overrideWithValue(
+            FakePaymentsRepository(),
+          ),
         ],
         child: const IIECMStudentApp(),
       ),
@@ -373,13 +398,27 @@ void main() {
     expect(navBarFinder, findsOneWidget);
 
     // Verify destinations
-    expect(find.descendant(of: navBarFinder, matching: find.text('Home')), findsOneWidget);
-    expect(find.descendant(of: navBarFinder, matching: find.text('My Courses')), findsOneWidget);
-    expect(find.descendant(of: navBarFinder, matching: find.text('Assessments')), findsOneWidget);
-    expect(find.descendant(of: navBarFinder, matching: find.text('Profile')), findsOneWidget);
+    expect(
+      find.descendant(of: navBarFinder, matching: find.text('Home')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: navBarFinder, matching: find.text('My Courses')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: navBarFinder, matching: find.text('Assessments')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: navBarFinder, matching: find.text('Profile')),
+      findsOneWidget,
+    );
 
     // Tap My Courses branch
-    await tester.tap(find.descendant(of: navBarFinder, matching: find.text('My Courses')));
+    await tester.tap(
+      find.descendant(of: navBarFinder, matching: find.text('My Courses')),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(MyCoursesScreen), findsOneWidget);
@@ -387,7 +426,9 @@ void main() {
     expect(find.text('Advanced Emergency Protocols'), findsOneWidget);
 
     // Tap Assessments branch
-    await tester.tap(find.descendant(of: navBarFinder, matching: find.text('Assessments')));
+    await tester.tap(
+      find.descendant(of: navBarFinder, matching: find.text('Assessments')),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byType(AssessmentsScreen), findsOneWidget);
@@ -395,7 +436,9 @@ void main() {
     expect(find.text('Emergency Medicine MCQ Checkpoint'), findsOneWidget);
 
     // Tap Profile branch
-    await tester.tap(find.descendant(of: navBarFinder, matching: find.text('Profile')));
+    await tester.tap(
+      find.descendant(of: navBarFinder, matching: find.text('Profile')),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Student Dossier & Profile'), findsOneWidget);
@@ -403,7 +446,9 @@ void main() {
     expect(find.text('Sign Out of Student Portal'), findsOneWidget);
   });
 
-  testWidgets('Authenticated student can access Results and Payments portals', (WidgetTester tester) async {
+  testWidgets('Authenticated student can access Results and Payments portals', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -422,14 +467,23 @@ void main() {
       ProviderScope(
         overrides: [
           authNotifierProvider.overrideWith(
-            (ref) => MockAuthNotifier(const AuthState.authenticated(testStudent)),
+            (ref) =>
+                MockAuthNotifier(const AuthState.authenticated(testStudent)),
           ),
-          dashboardRepositoryProvider.overrideWithValue(FakeDashboardRepository()),
+          dashboardRepositoryProvider.overrideWithValue(
+            FakeDashboardRepository(),
+          ),
           coursesRepositoryProvider.overrideWithValue(FakeCoursesRepository()),
-          assessmentsRepositoryProvider.overrideWithValue(FakeAssessmentsRepository()),
-          assignmentsRepositoryProvider.overrideWithValue(FakeAssignmentsRepository()),
+          assessmentsRepositoryProvider.overrideWithValue(
+            FakeAssessmentsRepository(),
+          ),
+          assignmentsRepositoryProvider.overrideWithValue(
+            FakeAssignmentsRepository(),
+          ),
           resultsRepositoryProvider.overrideWithValue(FakeResultsRepository()),
-          paymentsRepositoryProvider.overrideWithValue(FakePaymentsRepository()),
+          paymentsRepositoryProvider.overrideWithValue(
+            FakePaymentsRepository(),
+          ),
         ],
         child: const IIECMStudentApp(),
       ),
@@ -437,9 +491,17 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Quick Portals has Results and Fee Status
-    final resultsQuickActionFinder = find.byKey(const Key('quick_action_results'));
+    final resultsQuickActionFinder = find.byKey(
+      const Key('quick_action_results'),
+    );
     expect(resultsQuickActionFinder, findsOneWidget);
-    expect(find.descendant(of: resultsQuickActionFinder, matching: find.text('Results')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: resultsQuickActionFinder,
+        matching: find.text('Results'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Fee Status'), findsOneWidget);
 
     // Tap Results quick action

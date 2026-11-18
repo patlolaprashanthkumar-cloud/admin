@@ -22,7 +22,9 @@ import '../features/results/presentation/screens/result_detail_screen.dart';
 import '../features/results/presentation/screens/results_screen.dart';
 import '../shared/widgets/app_loading_screen.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
+  debugLabel: 'root',
+);
 
 class AppRoutes {
   AppRoutes._();
@@ -167,9 +169,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.courseDetail,
         name: 'course_detail',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => CourseDetailScreen(
-          courseId: state.pathParameters['id'] ?? '',
-        ),
+        builder: (context, state) =>
+            CourseDetailScreen(courseId: state.pathParameters['id'] ?? ''),
       ),
       GoRoute(
         path: AppRoutes.assignments,
@@ -211,9 +212,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.resultDetail,
         name: 'result_detail',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => ResultDetailScreen(
-          resultId: state.pathParameters['id'] ?? '',
-        ),
+        builder: (context, state) =>
+            ResultDetailScreen(resultId: state.pathParameters['id'] ?? ''),
       ),
       GoRoute(
         path: AppRoutes.notifications,
@@ -231,9 +231,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.paymentDetail,
         name: 'payment_detail',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => PaymentDetailScreen(
-          paymentId: state.pathParameters['id'] ?? '',
-        ),
+        builder: (context, state) =>
+            PaymentDetailScreen(paymentId: state.pathParameters['id'] ?? ''),
       ),
     ],
   );

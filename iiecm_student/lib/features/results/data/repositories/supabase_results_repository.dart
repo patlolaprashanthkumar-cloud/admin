@@ -40,7 +40,9 @@ class SupabaseResultsRepository implements ResultsRepository {
         try {
           final List<dynamic> assessments = await _client
               .from('assessments')
-              .select('id, title, type, passing_marks, total_marks, description')
+              .select(
+                'id, title, type, passing_marks, total_marks, description',
+              )
               .inFilter('id', assessmentIds)
               .timeout(const Duration(seconds: 8));
 
@@ -151,7 +153,9 @@ class SupabaseResultsRepository implements ResultsRepository {
         try {
           final aRow = await _client
               .from('assessments')
-              .select('id, title, type, passing_marks, total_marks, description')
+              .select(
+                'id, title, type, passing_marks, total_marks, description',
+              )
               .eq('id', aId)
               .maybeSingle();
           if (aRow != null) {
@@ -191,4 +195,3 @@ class SupabaseResultsRepository implements ResultsRepository {
     }
   }
 }
-

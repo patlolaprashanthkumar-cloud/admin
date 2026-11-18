@@ -42,14 +42,18 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
               'My Enrolled Courses',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
               ),
             ),
             Text(
               'Academic Curriculum & Clinical Training',
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 11,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -84,7 +88,9 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
                         hintText: 'Search course title, faculty, category...',
                         hintStyle: TextStyle(
                           fontSize: 13,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textMuted,
                         ),
                         prefixIcon: const Icon(Icons.search_rounded, size: 20),
                         suffixIcon: _searchController.text.isNotEmpty
@@ -97,22 +103,37 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
                               )
                             : null,
                         filled: true,
-                        fillColor: isDark ? AppColors.darkSurface : AppColors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        fillColor: isDark
+                            ? AppColors.darkSurface
+                            : AppColors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           borderSide: BorderSide(
-                            color: isDark ? AppColors.darkBorder : AppColors.border,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.border,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           borderSide: BorderSide(
-                            color: isDark ? AppColors.darkBorder : AppColors.border,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.border,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           borderSide: const BorderSide(
                             color: AppColors.primaryForest,
                             width: 1.5,
@@ -135,7 +156,8 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
                               isDark: isDark,
                             ),
                             ...coursesState.availableCategories.map((cat) {
-                              final isSelected = coursesState.selectedCategory == cat;
+                              final isSelected =
+                                  coursesState.selectedCategory == cat;
                               return _buildFilterChip(
                                 label: cat,
                                 isSelected: isSelected,
@@ -153,12 +175,16 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
 
             // Content Area depending on state
             if (coursesState.isLoading && coursesState.courses.isEmpty)
-              SliverFillRemaining(
-                child: _buildLoadingState(isDark),
-              )
+              SliverFillRemaining(child: _buildLoadingState(isDark))
             else if (coursesState.hasError && coursesState.courses.isEmpty)
               SliverFillRemaining(
-                child: _buildErrorState(context, coursesState.errorMessage, notifier, isDark, theme),
+                child: _buildErrorState(
+                  context,
+                  coursesState.errorMessage,
+                  notifier,
+                  isDark,
+                  theme,
+                ),
               )
             else if (coursesState.courses.isEmpty)
               SliverFillRemaining(
@@ -170,18 +196,17 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingMd),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.spacingMd,
+                ),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final course = coursesState.filteredCourses[index];
-                      return CourseCard(
-                        course: course,
-                        onTap: () => context.push('/courses/${course.id}'),
-                      );
-                    },
-                    childCount: coursesState.filteredCourses.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final course = coursesState.filteredCourses[index];
+                    return CourseCard(
+                      course: course,
+                      onTap: () => context.push('/courses/${course.id}'),
+                    );
+                  }, childCount: coursesState.filteredCourses.length),
                 ),
               ),
 
@@ -243,7 +268,9 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
             'Loading your academic courses...',
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -266,7 +293,11 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 44),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.error,
+                size: 44,
+              ),
               const SizedBox(height: AppConstants.spacingSm),
               Text(
                 'Unable to Load Courses',
@@ -276,10 +307,13 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                errorMessage ?? 'A network or server error occurred. Please try again.',
+                errorMessage ??
+                    'A network or server error occurred. Please try again.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
@@ -314,7 +348,9 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
               Icon(
                 Icons.school_outlined,
                 size: 48,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textMuted,
               ),
               const SizedBox(height: AppConstants.spacingMd),
               Text(
@@ -328,7 +364,9 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
                 'You are not currently enrolled in any academic courses. Once the registrar assigns your training curriculum, it will appear here automatically.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                   height: 1.4,
                 ),
               ),
@@ -377,7 +415,9 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
               'No enrolled courses match your current search criteria.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppConstants.spacingMd),
@@ -396,4 +436,3 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
     );
   }
 }
-

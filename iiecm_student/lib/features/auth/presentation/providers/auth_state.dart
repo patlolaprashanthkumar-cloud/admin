@@ -39,54 +39,55 @@ class AuthState {
   });
 
   const AuthState.initial()
-      : status = AuthStatus.initial,
-        student = null,
-        errorMessage = null,
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.initial,
+      student = null,
+      errorMessage = null,
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.unconfigured()
-      : status = AuthStatus.unconfigured,
-        student = null,
-        errorMessage = 'Supabase credentials are not configured. Run with --dart-define-from-file=.env.json',
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.unconfigured,
+      student = null,
+      errorMessage = 'Supabase credentials are not configured. Run with --dart-define-from-file=.env.json',
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.unauthenticated({this.errorMessage})
-      : status = AuthStatus.unauthenticated,
-        student = null,
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.unauthenticated,
+      student = null,
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.authenticating()
-      : status = AuthStatus.authenticating,
-        student = null,
-        errorMessage = null,
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.authenticating,
+      student = null,
+      errorMessage = null,
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.authenticated(StudentProfile studentProfile)
-      : status = AuthStatus.authenticated,
-        student = studentProfile,
-        errorMessage = null,
-        isRetryable = false,
-        pendingUserId = null,
-        pendingEmail = null;
+    : status = AuthStatus.authenticated,
+      student = studentProfile,
+      errorMessage = null,
+      isRetryable = false,
+      pendingUserId = null,
+      pendingEmail = null;
 
   const AuthState.verificationError({
     required this.errorMessage,
     required this.pendingUserId,
     this.pendingEmail,
-  })  : status = AuthStatus.verificationError,
-        student = null,
-        isRetryable = true;
+  }) : status = AuthStatus.verificationError,
+       student = null,
+       isRetryable = true;
 
-  bool get isAuthenticated => status == AuthStatus.authenticated && student != null;
-  bool get isLoading => status == AuthStatus.authenticating || status == AuthStatus.initial;
+  bool get isAuthenticated =>
+      status == AuthStatus.authenticated && student != null;
+  bool get isLoading =>
+      status == AuthStatus.authenticating || status == AuthStatus.initial;
   bool get isUnconfigured => status == AuthStatus.unconfigured;
 }
-

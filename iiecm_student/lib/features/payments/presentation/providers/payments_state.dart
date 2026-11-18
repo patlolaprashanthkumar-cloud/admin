@@ -71,9 +71,14 @@ class PaymentsState {
         final matchesRef = p.transactionRef.toLowerCase().contains(q);
         final matchesReceipt = p.receiptNumber.toLowerCase().contains(q);
         final matchesCourse = p.courseName?.toLowerCase().contains(q) ?? false;
-        final matchesPlan = p.subscriptionPlan?.toLowerCase().contains(q) ?? false;
+        final matchesPlan =
+            p.subscriptionPlan?.toLowerCase().contains(q) ?? false;
         final matchesNotes = p.notes?.toLowerCase().contains(q) ?? false;
-        return matchesRef || matchesReceipt || matchesCourse || matchesPlan || matchesNotes;
+        return matchesRef ||
+            matchesReceipt ||
+            matchesCourse ||
+            matchesPlan ||
+            matchesNotes;
       }).toList();
     }
 
@@ -108,4 +113,3 @@ class PaymentsState {
     );
   }
 }
-

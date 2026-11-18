@@ -13,6 +13,6 @@ class AppConstants {
   // UI Standard Tokens
   static const double radiusSmall = 8.0;
   static const double radiusMedium = 12.0;
-  static const double radiusLarge = 16.0;
+  static const double radiusLarge = 18.0;
   static const double radiusXLarge = 24.0;
 }

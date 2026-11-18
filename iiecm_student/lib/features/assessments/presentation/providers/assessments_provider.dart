@@ -17,18 +17,20 @@ final assessmentsRepositoryProvider = Provider<AssessmentsRepository>((ref) {
 
 /// StateNotifierProvider managing the assessments catalog for the active student
 final studentAssessmentsNotifierProvider =
-    StateNotifierProvider<StudentAssessmentsNotifier, AssessmentsListState>((ref) {
-  final repo = ref.watch(assessmentsRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  return StudentAssessmentsNotifier(repo, authState.student);
-});
+    StateNotifierProvider<StudentAssessmentsNotifier, AssessmentsListState>((
+      ref,
+    ) {
+      final repo = ref.watch(assessmentsRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      return StudentAssessmentsNotifier(repo, authState.student);
+    });
 
 class StudentAssessmentsNotifier extends StateNotifier<AssessmentsListState> {
   final AssessmentsRepository _repository;
   final StudentProfile? _student;
 
   StudentAssessmentsNotifier(this._repository, this._student)
-      : super(const AssessmentsListState()) {
+    : super(const AssessmentsListState()) {
     if (_student != null) {
       loadAssessments();
     }
@@ -47,8 +49,9 @@ class StudentAssessmentsNotifier extends StateNotifier<AssessmentsListState> {
     state = state.copyWith(status: AssessmentsListStatus.loading);
 
     try {
-      final assessments =
-          await _repository.getStudentAssessments(_student.studentRecordId);
+      final assessments = await _repository.getStudentAssessments(
+        _student.studentRecordId,
+      );
       state = state.copyWith(
         status: AssessmentsListStatus.loaded,
         assessments: assessments,
@@ -83,13 +86,17 @@ class StudentAssessmentsNotifier extends StateNotifier<AssessmentsListState> {
 }
 
 /// Family StateNotifierProvider managing assessment details and instructions
-final assessmentDetailProvider = StateNotifierProvider.family<
-    AssessmentDetailNotifier, AssessmentDetailState, String>((ref, assessmentId) {
-  final repo = ref.watch(assessmentsRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  final studentRecordId = authState.student?.studentRecordId ?? '';
-  return AssessmentDetailNotifier(repo, assessmentId, studentRecordId);
-});
+final assessmentDetailProvider =
+    StateNotifierProvider.family<
+      AssessmentDetailNotifier,
+      AssessmentDetailState,
+      String
+    >((ref, assessmentId) {
+      final repo = ref.watch(assessmentsRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      final studentRecordId = authState.student?.studentRecordId ?? '';
+      return AssessmentDetailNotifier(repo, assessmentId, studentRecordId);
+    });
 
 class AssessmentDetailNotifier extends StateNotifier<AssessmentDetailState> {
   final AssessmentsRepository _repository;
@@ -121,8 +128,7 @@ class AssessmentDetailNotifier extends StateNotifier<AssessmentDetailState> {
         studentRecordId: _studentRecordId,
       );
 
-      final questions =
-          await _repository.getAssessmentQuestions(_assessmentId);
+      final questions = await _repository.getAssessmentQuestions(_assessmentId);
 
       state = state.copyWith(
         status: AssessmentDetailStatus.loaded,
@@ -150,13 +156,17 @@ class AssessmentDetailNotifier extends StateNotifier<AssessmentDetailState> {
 }
 
 /// Family StateNotifierProvider managing the live timed examination attempt session
-final assessmentAttemptProvider = StateNotifierProvider.family<
-    AssessmentAttemptNotifier, AssessmentAttemptState, String>((ref, assessmentId) {
-  final repo = ref.watch(assessmentsRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  final studentRecordId = authState.student?.studentRecordId ?? '';
-  return AssessmentAttemptNotifier(repo, assessmentId, studentRecordId);
-});
+final assessmentAttemptProvider =
+    StateNotifierProvider.family<
+      AssessmentAttemptNotifier,
+      AssessmentAttemptState,
+      String
+    >((ref, assessmentId) {
+      final repo = ref.watch(assessmentsRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      final studentRecordId = authState.student?.studentRecordId ?? '';
+      return AssessmentAttemptNotifier(repo, assessmentId, studentRecordId);
+    });
 
 class AssessmentAttemptNotifier extends StateNotifier<AssessmentAttemptState> {
   final AssessmentsRepository _repository;
@@ -241,4 +251,3 @@ class AssessmentAttemptNotifier extends StateNotifier<AssessmentAttemptState> {
     }
   }
 }
-

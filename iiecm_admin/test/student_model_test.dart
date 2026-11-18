@@ -382,10 +382,7 @@ void main() {
       final student = Student.fromJson(json);
 
       expect(student.learningFormat, 'live_recorded');
-      expect(
-        student.preferredSlot,
-        'Weekend Intensive (Saturday & Sunday)',
-      );
+      expect(student.preferredSlot, 'Weekend Intensive (Saturday & Sunday)');
     });
 
     test(

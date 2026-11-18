@@ -46,10 +46,17 @@ class AssessmentCard extends StatelessWidget {
                   runSpacing: 4,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.forestSoft,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
                       ),
                       child: Text(
                         assessment.courseTitle.toUpperCase(),
@@ -64,12 +71,21 @@ class AssessmentCard extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkBackground : AppColors.warmCream,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                        color: isDark
+                            ? AppColors.darkBackground
+                            : AppColors.warmCream,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
                         border: Border.all(
-                          color: isDark ? AppColors.darkBorder : AppColors.border,
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.border,
                         ),
                       ),
                       child: Text(
@@ -77,7 +93,9 @@ class AssessmentCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
                         ),
                       ),
                     ),
@@ -90,9 +108,7 @@ class AssessmentCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
-                  border: Border.all(
-                    color: statusColor.withValues(alpha: 0.3),
-                  ),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -136,7 +152,9 @@ class AssessmentCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
                 height: 1.35,
               ),
             ),
@@ -156,7 +174,9 @@ class AssessmentCard extends StatelessWidget {
                   Icon(
                     Icons.calendar_today_rounded,
                     size: 13,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                   const SizedBox(width: 5),
                   Text(
@@ -164,7 +184,9 @@ class AssessmentCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -172,7 +194,11 @@ class AssessmentCard extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.timer_outlined, size: 13, color: AppColors.terracotta),
+                  const Icon(
+                    Icons.timer_outlined,
+                    size: 13,
+                    color: AppColors.terracotta,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '${assessment.durationMinutes} min',
@@ -188,7 +214,11 @@ class AssessmentCard extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.quiz_outlined, size: 13, color: AppColors.primaryForest),
+                    const Icon(
+                      Icons.quiz_outlined,
+                      size: 13,
+                      color: AppColors.primaryForest,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       '${assessment.questionCount} Questions',
@@ -250,12 +280,14 @@ class AssessmentCard extends StatelessWidget {
               AppButton(
                 label: assessment.isCompleted
                     ? 'View Evaluation'
-                    : (assessment.isAvailable ? 'Start Examination' : 'View Schedule'),
+                    : (assessment.isAvailable
+                          ? 'Start Examination'
+                          : 'View Schedule'),
                 icon: assessment.isCompleted
                     ? Icons.verified_outlined
                     : (assessment.isAvailable
-                        ? Icons.play_arrow_rounded
-                        : Icons.event_note_rounded),
+                          ? Icons.play_arrow_rounded
+                          : Icons.event_note_rounded),
                 isFullWidth: false,
                 height: 38,
                 variant: assessment.isCompleted
@@ -298,4 +330,3 @@ class AssessmentCard extends StatelessWidget {
     return Icons.lock_clock_rounded;
   }
 }
-

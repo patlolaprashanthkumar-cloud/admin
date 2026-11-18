@@ -30,9 +30,7 @@ class AppSupabase {
         url: AppConfig.supabaseUrl.trim(),
         // ignore: deprecated_member_use
         anonKey: AppConfig.supabaseAnonKey.trim(),
-        authOptions: const FlutterAuthClientOptions(
-          autoRefreshToken: true,
-        ),
+        authOptions: const FlutterAuthClientOptions(autoRefreshToken: true),
       );
       _isInitialized = true;
       developer.log(
@@ -61,4 +59,3 @@ class AppSupabase {
     return Supabase.instance.client;
   }
 }
-

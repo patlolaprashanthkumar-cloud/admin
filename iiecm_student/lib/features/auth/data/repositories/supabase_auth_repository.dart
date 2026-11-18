@@ -112,7 +112,9 @@ class SupabaseAuthRepository implements AuthRepository {
     try {
       final response = await _client
           .from('profiles')
-          .select('id, email, full_name, role, phone, avatar_url, last_login_at, created_at')
+          .select(
+            'id, email, full_name, role, phone, avatar_url, last_login_at, created_at',
+          )
           .eq('id', userId)
           .maybeSingle()
           .timeout(const Duration(seconds: 12));
@@ -154,7 +156,9 @@ class SupabaseAuthRepository implements AuthRepository {
         studentData = Map<String, dynamic>.from(response);
       }
     } on sb.PostgrestException catch (e) {
-      throw AuthNetworkException('Database query for student record failed: ${e.message}');
+      throw AuthNetworkException(
+        'Database query for student record failed: ${e.message}',
+      );
     } catch (e) {
       if (e is SocketException || e is TimeoutException) {
         throw const AuthNetworkException(
@@ -168,7 +172,9 @@ class SupabaseAuthRepository implements AuthRepository {
       throw const StudentRecordNotFoundException();
     }
 
-    final status = (studentData['account_status'] as String?)?.toLowerCase().trim() ?? 'active';
+    final status =
+        (studentData['account_status'] as String?)?.toLowerCase().trim() ??
+        'active';
     if (status != 'active') {
       throw StudentAccountSuspendedException(status);
     }
@@ -239,4 +245,3 @@ class SupabaseAuthRepository implements AuthRepository {
     }
   }
 }
-

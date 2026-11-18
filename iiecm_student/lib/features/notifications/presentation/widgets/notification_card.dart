@@ -134,10 +134,15 @@ class NotificationCard extends StatelessWidget {
                     ),
                     if (notification.priority == NotificationPriority.high)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.terracottaSoft,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusSm,
+                          ),
                           border: Border.all(
                             color: AppColors.terracotta.withValues(alpha: 0.5),
                             width: 0.8,
@@ -163,12 +168,18 @@ class NotificationCard extends StatelessWidget {
                           ],
                         ),
                       )
-                    else if (notification.priority == NotificationPriority.medium)
+                    else if (notification.priority ==
+                        NotificationPriority.medium)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.warningSoft,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusSm,
+                          ),
                           border: Border.all(
                             color: AppColors.warning.withValues(alpha: 0.5),
                             width: 0.8,
@@ -206,7 +217,9 @@ class NotificationCard extends StatelessWidget {
                 formattedTime,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 11,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -228,14 +241,18 @@ class NotificationCard extends StatelessWidget {
           Text(
             notification.message,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textPrimary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textPrimary,
               fontSize: 13,
               height: 1.4,
             ),
           ),
 
           // Action URL button / Mark as read row
-          if ((notification.actionUrl != null && notification.actionUrl!.isNotEmpty) || !isRead) ...[
+          if ((notification.actionUrl != null &&
+                  notification.actionUrl!.isNotEmpty) ||
+              !isRead) ...[
             const SizedBox(height: AppConstants.spacingSm),
             const Divider(height: 16),
             Row(
@@ -244,13 +261,19 @@ class NotificationCard extends StatelessWidget {
                 if (!isRead)
                   TextButton.icon(
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       visualDensity: VisualDensity.compact,
                     ),
                     icon: const Icon(Icons.check_rounded, size: 14),
                     label: const Text(
                       'Mark Read',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     onPressed: onMarkAsRead,
                   ),
@@ -261,16 +284,24 @@ class NotificationCard extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryForest,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       visualDensity: VisualDensity.compact,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
                       ),
                     ),
                     icon: const Icon(Icons.arrow_forward_rounded, size: 14),
                     label: const Text(
                       'Open Link',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     onPressed: () => _handleAction(context),
                   ),

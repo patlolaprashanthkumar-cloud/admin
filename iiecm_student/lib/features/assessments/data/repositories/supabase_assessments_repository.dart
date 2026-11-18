@@ -382,4 +382,3 @@ class SupabaseAssessmentsRepository implements AssessmentsRepository {
     }
   }
 }
-

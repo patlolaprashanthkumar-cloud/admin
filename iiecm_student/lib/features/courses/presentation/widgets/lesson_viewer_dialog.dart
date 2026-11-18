@@ -25,10 +25,8 @@ class LessonViewerDialog extends StatelessWidget {
     return showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (ctx) => LessonViewerDialog(
-        lesson: lesson,
-        moduleTitle: moduleTitle,
-      ),
+      builder: (ctx) =>
+          LessonViewerDialog(lesson: lesson, moduleTitle: moduleTitle),
     );
   }
 
@@ -55,7 +53,8 @@ class LessonViewerDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final hasUrl = lesson.contentUrl != null && lesson.contentUrl!.trim().isNotEmpty;
+    final hasUrl =
+        lesson.contentUrl != null && lesson.contentUrl!.trim().isNotEmpty;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -80,10 +79,17 @@ class LessonViewerDialog extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
-                            borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                            color: isDark
+                                ? AppColors.darkSurfaceElevated
+                                : AppColors.forestSoft,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.radiusSm,
+                            ),
                           ),
                           child: Text(
                             moduleTitle.toUpperCase(),
@@ -102,7 +108,9 @@ class LessonViewerDialog extends StatelessWidget {
                           lesson.title,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                       ],
@@ -235,7 +243,11 @@ class LessonViewerDialog extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline_rounded, color: AppColors.warning, size: 22),
+          const Icon(
+            Icons.info_outline_rounded,
+            color: AppColors.warning,
+            size: 22,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -249,7 +261,9 @@ class LessonViewerDialog extends StatelessWidget {
                 Text(
                   'This lesson module is conducted via clinical ward rounds, OSCE demonstration, or the faculty will publish digital access closer to the session date.',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -260,7 +274,11 @@ class LessonViewerDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildVideoResource(BuildContext context, bool isDark, ThemeData theme) {
+  Widget _buildVideoResource(
+    BuildContext context,
+    bool isDark,
+    ThemeData theme,
+  ) {
     final thumbUrl = lesson.videoThumbnailUrl;
     final isYouTube = lesson.youtubeVideoId != null;
 
@@ -281,7 +299,11 @@ class LessonViewerDialog extends StatelessWidget {
                     errorBuilder: (_, _, _) => Container(
                       color: Colors.black87,
                       child: const Center(
-                        child: Icon(Icons.video_library_rounded, size: 48, color: Colors.white54),
+                        child: Icon(
+                          Icons.video_library_rounded,
+                          size: 48,
+                          color: Colors.white54,
+                        ),
                       ),
                     ),
                   ),
@@ -302,7 +324,10 @@ class LessonViewerDialog extends StatelessWidget {
                   bottom: 8,
                   right: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black87,
                       borderRadius: BorderRadius.circular(4),
@@ -324,12 +349,18 @@ class LessonViewerDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AppConstants.spacingLg),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.warmCream,
               borderRadius: BorderRadius.circular(AppConstants.radiusMd),
             ),
             child: const Column(
               children: [
-                Icon(Icons.video_camera_front_rounded, size: 48, color: AppColors.terracotta),
+                Icon(
+                  Icons.video_camera_front_rounded,
+                  size: 48,
+                  color: AppColors.terracotta,
+                ),
                 SizedBox(height: 8),
                 Text(
                   'Video Lecture Stream Available',
@@ -344,7 +375,11 @@ class LessonViewerDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildImageResource(BuildContext context, bool isDark, ThemeData theme) {
+  Widget _buildImageResource(
+    BuildContext context,
+    bool isDark,
+    ThemeData theme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -357,7 +392,9 @@ class LessonViewerDialog extends StatelessWidget {
               if (progress == null) return child;
               return Container(
                 height: 200,
-                color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
+                color: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.warmCream,
                 child: const Center(
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
@@ -366,14 +403,20 @@ class LessonViewerDialog extends StatelessWidget {
             errorBuilder: (_, _, _) => Container(
               height: 180,
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
+                color: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.warmCream,
                 borderRadius: BorderRadius.circular(AppConstants.radiusMd),
               ),
               child: const Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.broken_image_rounded, size: 40, color: AppColors.error),
+                    Icon(
+                      Icons.broken_image_rounded,
+                      size: 40,
+                      color: AppColors.error,
+                    ),
                     SizedBox(height: 6),
                     Text('Unable to display image preview'),
                   ],
@@ -411,7 +454,11 @@ class LessonViewerDialog extends StatelessWidget {
                   color: AppColors.errorSoft,
                   borderRadius: BorderRadius.circular(AppConstants.radiusMd),
                 ),
-                child: const Icon(Icons.picture_as_pdf_rounded, color: AppColors.error, size: 32),
+                child: const Icon(
+                  Icons.picture_as_pdf_rounded,
+                  color: AppColors.error,
+                  size: 32,
+                ),
               ),
               const SizedBox(width: AppConstants.spacingMd),
               Expanded(
@@ -422,12 +469,18 @@ class LessonViewerDialog extends StatelessWidget {
                       fileName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     const Text(
                       'Portable Document Format • Clinical Case Study',
-                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -441,7 +494,11 @@ class LessonViewerDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildGenericFileResource(BuildContext context, bool isDark, ThemeData theme) {
+  Widget _buildGenericFileResource(
+    BuildContext context,
+    bool isDark,
+    ThemeData theme,
+  ) {
     final fileName = lesson.fileName ?? 'Study_Material';
     final ext = lesson.fileExtension?.toUpperCase() ?? 'FILE';
 
@@ -465,7 +522,11 @@ class LessonViewerDialog extends StatelessWidget {
                   color: AppColors.forestSoft,
                   borderRadius: BorderRadius.circular(AppConstants.radiusMd),
                 ),
-                child: const Icon(Icons.attach_file_rounded, color: AppColors.primaryForest, size: 30),
+                child: const Icon(
+                  Icons.attach_file_rounded,
+                  color: AppColors.primaryForest,
+                  size: 30,
+                ),
               ),
               const SizedBox(width: AppConstants.spacingMd),
               Expanded(
@@ -476,12 +537,18 @@ class LessonViewerDialog extends StatelessWidget {
                       fileName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '$ext Attachment • Academic Reference Document',
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -507,7 +574,11 @@ class LessonViewerDialog extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.link_rounded, size: 16, color: AppColors.primaryForest),
+          const Icon(
+            Icons.link_rounded,
+            size: 16,
+            color: AppColors.primaryForest,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -517,7 +588,9 @@ class LessonViewerDialog extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontFamily: 'monospace',
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ),
@@ -572,4 +645,3 @@ class LessonViewerDialog extends StatelessWidget {
     }
   }
 }
-

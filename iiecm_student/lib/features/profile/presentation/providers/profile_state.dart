@@ -28,7 +28,9 @@ class ProfileState {
       updateStatus: updateStatus ?? this.updateStatus,
       passwordStatus: passwordStatus ?? this.passwordStatus,
       errorMessage: clearMessages ? null : (errorMessage ?? this.errorMessage),
-      successMessage: clearMessages ? null : (successMessage ?? this.successMessage),
+      successMessage: clearMessages
+          ? null
+          : (successMessage ?? this.successMessage),
     );
   }
 }

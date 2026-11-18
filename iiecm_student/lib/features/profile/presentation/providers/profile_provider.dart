@@ -13,9 +13,9 @@ final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
 /// StateNotifierProvider managing profile editing and password updates
 final profileNotifierProvider =
     StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
-  final repo = ref.watch(profileRepositoryProvider);
-  return ProfileNotifier(repo, ref);
-});
+      final repo = ref.watch(profileRepositoryProvider);
+      return ProfileNotifier(repo, ref);
+    });
 
 class ProfileNotifier extends StateNotifier<ProfileState> {
   final ProfileRepository _repository;
@@ -104,4 +104,3 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = state.copyWith(clearMessages: true);
   }
 }
-

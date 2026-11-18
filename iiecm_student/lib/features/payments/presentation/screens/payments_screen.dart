@@ -79,8 +79,13 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                         )
                       : null,
                   filled: true,
-                  fillColor: isDark ? AppColors.darkSurfaceElevated : AppColors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  fillColor: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppConstants.radiusMd),
                     borderSide: BorderSide(
@@ -115,7 +120,9 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
               if (isLoading)
                 _buildLoadingState(isDark)
               else if (hasError)
-                _buildErrorState(paymentsState.errorMessage ?? 'Failed to load payments')
+                _buildErrorState(
+                  paymentsState.errorMessage ?? 'Failed to load payments',
+                )
               else if (filteredPayments.isEmpty)
                 _buildEmptyState(context, paymentsState)
               else
@@ -132,11 +139,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     );
   }
 
-  Widget _buildOverviewCard(
-    PaymentsState state,
-    bool isDark,
-    ThemeData theme,
-  ) {
+  Widget _buildOverviewCard(PaymentsState state, bool isDark, ThemeData theme) {
     return AppCard(
       backgroundColor: isDark ? AppColors.forestDark : AppColors.primaryForest,
       borderColor: isDark ? AppColors.forestLight : AppColors.forestDark,
@@ -195,11 +198,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                   color: const Color(0xFFA5D6A7),
                 ),
               ),
-              Container(
-                height: 28,
-                width: 1,
-                color: const Color(0x33FFFFFF),
-              ),
+              Container(height: 28, width: 1, color: const Color(0x33FFFFFF)),
               Expanded(
                 child: _buildMetricItem(
                   label: 'Verified Invoices',
@@ -207,16 +206,14 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                   color: Colors.white,
                 ),
               ),
-              Container(
-                height: 28,
-                width: 1,
-                color: const Color(0x33FFFFFF),
-              ),
+              Container(height: 28, width: 1, color: const Color(0x33FFFFFF)),
               Expanded(
                 child: _buildMetricItem(
                   label: 'Pending',
                   value: state.pendingCount.toString(),
-                  color: state.pendingCount > 0 ? const Color(0xFFFFCC80) : Colors.white,
+                  color: state.pendingCount > 0
+                      ? const Color(0xFFFFCC80)
+                      : Colors.white,
                 ),
               ),
             ],
@@ -271,7 +268,9 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
           child: const Center(
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryForest),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppColors.primaryForest,
+              ),
             ),
           ),
         ),
@@ -284,7 +283,11 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
       padding: const EdgeInsets.all(AppConstants.spacingLg),
       child: Column(
         children: [
-          const Icon(Icons.error_outline_rounded, size: 40, color: AppColors.error),
+          const Icon(
+            Icons.error_outline_rounded,
+            size: 40,
+            color: AppColors.error,
+          ),
           const SizedBox(height: AppConstants.spacingSm),
           const Text(
             'Unable to Load Payments',
@@ -294,7 +297,10 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppConstants.spacingMd),
           AppButton(
@@ -302,7 +308,8 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
             icon: Icons.refresh_rounded,
             isFullWidth: false,
             height: 38,
-            onPressed: () => ref.read(studentPaymentsNotifierProvider.notifier).refresh(),
+            onPressed: () =>
+                ref.read(studentPaymentsNotifierProvider.notifier).refresh(),
           ),
         ],
       ),
@@ -337,7 +344,10 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                 ? 'Try adjusting your search criteria or reset the current status filter.'
                 : 'No fee invoices or payment receipts have been recorded for your student account yet.',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
           ),
           const SizedBox(height: AppConstants.spacingMd),
           if (hasSearch || hasFilter)
@@ -349,8 +359,12 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
               variant: AppButtonVariant.outline,
               onPressed: () {
                 _searchController.clear();
-                ref.read(studentPaymentsNotifierProvider.notifier).setSearchQuery('');
-                ref.read(studentPaymentsNotifierProvider.notifier).setFilter(PaymentFilterType.all);
+                ref
+                    .read(studentPaymentsNotifierProvider.notifier)
+                    .setSearchQuery('');
+                ref
+                    .read(studentPaymentsNotifierProvider.notifier)
+                    .setFilter(PaymentFilterType.all);
               },
             ),
         ],
@@ -358,4 +372,3 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
     );
   }
 }
-

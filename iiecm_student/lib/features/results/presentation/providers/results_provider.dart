@@ -17,17 +17,17 @@ final resultsRepositoryProvider = Provider<ResultsRepository>((ref) {
 /// StateNotifierProvider managing student academic results
 final studentResultsNotifierProvider =
     StateNotifierProvider<StudentResultsNotifier, ResultsState>((ref) {
-  final repo = ref.watch(resultsRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  return StudentResultsNotifier(repo, authState.student);
-});
+      final repo = ref.watch(resultsRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      return StudentResultsNotifier(repo, authState.student);
+    });
 
 class StudentResultsNotifier extends StateNotifier<ResultsState> {
   final ResultsRepository _repository;
   final StudentProfile? _student;
 
   StudentResultsNotifier(this._repository, this._student)
-      : super(const ResultsState()) {
+    : super(const ResultsState()) {
     if (_student != null) {
       loadResults();
     }
@@ -46,8 +46,9 @@ class StudentResultsNotifier extends StateNotifier<ResultsState> {
     state = state.copyWith(status: ResultsStatus.loading);
 
     try {
-      final results =
-          await _repository.getStudentResults(_student.studentRecordId);
+      final results = await _repository.getStudentResults(
+        _student.studentRecordId,
+      );
       state = state.copyWith(
         status: ResultsStatus.loaded,
         results: results,
@@ -62,8 +63,7 @@ class StudentResultsNotifier extends StateNotifier<ResultsState> {
       );
       state = state.copyWith(
         status: ResultsStatus.error,
-        errorMessage:
-            'Unable to retrieve academic results. Please check your network connection.',
+        errorMessage: 'Unable to retrieve academic results. Please check your network connection.',
       );
     }
   }
@@ -82,15 +82,14 @@ class StudentResultsNotifier extends StateNotifier<ResultsState> {
 /// Provider for retrieving specific result details by resultId
 final studentResultDetailProvider =
     FutureProvider.family<StudentResult?, String>((ref, resultId) async {
-  final repo = ref.watch(resultsRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  final student = authState.student;
+      final repo = ref.watch(resultsRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      final student = authState.student;
 
-  if (student == null || resultId.isEmpty) return null;
+      if (student == null || resultId.isEmpty) return null;
 
-  return repo.getResultDetails(
-    resultId: resultId,
-    studentRecordId: student.studentRecordId,
-  );
-});
-
+      return repo.getResultDetails(
+        resultId: resultId,
+        studentRecordId: student.studentRecordId,
+      );
+    });

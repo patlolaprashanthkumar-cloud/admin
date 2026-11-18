@@ -30,13 +30,12 @@ class AppCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final effectiveBg = backgroundColor ?? (isDark ? AppColors.darkSurface : AppColors.white);
-    final effectiveBorder = borderColor ?? (isDark ? AppColors.darkBorder : AppColors.border);
+    final effectiveBg =
+        backgroundColor ?? (isDark ? AppColors.darkSurface : AppColors.white);
+    final effectiveBorder =
+        borderColor ?? (isDark ? AppColors.darkBorder : AppColors.border);
 
-    Widget content = Padding(
-      padding: padding,
-      child: child,
-    );
+    Widget content = Padding(padding: padding, child: child);
 
     if (onTap != null) {
       content = InkWell(
@@ -70,4 +69,3 @@ class AppCard extends StatelessWidget {
     return card;
   }
 }
-

@@ -3,10 +3,7 @@ class StudentQuestionOption {
   final String id;
   final String text;
 
-  const StudentQuestionOption({
-    required this.id,
-    required this.text,
-  });
+  const StudentQuestionOption({required this.id, required this.text});
 
   factory StudentQuestionOption.fromJson(Map<String, dynamic> json) {
     return StudentQuestionOption(
@@ -66,4 +63,3 @@ class StudentQuestion {
     );
   }
 }
-

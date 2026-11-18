@@ -22,4 +22,3 @@ class IIECMStudentApp extends ConsumerWidget {
     );
   }
 }
-

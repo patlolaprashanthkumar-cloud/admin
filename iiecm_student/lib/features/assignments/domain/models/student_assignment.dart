@@ -86,24 +86,28 @@ class StudentAssignment {
     final hasSubmission = submissionJson != null;
     final scoreVal = (submissionJson?['score'] as num?)?.toDouble();
     final pctVal = (submissionJson?['percentage'] as num?)?.toDouble();
-    final isPassedVal = submissionJson?['passed'] == true ||
+    final isPassedVal =
+        submissionJson?['passed'] == true ||
         submissionJson?['passed']?.toString().toLowerCase() == 'true';
 
     String? feedbackText;
     String? submissionNotesText;
     final answersData = submissionJson?['answers'];
     if (answersData is Map<String, dynamic>) {
-      feedbackText = answersData['feedback']?.toString() ??
+      feedbackText =
+          answersData['feedback']?.toString() ??
           answersData['instructor_feedback']?.toString() ??
           answersData['review']?.toString();
-      submissionNotesText = answersData['submission_text']?.toString() ??
+      submissionNotesText =
+          answersData['submission_text']?.toString() ??
           answersData['notes']?.toString();
     }
 
     final hasFeedback = feedbackText != null && feedbackText.trim().isNotEmpty;
     // An assignment is graded if faculty has evaluated it:
     // feedback is present, score > 0, percentage > 0, or explicitly marked passed.
-    final isGradedVal = hasSubmission &&
+    final isGradedVal =
+        hasSubmission &&
         (hasFeedback ||
             (scoreVal != null && scoreVal > 0) ||
             (pctVal != null && pctVal > 0) ||
@@ -118,7 +122,8 @@ class StudentAssignment {
       type: assessmentJson['type']?.toString() ?? 'assignment',
       totalMarks: (assessmentJson['total_marks'] as num?)?.toInt() ?? 100,
       passingMarks: (assessmentJson['passing_marks'] as num?)?.toInt() ?? 40,
-      durationMinutes: (assessmentJson['duration_minutes'] as num?)?.toInt() ?? 1440,
+      durationMinutes:
+          (assessmentJson['duration_minutes'] as num?)?.toInt() ?? 1440,
       status: assessmentJson['status']?.toString() ?? 'active',
       deadline: parseDate(assessmentJson['scheduled_at']),
       createdAt: parseDate(assessmentJson['created_at']) ?? DateTime.now(),
@@ -136,4 +141,3 @@ class StudentAssignment {
     );
   }
 }
-

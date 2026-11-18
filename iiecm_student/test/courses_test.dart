@@ -73,26 +73,29 @@ void main() {
       );
     });
 
-    test('correctly parses PDF document lesson with extension and filename', () {
-      final json = {
-        'id': 'les-2',
-        'module_id': 'mod-1',
-        'title': 'Trauma Resuscitation Clinical Protocol',
-        'duration_minutes': 20,
-        'type': 'pdf',
-        'order_index': 2,
-        'content_url': 'https://storage.supabase.co/protocols/trauma_resuscitation_guidelines.pdf',
-        'created_at': '2026-01-15T10:00:00Z',
-      };
+    test(
+      'correctly parses PDF document lesson with extension and filename',
+      () {
+        final json = {
+          'id': 'les-2',
+          'module_id': 'mod-1',
+          'title': 'Trauma Resuscitation Clinical Protocol',
+          'duration_minutes': 20,
+          'type': 'pdf',
+          'order_index': 2,
+          'content_url': 'https://storage.supabase.co/protocols/trauma_resuscitation_guidelines.pdf',
+          'created_at': '2026-01-15T10:00:00Z',
+        };
 
-      final lesson = CourseLesson.fromJson(json);
+        final lesson = CourseLesson.fromJson(json);
 
-      expect(lesson.isPdf, isTrue);
-      expect(lesson.isVideo, isFalse);
-      expect(lesson.fileExtension, 'pdf');
-      expect(lesson.fileName, 'trauma_resuscitation_guidelines.pdf');
-      expect(lesson.typeDisplayLabel, 'PDF Document');
-    });
+        expect(lesson.isPdf, isTrue);
+        expect(lesson.isVideo, isFalse);
+        expect(lesson.fileExtension, 'pdf');
+        expect(lesson.fileName, 'trauma_resuscitation_guidelines.pdf');
+        expect(lesson.typeDisplayLabel, 'PDF Document');
+      },
+    );
 
     test('correctly parses clinical image lesson', () {
       final json = {
@@ -102,7 +105,8 @@ void main() {
         'duration_minutes': 10,
         'type': 'image',
         'order_index': 3,
-        'content_url': 'https://storage.supabase.co/radiology/ct_thorax_case.png',
+        'content_url':
+            'https://storage.supabase.co/radiology/ct_thorax_case.png',
         'created_at': '2026-01-15T10:00:00Z',
       };
 
@@ -229,19 +233,18 @@ void main() {
     });
 
     test('filters courses by search query', () {
-      final state = CoursesListState(
-        courses: courses,
-        searchQuery: 'trauma',
-      );
+      final state = CoursesListState(courses: courses, searchQuery: 'trauma');
 
       expect(state.filteredCourses.length, 1);
       expect(state.filteredCourses.first.id, '2');
     });
 
-    test('returns all courses when category is null or All and query is empty', () {
-      final state = CoursesListState(courses: courses);
-      expect(state.filteredCourses.length, 2);
-    });
+    test(
+      'returns all courses when category is null or All and query is empty',
+      () {
+        final state = CoursesListState(courses: courses);
+        expect(state.filteredCourses.length, 2);
+      },
+    );
   });
 }
-

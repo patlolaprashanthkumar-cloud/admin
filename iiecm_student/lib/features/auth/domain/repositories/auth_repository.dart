@@ -32,4 +32,3 @@ abstract class AuthRepository {
   /// Dispatches password reset email to student's registered address
   Future<void> sendPasswordResetEmail(String email);
 }
-

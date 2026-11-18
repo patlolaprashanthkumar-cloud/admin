@@ -11,43 +11,39 @@ import '../widgets/payment_receipt_card.dart';
 class PaymentDetailScreen extends ConsumerWidget {
   final String paymentId;
 
-  const PaymentDetailScreen({
-    super.key,
-    required this.paymentId,
-  });
+  const PaymentDetailScreen({super.key, required this.paymentId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // First check in-memory list from studentPaymentsNotifierProvider for instant display
     final paymentsState = ref.watch(studentPaymentsNotifierProvider);
-    final cachedPayment =
-        paymentsState.payments.where((p) => p.id == paymentId).firstOrNull;
+    final cachedPayment = paymentsState.payments
+        .where((p) => p.id == paymentId)
+        .firstOrNull;
 
     final asyncPayment = ref.watch(studentPaymentDetailProvider(paymentId));
 
     final StudentPayment? payment = cachedPayment ?? asyncPayment.valueOrNull;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fee Receipt Voucher'),
-      ),
+      appBar: AppBar(title: const Text('Fee Receipt Voucher')),
       body: SafeArea(
         child: asyncPayment.isLoading && payment == null
             ? const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryForest),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryForest,
+                  ),
                 ),
               )
             : asyncPayment.hasError && payment == null
-                ? _buildErrorView(context, ref, asyncPayment.error.toString())
-                : payment == null
-                    ? _buildNotFoundView(context)
-                    : ListView(
-                        padding: const EdgeInsets.all(AppConstants.spacingMd),
-                        children: [
-                          PaymentReceiptCard(payment: payment),
-                        ],
-                      ),
+            ? _buildErrorView(context, ref, asyncPayment.error.toString())
+            : payment == null
+            ? _buildNotFoundView(context)
+            : ListView(
+                padding: const EdgeInsets.all(AppConstants.spacingMd),
+                children: [PaymentReceiptCard(payment: payment)],
+              ),
       ),
     );
   }
@@ -59,7 +55,11 @@ class PaymentDetailScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline_rounded, size: 44, color: AppColors.error),
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 44,
+              color: AppColors.error,
+            ),
             const SizedBox(height: AppConstants.spacingSm),
             const Text(
               'Error Loading Transaction',
@@ -69,7 +69,10 @@ class PaymentDetailScreen extends ConsumerWidget {
             Text(
               error,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppConstants.spacingMd),
             AppButton(
@@ -77,7 +80,8 @@ class PaymentDetailScreen extends ConsumerWidget {
               icon: Icons.refresh_rounded,
               isFullWidth: false,
               height: 38,
-              onPressed: () => ref.refresh(studentPaymentDetailProvider(paymentId)),
+              onPressed: () =>
+                  ref.refresh(studentPaymentDetailProvider(paymentId)),
             ),
           ],
         ),
@@ -92,7 +96,11 @@ class PaymentDetailScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.search_off_rounded, size: 44, color: AppColors.textSecondary),
+            const Icon(
+              Icons.search_off_rounded,
+              size: 44,
+              color: AppColors.textSecondary,
+            ),
             const SizedBox(height: AppConstants.spacingSm),
             const Text(
               'Payment Record Not Found',
@@ -118,4 +126,3 @@ class PaymentDetailScreen extends ConsumerWidget {
     );
   }
 }
-

@@ -10,11 +10,7 @@ class ResultCard extends StatelessWidget {
   final StudentResult result;
   final VoidCallback onTap;
 
-  const ResultCard({
-    super.key,
-    required this.result,
-    required this.onTap,
-  });
+  const ResultCard({super.key, required this.result, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +20,9 @@ class ResultCard extends StatelessWidget {
 
     final isPassed = result.passed;
     final statusColor = isPassed ? AppColors.success : AppColors.error;
-    final statusBgColor = isPassed ? AppColors.successSoft : AppColors.errorSoft;
+    final statusBgColor = isPassed
+        ? AppColors.successSoft
+        : AppColors.errorSoft;
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingMd),
@@ -41,10 +39,17 @@ class ResultCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.forestSoft,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
                       ),
                       child: Text(
                         result.type.displayName.toUpperCase(),
@@ -57,10 +62,15 @@ class ResultCard extends StatelessWidget {
                     ),
                     const SizedBox(width: AppConstants.spacingSm),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: statusBgColor,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
                       ),
                       child: Text(
                         result.displayStatus,
@@ -76,12 +86,19 @@ class ResultCard extends StatelessWidget {
               ),
               // Percentage Pill
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.warmCream,
                   borderRadius: BorderRadius.circular(AppConstants.radiusFull),
                   border: Border.all(
-                    color: isPassed ? AppColors.primaryForest : AppColors.terracotta,
+                    color: isPassed
+                        ? AppColors.primaryForest
+                        : AppColors.terracotta,
                     width: 1.2,
                   ),
                 ),
@@ -90,7 +107,9 @@ class ResultCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
-                    color: isPassed ? AppColors.primaryForest : AppColors.terracotta,
+                    color: isPassed
+                        ? AppColors.primaryForest
+                        : AppColors.terracotta,
                   ),
                 ),
               ),
@@ -121,7 +140,9 @@ class ResultCard extends StatelessWidget {
                 child: Text(
                   result.courseTitle,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                     fontSize: 12,
                   ),
                   maxLines: 1,
@@ -171,7 +192,9 @@ class ResultCard extends StatelessWidget {
                   Text(
                     dateFormatted,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
                       fontSize: 11,
                     ),
                   ),
@@ -184,4 +207,3 @@ class ResultCard extends StatelessWidget {
     );
   }
 }
-

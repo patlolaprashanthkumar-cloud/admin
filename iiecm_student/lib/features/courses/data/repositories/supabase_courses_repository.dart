@@ -196,7 +196,11 @@ class SupabaseCoursesRepository implements CoursesRepository {
                 .timeout(const Duration(seconds: 10));
 
             lessons = lessonRows
-                .map((l) => CourseLesson.fromJson(Map<String, dynamic>.from(l as Map)))
+                .map(
+                  (l) => CourseLesson.fromJson(
+                    Map<String, dynamic>.from(l as Map),
+                  ),
+                )
                 .toList();
           } catch (le) {
             developer.log(
@@ -219,4 +223,3 @@ class SupabaseCoursesRepository implements CoursesRepository {
     }
   }
 }
-

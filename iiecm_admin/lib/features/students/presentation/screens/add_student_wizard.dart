@@ -15,6 +15,15 @@ import '../../../courses/domain/models/course.dart';
 import '../../../courses/presentation/providers/courses_provider.dart';
 import '../providers/students_provider.dart';
 
+/// AddStudentWizard
+///
+/// 6-step guided admissions workflow for enrolling new student candidates:
+/// 1. Personal & Contact Information
+/// 2. Multi-Category Academic Streams
+/// 3. Curriculum Course Enrollments
+/// 4. Faculty Advisor Assignment
+/// 5. Class Format & Timetable Schedule
+/// 6. Review & Final Confirmation
 class AddStudentWizard extends ConsumerStatefulWidget {
   const AddStudentWizard({super.key});
 
@@ -89,7 +98,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
       buffer.write(hex.replaceFirst('#', ''));
       return Color(int.parse(buffer.toString(), radix: 16));
     } catch (_) {
-      return AppColors.primaryForest;
+      return AppColors.primaryNavy;
     }
   }
 
@@ -153,7 +162,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
       setState(() => _isSubmitting = false);
       if (result != null) {
         String feedbackMessage;
-        Color snackColor = AppColors.primaryForest;
+        Color snackColor = AppColors.primaryNavy;
 
         if (result.hasAssignmentWarning) {
           snackColor = AppColors.warning;
@@ -209,18 +218,24 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.warmCream,
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.backgroundWarmOffWhite,
       appBar: AppBar(
         title: const Text('Add Student Admission'),
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.warmCream,
+        backgroundColor: isDark
+            ? AppColors.darkSurface
+            : AppColors.backgroundWarmOffWhite,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // Stepper Indicator
+            // Stepper Indicator Bar
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: isDark ? AppColors.darkSurface : Colors.white,
+              color: isDark ? AppColors.darkSurface : AppColors.cardWhite,
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(
@@ -231,8 +246,10 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                       final isPassed = index < _currentStep;
                       final isCurrent = index == _currentStep;
                       final color = isPassed || isCurrent
-                          ? AppColors.primaryForest
-                          : Colors.grey.withValues(alpha: 0.3);
+                          ? AppColors.primaryNavy
+                          : (isDark
+                                ? Colors.white.withValues(alpha: 0.15)
+                                : Colors.grey.withValues(alpha: 0.25));
 
                       return Expanded(
                         child: Row(
@@ -272,13 +289,23 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.forestSoft,
+                          color: isDark
+                              ? AppColors.primaryNavy.withValues(alpha: 0.3)
+                              : AppColors.forestSoft,
                           borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.primaryNavy.withValues(
+                              alpha: 0.15,
+                            ),
+                            width: 0.8,
+                          ),
                         ),
                         child: Text(
                           'Step ${_currentStep + 1} of 6',
-                          style: const TextStyle(
-                            color: AppColors.primaryForest,
+                          style: TextStyle(
+                            color: isDark
+                                ? AppColors.accentOrangeLight
+                                : AppColors.primaryNavy,
                             fontWeight: FontWeight.w800,
                             fontSize: 11,
                           ),
@@ -290,7 +317,9 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                           _getStepTitle(_currentStep),
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
                           ),
                         ),
                       ),
@@ -314,9 +343,11 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.error.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.error),
+                        color: AppColors.errorSoft,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppColors.error.withValues(alpha: 0.4),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -332,6 +363,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                               style: const TextStyle(
                                 color: AppColors.error,
                                 fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -398,7 +430,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             // Sticky Bottom Navigation Controls
             Container(
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface : Colors.white,
+                color: isDark ? AppColors.darkSurface : AppColors.cardWhite,
                 border: Border(
                   top: BorderSide(
                     color: isDark
@@ -424,6 +456,19 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                                 onPressed: _isSubmitting
                                     ? null
                                     : () => setState(() => _currentStep--),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  side: BorderSide(
+                                    color: isDark
+                                        ? AppColors.darkBorder
+                                        : AppColors.borderNeutral,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                                 child: const Text('Previous'),
                               ),
                             )
@@ -433,6 +478,19 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                                 onPressed: _isSubmitting
                                     ? null
                                     : () => Navigator.pop(context),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  side: BorderSide(
+                                    color: isDark
+                                        ? AppColors.darkBorder
+                                        : AppColors.borderNeutral,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
                                 child: const Text('Cancel'),
                               ),
                             ),
@@ -451,7 +509,15 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                                       }
                                     },
                               style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.primaryForest,
+                                backgroundColor: AppColors.primaryNavy,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                elevation: 0,
                               ),
                               child: _isSubmitting
                                   ? const SizedBox(
@@ -466,6 +532,10 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                                       _currentStep == 5
                                           ? 'Confirm & Register Student'
                                           : 'Continue',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
+                                      ),
                                     ),
                             ),
                           ),
@@ -524,13 +594,59 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
   }
 
   Widget _buildStep1Personal() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    InputDecoration inputDecor({
+      required String hintText,
+      required IconData icon,
+    }) {
+      return InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(
+          color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+          fontSize: 13,
+        ),
+        prefixIcon: Icon(
+          icon,
+          color: isDark ? AppColors.accentOrangeLight : AppColors.primaryNavy,
+          size: 20,
+        ),
+        filled: true,
+        fillColor: isDark ? AppColors.darkSurface : AppColors.cardWhite,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+            color: AppColors.primaryNavy,
+            width: 1.6,
+          ),
+        ),
+      );
+    }
+
     return Form(
       key: _formKeyStep1,
       child: AppCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Name
+            // 1. Name
             const Text(
               'Full Name *',
               style: TextStyle(fontWeight: FontWeight.w700),
@@ -539,9 +655,9 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             TextFormField(
               controller: _nameController,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: inputDecor(
                 hintText: 'e.g. Dr. Aarav Patel',
-                prefixIcon: Icon(Icons.person_outline_rounded),
+                icon: Icons.person_outline_rounded,
               ),
               validator: (v) => v == null || v.trim().isEmpty
                   ? 'Please enter student name'
@@ -549,7 +665,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             ),
             const SizedBox(height: 14),
 
-            // Email
+            // 2. Email
             const Text(
               'Institutional Email *',
               style: TextStyle(fontWeight: FontWeight.w700),
@@ -559,9 +675,9 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: inputDecor(
                 hintText: 'student@example.com',
-                prefixIcon: Icon(Icons.email_outlined),
+                icon: Icons.email_outlined,
               ),
               validator: (v) => v == null || !v.contains('@')
                   ? 'Enter a valid email address'
@@ -569,7 +685,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             ),
             const SizedBox(height: 14),
 
-            // Phone
+            // 3. Phone
             const Text(
               'Phone Number *',
               style: TextStyle(fontWeight: FontWeight.w700),
@@ -579,29 +695,29 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: inputDecor(
                 hintText: '+91 98765 43210',
-                prefixIcon: Icon(Icons.phone_outlined),
+                icon: Icons.phone_outlined,
               ),
               validator: (v) =>
                   v == null || v.trim().isEmpty ? 'Enter phone number' : null,
             ),
             const SizedBox(height: 14),
 
-            // City
+            // 4. City
             const Text('City', style: TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 6),
             TextFormField(
               controller: _cityController,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: inputDecor(
                 hintText: 'e.g. Mumbai',
-                prefixIcon: Icon(Icons.location_city_outlined),
+                icon: Icons.location_city_outlined,
               ),
             ),
             const SizedBox(height: 14),
 
-            // Education Level
+            // Education Level Dropdown
             const Text(
               'Education Level *',
               style: TextStyle(fontWeight: FontWeight.w700),
@@ -610,6 +726,37 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             DropdownButtonFormField<String>(
               isExpanded: true,
               initialValue: _educationLevel,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark ? AppColors.darkSurface : AppColors.cardWhite,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderNeutral,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderNeutral,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryNavy,
+                    width: 1.6,
+                  ),
+                ),
+              ),
               items:
                   [
                     "High School",
@@ -625,7 +772,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             ),
             const SizedBox(height: 14),
 
-            // Specialization or Stream
+            // 5. Specialization or Stream
             const Text(
               'Specialization or Stream *',
               style: TextStyle(fontWeight: FontWeight.w700),
@@ -634,9 +781,9 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             TextFormField(
               controller: _qualificationController,
               textInputAction: TextInputAction.done,
-              decoration: const InputDecoration(
+              decoration: inputDecor(
                 hintText: 'e.g. Emergency Medicine, Critical Care, Cardiology',
-                prefixIcon: Icon(Icons.school_outlined),
+                icon: Icons.school_outlined,
               ),
               validator: (v) => v == null || v.trim().isEmpty
                   ? 'Enter specialization or stream'
@@ -649,27 +796,40 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
   }
 
   Widget _buildStep2Categories(List<CourseCategory> categories) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppCard(
-          backgroundColor: AppColors.forestSoft,
-          borderSide: BorderSide(
-            color: AppColors.primaryForest.withValues(alpha: 0.3),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.primaryNavy.withValues(alpha: 0.2)
+                : AppColors.forestSoft,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.primaryNavy.withValues(alpha: 0.2),
+            ),
           ),
           child: Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.info_outline_rounded,
-                color: AppColors.primaryForest,
+                color: isDark
+                    ? AppColors.accentOrangeLight
+                    : AppColors.primaryNavy,
                 size: 20,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Multi-Category Support Active: Select one or more curriculum streams for this student. Courses and faculty in following steps will adapt dynamically.',
-                  style: const TextStyle(
-                    color: AppColors.primaryForest,
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.primaryNavy,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -698,77 +858,108 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
 
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: AppCard(
-                backgroundColor: isSelected
-                    ? catColor.withValues(alpha: 0.08)
-                    : null,
-                borderSide: BorderSide(
-                  color: isSelected ? catColor : AppColors.borderNeutral,
-                  width: isSelected ? 1.8 : 1.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? catColor.withValues(alpha: isDark ? 0.16 : 0.08)
+                      : (isDark ? AppColors.darkSurface : AppColors.cardWhite),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? catColor
+                        : (isDark
+                              ? AppColors.darkBorder
+                              : AppColors.borderNeutral),
+                    width: isSelected ? 1.8 : 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.2 : 0.03,
+                      ),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      if (isSelected) {
-                        _selectedCategoryIds.remove(cat.id);
-                      } else {
-                        _selectedCategoryIds.add(cat.id);
-                      }
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Checkbox(
-                        value: isSelected,
-                        activeColor: catColor,
-                        onChanged: (val) {
-                          setState(() {
-                            if (val == true) {
-                              _selectedCategoryIds.add(cat.id);
-                            } else {
-                              _selectedCategoryIds.remove(cat.id);
-                            }
-                          });
-                        },
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      setState(() {
+                        if (isSelected) {
+                          _selectedCategoryIds.remove(cat.id);
+                        } else {
+                          _selectedCategoryIds.add(cat.id);
+                        }
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 10,
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: catColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          Icons.category_rounded,
-                          color: catColor,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              cat.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 14,
-                              ),
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: isSelected,
+                            activeColor: catColor,
+                            onChanged: (val) {
+                              setState(() {
+                                if (val == true) {
+                                  _selectedCategoryIds.add(cat.id);
+                                } else {
+                                  _selectedCategoryIds.remove(cat.id);
+                                }
+                              });
+                            },
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: catColor.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              cat.description,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 11,
-                              ),
+                            child: Icon(
+                              Icons.category_rounded,
+                              color: catColor,
+                              size: 20,
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  cat.name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 14,
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  cat.description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? AppColors.darkTextSecondary
+                                        : AppColors.textSecondary,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -779,6 +970,8 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
   }
 
   Widget _buildStep3Courses(List<Course> courses) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (_selectedCategoryIds.isEmpty) {
       return const AppCard(
         child: Center(
@@ -793,9 +986,20 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Available Courses in Selected Streams (${courses.length})',
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Available Courses in Selected Streams (${courses.length})',
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 10),
         if (courses.isEmpty)
@@ -814,20 +1018,44 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             final isEnrolled = _selectedCourseIds.contains(course.id);
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: AppCard(
-                backgroundColor: isEnrolled ? AppColors.forestSoft : null,
-                borderSide: BorderSide(
+              child: Container(
+                decoration: BoxDecoration(
                   color: isEnrolled
-                      ? AppColors.primaryForest
-                      : AppColors.borderNeutral,
-                  width: isEnrolled ? 1.8 : 1.0,
+                      ? (isDark
+                            ? AppColors.primaryNavy.withValues(alpha: 0.2)
+                            : AppColors.forestSoft)
+                      : (isDark ? AppColors.darkSurface : AppColors.cardWhite),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isEnrolled
+                        ? AppColors.primaryNavy
+                        : (isDark
+                              ? AppColors.darkBorder
+                              : AppColors.borderNeutral),
+                    width: isEnrolled ? 1.8 : 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.2 : 0.03,
+                      ),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Material(
                   color: Colors.transparent,
                   child: CheckboxListTile(
                     value: isEnrolled,
-                    activeColor: AppColors.primaryForest,
-                    contentPadding: EdgeInsets.zero,
+                    activeColor: AppColors.primaryNavy,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     onChanged: (val) {
                       setState(() {
                         if (val == true) {
@@ -839,14 +1067,22 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                     },
                     title: Text(
                       course.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 13.5,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
                       ),
                     ),
                     subtitle: Text(
                       '${course.categoryName} · ${course.durationWeeks} weeks · ${CurrencyFormatter.format(course.fee)}',
-                      style: const TextStyle(fontSize: 11),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
                     ),
                   ),
                 ),
@@ -858,6 +1094,8 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
   }
 
   Widget _buildStep4Instructors() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: _instructorsFuture,
       builder: (context, snapshot) {
@@ -865,7 +1103,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(24),
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(color: AppColors.primaryNavy),
             ),
           );
         }
@@ -877,14 +1115,20 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Assign Primary Faculty Advisor',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
                 ),
                 if (_selectedInstructorId != null)
                   TextButton.icon(
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.accentTerracotta,
+                      foregroundColor: AppColors.accentOrange,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 4,
@@ -913,14 +1157,12 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
-                    // Single tap: select this instructor
                     setState(() {
                       _selectedInstructorId = id;
                       _selectedInstructorName = ins['full_name']?.toString();
                     });
                   },
                   onDoubleTap: () {
-                    // Double-click/double-tap removes selection as requested
                     if (isSelected) {
                       setState(() {
                         _selectedInstructorId = null;
@@ -928,24 +1170,44 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                       });
                     }
                   },
-                  child: AppCard(
-                    backgroundColor: isSelected
-                        ? AppColors.terracottaSoft
-                        : null,
-                    borderSide: BorderSide(
+                  child: Container(
+                    decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.accentTerracotta
-                          : AppColors.borderNeutral,
+                          ? (isDark
+                                ? AppColors.accentOrange.withValues(alpha: 0.15)
+                                : AppColors.accentOrangeSoft)
+                          : (isDark
+                                ? AppColors.darkSurface
+                                : AppColors.cardWhite),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.accentOrange
+                            : (isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.borderNeutral),
+                        width: isSelected ? 1.6 : 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.2 : 0.03,
+                          ),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
                     ),
                     child: Row(
                       children: [
-                        // ignore: deprecated_member_use
                         Radio<String>(
                           value: id,
-                          // ignore: deprecated_member_use
                           groupValue: _selectedInstructorId,
-                          activeColor: AppColors.accentTerracotta,
-                          // ignore: deprecated_member_use
+                          activeColor: AppColors.accentOrange,
                           onChanged: (_) {
                             setState(() {
                               _selectedInstructorId = id;
@@ -961,15 +1223,23 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                             children: [
                               Text(
                                 ins['full_name']?.toString() ?? 'Faculty',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w700,
+                                  color: isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               if (ins['specialization'] != null &&
                                   ins['specialization'].toString().isNotEmpty)
                                 Text(
                                   ins['specialization'].toString(),
-                                  style: const TextStyle(fontSize: 11),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isDark
+                                        ? AppColors.darkTextSecondary
+                                        : AppColors.textSecondary,
+                                  ),
                                 ),
                             ],
                           ),
@@ -980,7 +1250,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                             icon: const Icon(
                               Icons.close_rounded,
                               size: 18,
-                              color: AppColors.accentTerracotta,
+                              color: AppColors.accentOrange,
                             ),
                             onPressed: () {
                               setState(() {
@@ -1004,9 +1274,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
   Widget _buildStep5Timetable() {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark
-        ? theme.colorScheme.surfaceContainerLow
-        : Colors.white;
+    final cardBg = isDark ? AppColors.darkSurface : AppColors.cardWhite;
 
     return Material(
       color: Colors.transparent,
@@ -1015,6 +1283,9 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
+          border: Border.all(
+            color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
@@ -1034,6 +1305,37 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             DropdownButtonFormField<String>(
               isExpanded: true,
               initialValue: _learningFormat,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark ? AppColors.darkSurface : AppColors.cardWhite,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderNeutral,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderNeutral,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryNavy,
+                    width: 1.6,
+                  ),
+                ),
+              ),
               items: const [
                 DropdownMenuItem(
                   value: 'hybrid',
@@ -1065,6 +1367,37 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
             DropdownButtonFormField<String>(
               isExpanded: true,
               initialValue: _preferredSlot,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark ? AppColors.darkSurface : AppColors.cardWhite,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderNeutral,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderNeutral,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryNavy,
+                    width: 1.6,
+                  ),
+                ),
+              ),
               items: const [
                 DropdownMenuItem(
                   value: 'Morning Clinical Batch (08:00 - 10:00 IST)',
@@ -1092,6 +1425,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
     List<CourseCategory> categories,
     List<Course> courses,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedCats = categories
         .where((c) => _selectedCategoryIds.contains(c.id))
         .toList();
@@ -1109,7 +1443,9 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
               Text(
                 'Student Candidate',
                 style: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1117,33 +1453,49 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
               const SizedBox(height: 4),
               Text(
                 _nameController.text,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
                 ),
               ),
               Text(
                 '${_emailController.text} · ${_phoneController.text}',
-                style: const TextStyle(fontSize: 12),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 3),
               Text(
                 'Specialization / Stream: ${_qualificationController.text} · $_educationLevel',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 10),
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+              ),
               const SizedBox(height: 10),
 
               Text(
                 'Multi-Category Academic Streams (${selectedCats.length})',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 6),
@@ -1151,12 +1503,15 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                 spacing: 6,
                 runSpacing: 6,
                 children: selectedCats.map((c) {
+                  final catColor = _parseHex(c.color);
                   return Chip(
-                    backgroundColor: _parseHex(c.color).withValues(alpha: 0.15),
+                    backgroundColor: catColor.withValues(
+                      alpha: isDark ? 0.2 : 0.12,
+                    ),
                     label: Text(
                       c.name,
                       style: TextStyle(
-                        color: _parseHex(c.color),
+                        color: catColor,
                         fontWeight: FontWeight.w700,
                         fontSize: 11,
                       ),
@@ -1165,22 +1520,30 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                 }).toList(),
               ),
               const SizedBox(height: 12),
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+              ),
               const SizedBox(height: 10),
 
               Text(
                 'Assigned Courses (${selectedCrs.length})',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 6),
               if (selectedCrs.isEmpty)
-                const Text(
+                Text(
                   'No courses assigned during admission',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                     fontSize: 12,
                   ),
                 )
@@ -1193,13 +1556,18 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                         const Icon(
                           Icons.check_circle_outline_rounded,
                           size: 14,
-                          color: AppColors.primaryForest,
+                          color: AppColors.primaryNavy,
                         ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             '${c.title} (${c.categoryName})',
-                            style: const TextStyle(fontSize: 12),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
+                            ),
                           ),
                         ),
                       ],
@@ -1207,30 +1575,49 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                   ),
                 ),
               const SizedBox(height: 12),
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+              ),
               const SizedBox(height: 10),
 
               if (_selectedInstructorName != null) ...[
                 Text(
                   'Faculty Advisor: $_selectedInstructorName',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Divider(height: 1),
+                Divider(
+                  height: 1,
+                  color: isDark
+                      ? AppColors.darkBorder
+                      : AppColors.borderNeutral,
+                ),
                 const SizedBox(height: 10),
               ],
-              const Text(
+              Text(
                 'Class Format & Schedule',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Format: ${_formatLearningFormatLabel(_learningFormat)} · $_preferredSlot',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                   fontSize: 11,
                 ),
               ),

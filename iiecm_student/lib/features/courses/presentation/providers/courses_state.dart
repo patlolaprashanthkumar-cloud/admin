@@ -51,8 +51,9 @@ class CoursesListState {
       if (searchQuery.trim().isNotEmpty) {
         final query = searchQuery.toLowerCase().trim();
         final matchesTitle = course.title.toLowerCase().contains(query);
-        final matchesCategory =
-            course.categoryName.toLowerCase().contains(query);
+        final matchesCategory = course.categoryName.toLowerCase().contains(
+          query,
+        );
         final matchesInstructor =
             course.instructorName?.toLowerCase().contains(query) ?? false;
         return matchesTitle || matchesCategory || matchesInstructor;
@@ -74,8 +75,9 @@ class CoursesListState {
       status: status ?? this.status,
       courses: courses ?? this.courses,
       searchQuery: searchQuery ?? this.searchQuery,
-      selectedCategory:
-          clearCategory ? null : (selectedCategory ?? this.selectedCategory),
+      selectedCategory: clearCategory
+          ? null
+          : (selectedCategory ?? this.selectedCategory),
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -107,11 +109,9 @@ class CourseDetailState {
   int get totalDurationMinutes =>
       modules.fold<int>(0, (sum, m) => sum + m.totalDurationMinutes);
 
-  int get videoCount =>
-      modules.fold<int>(0, (sum, m) => sum + m.videoCount);
+  int get videoCount => modules.fold<int>(0, (sum, m) => sum + m.videoCount);
 
-  int get pdfCount =>
-      modules.fold<int>(0, (sum, m) => sum + m.pdfCount);
+  int get pdfCount => modules.fold<int>(0, (sum, m) => sum + m.pdfCount);
 
   int get fileCount =>
       modules.fold<int>(0, (sum, m) => sum + m.fileCount + m.imageCount);
@@ -130,4 +130,3 @@ class CourseDetailState {
     );
   }
 }
-

@@ -11,7 +11,9 @@ class SupabasePaymentsRepository implements PaymentsRepository {
   SupabaseClient get _client => AppSupabase.client;
 
   @override
-  Future<List<StudentPayment>> getStudentPayments(String studentRecordId) async {
+  Future<List<StudentPayment>> getStudentPayments(
+    String studentRecordId,
+  ) async {
     if (!AppSupabase.isInitialized) {
       throw StateError('Supabase is not initialized.');
     }
@@ -107,4 +109,3 @@ class SupabasePaymentsRepository implements PaymentsRepository {
     }
   }
 }
-

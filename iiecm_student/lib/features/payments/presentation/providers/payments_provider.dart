@@ -17,17 +17,17 @@ final paymentsRepositoryProvider = Provider<PaymentsRepository>((ref) {
 /// StateNotifierProvider managing student payment history
 final studentPaymentsNotifierProvider =
     StateNotifierProvider<StudentPaymentsNotifier, PaymentsState>((ref) {
-  final repo = ref.watch(paymentsRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  return StudentPaymentsNotifier(repo, authState.student);
-});
+      final repo = ref.watch(paymentsRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      return StudentPaymentsNotifier(repo, authState.student);
+    });
 
 class StudentPaymentsNotifier extends StateNotifier<PaymentsState> {
   final PaymentsRepository _repository;
   final StudentProfile? _student;
 
   StudentPaymentsNotifier(this._repository, this._student)
-      : super(const PaymentsState()) {
+    : super(const PaymentsState()) {
     if (_student != null) {
       loadPayments();
     }
@@ -46,8 +46,9 @@ class StudentPaymentsNotifier extends StateNotifier<PaymentsState> {
     state = state.copyWith(status: PaymentsStatus.loading);
 
     try {
-      final payments =
-          await _repository.getStudentPayments(_student.studentRecordId);
+      final payments = await _repository.getStudentPayments(
+        _student.studentRecordId,
+      );
       state = state.copyWith(
         status: PaymentsStatus.loaded,
         payments: payments,
@@ -62,8 +63,7 @@ class StudentPaymentsNotifier extends StateNotifier<PaymentsState> {
       );
       state = state.copyWith(
         status: PaymentsStatus.error,
-        errorMessage:
-            'Unable to retrieve payment records. Please verify your internet connection.',
+        errorMessage: 'Unable to retrieve payment records. Please verify your internet connection.',
       );
     }
   }
@@ -82,15 +82,14 @@ class StudentPaymentsNotifier extends StateNotifier<PaymentsState> {
 /// Provider for retrieving specific payment details by paymentId
 final studentPaymentDetailProvider =
     FutureProvider.family<StudentPayment?, String>((ref, paymentId) async {
-  final repo = ref.watch(paymentsRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  final student = authState.student;
+      final repo = ref.watch(paymentsRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      final student = authState.student;
 
-  if (student == null || paymentId.isEmpty) return null;
+      if (student == null || paymentId.isEmpty) return null;
 
-  return repo.getPaymentDetails(
-    paymentId: paymentId,
-    studentRecordId: student.studentRecordId,
-  );
-});
-
+      return repo.getPaymentDetails(
+        paymentId: paymentId,
+        studentRecordId: student.studentRecordId,
+      );
+    });

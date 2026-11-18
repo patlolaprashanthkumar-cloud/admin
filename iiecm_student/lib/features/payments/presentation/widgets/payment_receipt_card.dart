@@ -10,16 +10,14 @@ import '../../domain/models/student_payment.dart';
 class PaymentReceiptCard extends StatelessWidget {
   final StudentPayment payment;
 
-  const PaymentReceiptCard({
-    super.key,
-    required this.payment,
-  });
+  const PaymentReceiptCard({super.key, required this.payment});
 
   void _copyReceiptToClipboard(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
     final formattedDate = dateFormat.format(payment.paymentDate);
 
-    final receiptText = '''
+    final receiptText =
+        '''
 ======================================================
 INDIAN INSTITUTE OF EMERGENCY & CRITICAL CARE MEDICINE
 OFFICIAL DIGITAL FEE RECEIPT
@@ -56,14 +54,18 @@ Generated via IIECM Student Academic Portal
     final formattedDate = dateFormat.format(payment.paymentDate);
 
     final isVerified = payment.isVerified;
-    final statusColor = isVerified ? AppColors.success : (payment.isPending ? AppColors.warning : AppColors.error);
+    final statusColor = isVerified
+        ? AppColors.success
+        : (payment.isPending ? AppColors.warning : AppColors.error);
 
     return Container(
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusLg),
         border: Border.all(
-          color: isVerified ? AppColors.primaryForest : (isDark ? AppColors.darkBorder : AppColors.border),
+          color: isVerified
+              ? AppColors.primaryForest
+              : (isDark ? AppColors.darkBorder : AppColors.border),
           width: 1.5,
         ),
         boxShadow: [
@@ -82,7 +84,10 @@ Generated via IIECM Student Academic Portal
             children: [
               // 1. Institutional Banner Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: isDark ? AppColors.forestDark : AppColors.forestSoft,
                   borderRadius: const BorderRadius.only(
@@ -121,7 +126,9 @@ Generated via IIECM Student Academic Portal
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w800,
                               fontSize: 12,
-                              color: isDark ? Colors.white : AppColors.forestDark,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppColors.forestDark,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -141,7 +148,10 @@ Generated via IIECM Student Academic Portal
 
               // 2. Receipt Title & Reference Bar
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -158,10 +168,17 @@ Generated via IIECM Student Academic Portal
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                            color: isVerified ? AppColors.successSoft : AppColors.warningSoft,
-                            borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                            color: isVerified
+                                ? AppColors.successSoft
+                                : AppColors.warningSoft,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.radiusSm,
+                            ),
                           ),
                           child: Text(
                             payment.displayStatus,
@@ -188,14 +205,27 @@ Generated via IIECM Student Academic Portal
                     const SizedBox(height: AppConstants.spacingSm),
 
                     // 3. Key Receipt Details Table
-                    _buildReceiptRow('Transaction Ref', payment.transactionRef, isMonospace: true),
+                    _buildReceiptRow(
+                      'Transaction Ref',
+                      payment.transactionRef,
+                      isMonospace: true,
+                    ),
                     _buildReceiptRow('Receipt Date & Time', formattedDate),
                     _buildReceiptRow('Student Legal Name', payment.studentName),
-                    if (payment.studentCode != null && payment.studentCode!.isNotEmpty)
-                      _buildReceiptRow('Student Reg ID', payment.studentCode!, isMonospace: true),
+                    if (payment.studentCode != null &&
+                        payment.studentCode!.isNotEmpty)
+                      _buildReceiptRow(
+                        'Student Reg ID',
+                        payment.studentCode!,
+                        isMonospace: true,
+                      ),
                     _buildReceiptRow('Payment Method', payment.formattedMethod),
-                    _buildReceiptRow('Fee Description', payment.purposeDescription),
-                    if (payment.verifiedBy != null && payment.verifiedBy!.isNotEmpty)
+                    _buildReceiptRow(
+                      'Fee Description',
+                      payment.purposeDescription,
+                    ),
+                    if (payment.verifiedBy != null &&
+                        payment.verifiedBy!.isNotEmpty)
                       _buildReceiptRow('Verified By', payment.verifiedBy!),
 
                     const SizedBox(height: AppConstants.spacingSm),
@@ -204,12 +234,21 @@ Generated via IIECM Student Academic Portal
 
                     // 4. Total Amount Highlight
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.warmCream,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusMd,
+                        ),
                         border: Border.all(
-                          color: isDark ? AppColors.darkBorder : AppColors.border,
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.border,
                         ),
                       ),
                       child: Row(
@@ -228,7 +267,9 @@ Generated via IIECM Student Academic Portal
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w900,
-                              color: isVerified ? AppColors.primaryForest : statusColor,
+                              color: isVerified
+                                  ? AppColors.primaryForest
+                                  : statusColor,
                             ),
                           ),
                         ],
@@ -256,8 +297,12 @@ Generated via IIECM Student Academic Portal
                     Container(
                       padding: const EdgeInsets.all(AppConstants.spacingSm),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCreamLight,
-                        borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.warmCreamLight,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,9 +333,7 @@ Generated via IIECM Student Academic Portal
           );
 
           if (constraints.maxHeight.isFinite) {
-            return SingleChildScrollView(
-              child: content,
-            );
+            return SingleChildScrollView(child: content);
           }
 
           return content;
@@ -299,7 +342,11 @@ Generated via IIECM Student Academic Portal
     );
   }
 
-  Widget _buildReceiptRow(String label, String value, {bool isMonospace = false}) {
+  Widget _buildReceiptRow(
+    String label,
+    String value, {
+    bool isMonospace = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.5),
       child: Row(
@@ -333,4 +380,3 @@ Generated via IIECM Student Academic Portal
     );
   }
 }
-

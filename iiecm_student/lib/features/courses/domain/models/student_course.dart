@@ -69,9 +69,11 @@ class StudentCourse {
       title: courseJson['title']?.toString() ?? 'Curriculum Module',
       description: courseJson['description']?.toString() ?? '',
       categoryId: courseJson['category_id']?.toString(),
-      categoryName: courseJson['category_name']?.toString() ?? 'Emergency Medicine',
+      categoryName:
+          courseJson['category_name']?.toString() ?? 'Emergency Medicine',
       instructorId: courseJson['instructor_id']?.toString(),
-      instructorName: instructorName ?? courseJson['instructor_name']?.toString(),
+      instructorName:
+          instructorName ?? courseJson['instructor_name']?.toString(),
       thumbnailUrl: courseJson['thumbnail_url']?.toString(),
       durationWeeks: (courseJson['duration_weeks'] as num?)?.toInt() ?? 8,
       fee: (courseJson['fee'] as num?)?.toDouble() ?? 0.0,
@@ -87,4 +89,3 @@ class StudentCourse {
     );
   }
 }
-

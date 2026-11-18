@@ -35,7 +35,9 @@ class SupabaseNotificationsRepository implements NotificationsRepository {
           .timeout(const Duration(seconds: 15));
 
       return response
-          .map((item) => StudentNotification.fromMap(item as Map<String, dynamic>))
+          .map(
+            (item) => StudentNotification.fromMap(item as Map<String, dynamic>),
+          )
           .toList();
     } on sb.PostgrestException catch (e) {
       developer.log(
@@ -43,7 +45,9 @@ class SupabaseNotificationsRepository implements NotificationsRepository {
         name: 'SupabaseNotificationsRepository',
         error: e,
       );
-      throw GenericAuthException('Could not retrieve notifications: ${e.message}');
+      throw GenericAuthException(
+        'Could not retrieve notifications: ${e.message}',
+      );
     } catch (e, stack) {
       developer.log(
         'Error fetching notifications: $e',
@@ -95,9 +99,7 @@ class SupabaseNotificationsRepository implements NotificationsRepository {
   }
 
   @override
-  Future<void> markAllAsRead({
-    required String userId,
-  }) async {
+  Future<void> markAllAsRead({required String userId}) async {
     if (!AppSupabase.isInitialized || userId.trim().isEmpty) {
       return;
     }
@@ -124,4 +126,3 @@ class SupabaseNotificationsRepository implements NotificationsRepository {
     }
   }
 }
-

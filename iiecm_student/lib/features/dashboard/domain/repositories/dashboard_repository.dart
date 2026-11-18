@@ -6,4 +6,3 @@ abstract class DashboardRepository {
   /// Fetches real consolidated dashboard metrics and schedules for the student
   Future<StudentDashboardData> getDashboardData(StudentProfile student);
 }
-

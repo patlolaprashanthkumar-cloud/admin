@@ -13,10 +13,7 @@ import '../providers/assessments_provider.dart';
 class AssessmentAttemptScreen extends ConsumerStatefulWidget {
   final String assessmentId;
 
-  const AssessmentAttemptScreen({
-    super.key,
-    required this.assessmentId,
-  });
+  const AssessmentAttemptScreen({super.key, required this.assessmentId});
 
   @override
   ConsumerState<AssessmentAttemptScreen> createState() =>
@@ -58,7 +55,10 @@ class _AssessmentAttemptScreenState
       builder: (ctx) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.assignment_turned_in_rounded, color: AppColors.primaryForest),
+            Icon(
+              Icons.assignment_turned_in_rounded,
+              color: AppColors.primaryForest,
+            ),
             SizedBox(width: 8),
             Text('Submit Examination?'),
           ],
@@ -117,11 +117,15 @@ class _AssessmentAttemptScreenState
         title: Row(
           children: [
             Icon(
-              result.passed ? Icons.check_circle_rounded : Icons.info_outline_rounded,
+              result.passed
+                  ? Icons.check_circle_rounded
+                  : Icons.info_outline_rounded,
               color: result.passed ? AppColors.success : AppColors.error,
             ),
             const SizedBox(width: 8),
-            Text(result.passed ? 'Examination Passed!' : 'Examination Completed'),
+            Text(
+              result.passed ? 'Examination Passed!' : 'Examination Completed',
+            ),
           ],
         ),
         content: Column(
@@ -130,7 +134,9 @@ class _AssessmentAttemptScreenState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: result.passed ? AppColors.successSoft : AppColors.errorSoft,
+                color: result.passed
+                    ? AppColors.successSoft
+                    : AppColors.errorSoft,
                 borderRadius: BorderRadius.circular(AppConstants.radiusMd),
               ),
               child: Column(
@@ -140,12 +146,17 @@ class _AssessmentAttemptScreenState
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
-                      color: result.passed ? AppColors.success : AppColors.error,
+                      color: result.passed
+                          ? AppColors.success
+                          : AppColors.error,
                     ),
                   ),
                   Text(
                     'Overall Percentage: ${result.percentage.toStringAsFixed(1)}%',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -156,7 +167,10 @@ class _AssessmentAttemptScreenState
                   ? 'Congratulations! You have satisfied the clinical passing requirements for this examination checkpoint.'
                   : 'Your assessment attempt has been recorded. Review clinical protocols with your lead faculty mentor.',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -184,10 +198,15 @@ class _AssessmentAttemptScreenState
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final detailState = ref.watch(assessmentDetailProvider(widget.assessmentId));
-    final attemptState = ref.watch(assessmentAttemptProvider(widget.assessmentId));
-    final attemptNotifier =
-        ref.read(assessmentAttemptProvider(widget.assessmentId).notifier);
+    final detailState = ref.watch(
+      assessmentDetailProvider(widget.assessmentId),
+    );
+    final attemptState = ref.watch(
+      assessmentAttemptProvider(widget.assessmentId),
+    );
+    final attemptNotifier = ref.read(
+      assessmentAttemptProvider(widget.assessmentId).notifier,
+    );
 
     final questions = detailState.questions;
     final totalQuestions = questions.length;
@@ -207,7 +226,11 @@ class _AssessmentAttemptScreenState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.quiz_outlined, size: 48, color: AppColors.warning),
+                const Icon(
+                  Icons.quiz_outlined,
+                  size: 48,
+                  color: AppColors.warning,
+                ),
                 const SizedBox(height: 12),
                 const Text(
                   'No Questions Available',
@@ -217,7 +240,10 @@ class _AssessmentAttemptScreenState
                 const Text(
                   'The questions for this examination are currently being uploaded by the examination board.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 AppButton(
@@ -253,7 +279,9 @@ class _AssessmentAttemptScreenState
             decoration: BoxDecoration(
               color: isLowTime
                   ? AppColors.errorSoft
-                  : (isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft),
+                  : (isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.forestSoft),
               borderRadius: BorderRadius.circular(AppConstants.radiusFull),
               border: Border.all(
                 color: isLowTime ? AppColors.error : AppColors.primaryForest,
@@ -274,7 +302,9 @@ class _AssessmentAttemptScreenState
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                     fontFamily: 'monospace',
-                    color: isLowTime ? AppColors.error : AppColors.primaryForest,
+                    color: isLowTime
+                        ? AppColors.error
+                        : AppColors.primaryForest,
                   ),
                 ),
               ],
@@ -289,7 +319,9 @@ class _AssessmentAttemptScreenState
           LinearProgressIndicator(
             value: (currentIndex + 1) / totalQuestions,
             backgroundColor: isDark ? AppColors.darkBorder : AppColors.border,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryForest),
+            valueColor: const AlwaysStoppedAnimation<Color>(
+              AppColors.primaryForest,
+            ),
             minHeight: 4,
           ),
 
@@ -308,10 +340,17 @@ class _AssessmentAttemptScreenState
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
-                              color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
-                              borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                              color: isDark
+                                  ? AppColors.darkSurfaceElevated
+                                  : AppColors.forestSoft,
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.radiusSm,
+                              ),
                             ),
                             child: Text(
                               'QUESTION #${currentIndex + 1}',
@@ -323,10 +362,17 @@ class _AssessmentAttemptScreenState
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
-                              color: isDark ? AppColors.darkBackground : AppColors.warmCream,
-                              borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                              color: isDark
+                                  ? AppColors.darkBackground
+                                  : AppColors.warmCream,
+                              borderRadius: BorderRadius.circular(
+                                AppConstants.radiusSm,
+                              ),
                             ),
                             child: Text(
                               '${currentQuestion.marks} Mark${currentQuestion.marks > 1 ? "s" : ""}',
@@ -346,7 +392,9 @@ class _AssessmentAttemptScreenState
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                           height: 1.4,
-                          color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -361,7 +409,10 @@ class _AssessmentAttemptScreenState
                     option: option,
                     isSelected: isSelected,
                     onTap: () {
-                      attemptNotifier.selectAnswer(currentQuestion.id, option.id);
+                      attemptNotifier.selectAnswer(
+                        currentQuestion.id,
+                        option.id,
+                      );
                     },
                     isDark: isDark,
                   );
@@ -467,11 +518,17 @@ class _AssessmentAttemptScreenState
                           : (isDark ? AppColors.darkBorder : AppColors.border),
                       width: 2,
                     ),
-                    color: isSelected ? AppColors.primaryForest : Colors.transparent,
+                    color: isSelected
+                        ? AppColors.primaryForest
+                        : Colors.transparent,
                   ),
                   child: isSelected
                       ? const Center(
-                          child: Icon(Icons.check, size: 14, color: Colors.white),
+                          child: Icon(
+                            Icons.check,
+                            size: 14,
+                            color: Colors.white,
+                          ),
                         )
                       : null,
                 ),
@@ -481,8 +538,12 @@ class _AssessmentAttemptScreenState
                     option.text,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                      fontWeight: isSelected
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -494,4 +555,3 @@ class _AssessmentAttemptScreenState
     );
   }
 }
-

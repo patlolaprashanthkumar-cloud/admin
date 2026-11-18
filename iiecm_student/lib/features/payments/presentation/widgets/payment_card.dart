@@ -10,11 +10,7 @@ class PaymentCard extends StatelessWidget {
   final StudentPayment payment;
   final VoidCallback onTap;
 
-  const PaymentCard({
-    super.key,
-    required this.payment,
-    required this.onTap,
-  });
+  const PaymentCard({super.key, required this.payment, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +102,9 @@ class PaymentCard extends StatelessWidget {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
                   fontSize: 18,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
                 ),
               ),
               Text(
@@ -125,7 +123,9 @@ class PaymentCard extends StatelessWidget {
           Text(
             payment.purposeDescription,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
               fontSize: 12,
             ),
             maxLines: 1,
@@ -165,7 +165,9 @@ class PaymentCard extends StatelessWidget {
                     dateFormatted,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 11,
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -177,4 +179,3 @@ class PaymentCard extends StatelessWidget {
     );
   }
 }
-

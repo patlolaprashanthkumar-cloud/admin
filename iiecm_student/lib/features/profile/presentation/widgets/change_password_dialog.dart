@@ -33,10 +33,9 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final success =
-        await ref.read(profileNotifierProvider.notifier).changePassword(
-              newPassword: _newPasswordController.text,
-            );
+    final success = await ref
+        .read(profileNotifierProvider.notifier)
+        .changePassword(newPassword: _newPasswordController.text);
 
     if (!mounted) return;
 
@@ -82,8 +81,10 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.lock_reset_rounded,
-                        color: AppColors.primaryForest),
+                    const Icon(
+                      Icons.lock_reset_rounded,
+                      color: AppColors.primaryForest,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -128,8 +129,10 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   },
                   decoration: InputDecoration(
                     labelText: 'New Password',
-                    prefixIcon:
-                        const Icon(Icons.lock_outline_rounded, size: 18),
+                    prefixIcon: const Icon(
+                      Icons.lock_outline_rounded,
+                      size: 18,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureNew
@@ -146,10 +149,13 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                     filled: true,
                     fillColor: isDark ? AppColors.darkSurface : AppColors.white,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppConstants.radiusSm),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusSm,
+                      ),
                       borderSide: BorderSide(
                         color: isDark ? AppColors.darkBorder : AppColors.border,
                       ),
@@ -174,8 +180,10 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   },
                   decoration: InputDecoration(
                     labelText: 'Confirm New Password',
-                    prefixIcon:
-                        const Icon(Icons.lock_outline_rounded, size: 18),
+                    prefixIcon: const Icon(
+                      Icons.lock_outline_rounded,
+                      size: 18,
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureConfirm
@@ -192,10 +200,13 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                     filled: true,
                     fillColor: isDark ? AppColors.darkSurface : AppColors.white,
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     border: OutlineInputBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppConstants.radiusSm),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusSm,
+                      ),
                       borderSide: BorderSide(
                         color: isDark ? AppColors.darkBorder : AppColors.border,
                       ),
@@ -223,7 +234,9 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                       isLoading: profileState.isPasswordUpdating,
                       isFullWidth: false,
                       height: 38,
-                      onPressed: profileState.isPasswordUpdating ? null : _submit,
+                      onPressed: profileState.isPasswordUpdating
+                          ? null
+                          : _submit,
                     ),
                   ],
                 ),

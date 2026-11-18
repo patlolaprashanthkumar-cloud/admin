@@ -248,10 +248,13 @@ class SupabaseAssignmentsRepository implements AssignmentsRepository {
 
       if (existing != null) {
         // Update existing record
-        await _client.from('assessment_results').update({
-          'completed_at': DateTime.now().toIso8601String(),
-          'answers': answersPayload,
-        }).eq('id', existing['id']);
+        await _client
+            .from('assessment_results')
+            .update({
+              'completed_at': DateTime.now().toIso8601String(),
+              'answers': answersPayload,
+            })
+            .eq('id', existing['id']);
       } else {
         // Insert new submission record
         await _client.from('assessment_results').insert({
@@ -276,4 +279,3 @@ class SupabaseAssignmentsRepository implements AssignmentsRepository {
     }
   }
 }
-

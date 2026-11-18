@@ -33,7 +33,9 @@ class LessonTile extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCreamLight,
+          color: isDark
+              ? AppColors.darkSurfaceElevated
+              : AppColors.warmCreamLight,
           borderRadius: BorderRadius.circular(AppConstants.radiusMd),
           border: Border.all(
             color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
@@ -70,7 +72,9 @@ class LessonTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -92,7 +96,9 @@ class LessonTile extends StatelessWidget {
                           '•',
                           style: TextStyle(
                             fontSize: 11,
-                            color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textMuted,
                           ),
                         ),
                         Row(
@@ -101,14 +107,18 @@ class LessonTile extends StatelessWidget {
                             Icon(
                               Icons.schedule_rounded,
                               size: 11,
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textMuted,
                             ),
                             const SizedBox(width: 3),
                             Text(
                               '${lesson.durationMinutes} min',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.textSecondary,
                               ),
                             ),
                           ],
@@ -134,7 +144,9 @@ class LessonTile extends StatelessWidget {
               child: Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 12,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -189,4 +201,3 @@ class LessonTile extends StatelessWidget {
     }
   }
 }
-

@@ -1,6 +1,7 @@
 import '../../domain/models/student_assignment.dart';
 
 enum AssignmentsListStatus { initial, loading, loaded, error }
+
 enum AssignmentFilter { all, pending, submitted, evaluated, overdue }
 
 /// Immutable state for the student's assignments list
@@ -27,10 +28,8 @@ class AssignmentsListState {
       assignments.where((a) => !a.isSubmitted && !a.isOverdue).length;
   int get submittedCount =>
       assignments.where((a) => a.isSubmitted && !a.isGraded).length;
-  int get evaluatedCount =>
-      assignments.where((a) => a.isGraded).length;
-  int get overdueCount =>
-      assignments.where((a) => a.isOverdue).length;
+  int get evaluatedCount => assignments.where((a) => a.isGraded).length;
+  int get overdueCount => assignments.where((a) => a.isOverdue).length;
 
   List<StudentAssignment> get filteredAssignments {
     return assignments.where((assignment) {
@@ -124,4 +123,3 @@ class AssignmentDetailState {
     );
   }
 }
-

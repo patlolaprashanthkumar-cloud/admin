@@ -30,9 +30,7 @@ class PlaceholderScreen extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
+      appBar: AppBar(title: Text(title)),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -47,28 +45,41 @@ class PlaceholderScreen extends StatelessWidget {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.forestDark : AppColors.forestSoft,
+                      color: isDark
+                          ? AppColors.forestDark
+                          : AppColors.forestSoft,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isDark ? AppColors.forestLight : AppColors.primaryForest.withValues(alpha: 0.2),
+                        color: isDark
+                            ? AppColors.forestLight
+                            : AppColors.primaryForest.withValues(alpha: 0.2),
                         width: 2,
                       ),
                     ),
                     child: Icon(
                       icon,
                       size: 40,
-                      color: isDark ? AppColors.forestLight : AppColors.primaryForest,
+                      color: isDark
+                          ? AppColors.forestLight
+                          : AppColors.primaryForest,
                     ),
                   ),
                   const SizedBox(height: AppConstants.spacingLg),
 
                   // Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.terracottaSoft,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusFull),
-                      border: Border.all(color: AppColors.terracotta.withValues(alpha: 0.3)),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusFull,
+                      ),
+                      border: Border.all(
+                        color: AppColors.terracotta.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Text(
                       badgeText,
@@ -94,7 +105,9 @@ class PlaceholderScreen extends StatelessWidget {
                     subtitle,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: AppConstants.spacingXl),
@@ -114,7 +127,9 @@ class PlaceholderScreen extends StatelessWidget {
                           child: Text(
                             'This module is part of the student portal architecture and will connect to live data in Phase 2.',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
                             ),
                           ),
                         ),
@@ -138,4 +153,3 @@ class PlaceholderScreen extends StatelessWidget {
     );
   }
 }
-

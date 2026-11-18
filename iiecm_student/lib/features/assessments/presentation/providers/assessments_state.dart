@@ -3,6 +3,7 @@ import '../../domain/models/assessment_question.dart';
 import '../../domain/models/student_assessment.dart';
 
 enum AssessmentsListStatus { initial, loading, loaded, error }
+
 enum AssessmentFilter { all, available, scheduled, completed }
 
 /// Immutable state for the student's examinations and assessments list
@@ -153,4 +154,3 @@ class AssessmentAttemptState {
     );
   }
 }
-

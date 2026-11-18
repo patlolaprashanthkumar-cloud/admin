@@ -23,11 +23,14 @@ void main() {
       expect(ex.toString(), contains('strictly for enrolled students'));
     });
 
-    test('StudentProfileNotFoundException communicates missing database profile', () {
-      const ex = StudentProfileNotFoundException();
-      expect(ex.isRetryable, isFalse);
-      expect(ex.toString(), contains('profile record not found'));
-    });
+    test(
+      'StudentProfileNotFoundException communicates missing database profile',
+      () {
+        const ex = StudentProfileNotFoundException();
+        expect(ex.isRetryable, isFalse);
+        expect(ex.toString(), contains('profile record not found'));
+      },
+    );
 
     test('StudentRecordNotFoundException communicates missing institutional enrollment record', () {
       const ex = StudentRecordNotFoundException();
@@ -49,4 +52,3 @@ void main() {
     });
   });
 }
-

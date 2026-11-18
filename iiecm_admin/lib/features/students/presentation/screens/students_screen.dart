@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme/app_colors.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
-import '../../domain/models/student.dart';
 import '../providers/students_provider.dart';
+import '../widgets/student_card.dart';
 
+/// Students & Admissions Screen
+///
+/// Institutional directory and admissions management for IIECM LEARNING HUB.
+/// Displays student rosters, academic category filters, search capabilities,
+/// and provides rapid access to new candidate registration.
 class StudentsScreen extends ConsumerWidget {
   const StudentsScreen({super.key});
 
@@ -20,7 +23,7 @@ class StudentsScreen extends ConsumerWidget {
       buffer.write(hex.replaceFirst('#', ''));
       return Color(int.parse(buffer.toString(), radix: 16));
     } catch (_) {
-      return AppColors.primaryForest;
+      return AppColors.primaryNavy;
     }
   }
 
@@ -33,31 +36,137 @@ class StudentsScreen extends ConsumerWidget {
     final categoriesState = ref.watch(categoryNotifierProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.warmCream,
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.backgroundWarmOffWhite,
       appBar: AppBar(
-        title: const Text('Students & Admissions'),
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.warmCream,
+        backgroundColor: isDark
+            ? AppColors.darkSurface
+            : AppColors.backgroundWarmOffWhite,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.darkSurfaceContainerLow
+                    : AppColors.forestSoft,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primaryNavy.withValues(alpha: 0.15),
+                  width: 1.2,
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.people_alt_rounded,
+                  color: AppColors.primaryNavy,
+                  size: 20,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'Students & Admissions',
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.white
+                                : AppColors.textPrimary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (!state.isLoading) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 1.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryNavy.withValues(
+                              alpha: isDark ? 0.3 : 0.08,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${state.filteredStudents.length}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: isDark
+                                  ? AppColors.accentOrangeLight
+                                  : AppColors.primaryNavy,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  Text(
+                    'Institutional Roster · Enrollment Management',
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
-            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Refresh Roster',
+            icon: Icon(
+              Icons.refresh_rounded,
+              color: isDark ? Colors.white : AppColors.primaryNavy,
+              size: 22,
+            ),
             onPressed: () => notifier.loadStudents(),
           ),
+          const SizedBox(width: 4),
           FilledButton.icon(
             onPressed: () => context.push('/students/add'),
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primaryForest,
+              backgroundColor: AppColors.primaryNavy,
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
             ),
-            icon: const Icon(Icons.person_add_rounded, size: 18),
-            label: const Text('Add Student'),
+            icon: const Icon(Icons.person_add_rounded, size: 17),
+            label: const Text(
+              'Add Student',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
         ],
       ),
       body: SafeArea(
         child: ResponsiveLayout(
           child: RefreshIndicator(
+            color: AppColors.primaryNavy,
             onRefresh: () => notifier.loadStudents(),
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -65,42 +174,80 @@ class StudentsScreen extends ConsumerWidget {
                 // Search and Filters Bar
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Search bar
-                        TextField(
-                          onChanged: notifier.setSearchQuery,
-                          decoration: InputDecoration(
-                            hintText: 'Search by name, student ID, email, or stream...',
-                            prefixIcon: const Icon(Icons.search_rounded),
-                            suffixIcon: state.searchQuery.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(
-                                      Icons.clear_rounded,
-                                      size: 18,
-                                    ),
-                                    onPressed: () =>
-                                        notifier.setSearchQuery(''),
-                                  )
-                                : null,
-                            filled: true,
-                            fillColor: isDark
-                                ? AppColors.darkSurface
-                                : Colors.white,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppConstants.radiusMedium,
+                        // Search bar with Modern Academic styling
+                        Container(
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(
+                                  alpha: isDark ? 0.2 : 0.03,
+                                ),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
-                              borderSide: BorderSide(
+                            ],
+                          ),
+                          child: TextField(
+                            onChanged: notifier.setSearchQuery,
+                            decoration: InputDecoration(
+                              hintText: 'Search by name, student ID, email, or stream...',
+                              hintStyle: TextStyle(
                                 color: isDark
-                                    ? AppColors.darkBorder
-                                    : AppColors.borderNeutral,
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.textMuted,
+                                fontSize: 13,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search_rounded,
+                                color: isDark
+                                    ? AppColors.accentOrangeLight
+                                    : AppColors.primaryNavy,
+                                size: 20,
+                              ),
+                              suffixIcon: state.searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(
+                                        Icons.clear_rounded,
+                                        size: 18,
+                                      ),
+                                      onPressed: () =>
+                                          notifier.setSearchQuery(''),
+                                    )
+                                  : null,
+                              filled: true,
+                              fillColor: isDark
+                                  ? AppColors.darkSurface
+                                  : AppColors.cardWhite,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.borderNeutral,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.borderNeutral,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primaryNavy,
+                                  width: 1.6,
+                                ),
                               ),
                             ),
                           ),
@@ -110,11 +257,36 @@ class StudentsScreen extends ConsumerWidget {
                         // Dynamic Multi-Category Filter Chips
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
                           child: Row(
                             children: [
                               FilterChip(
                                 label: const Text('All Categories'),
+                                labelStyle: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: state.selectedCategoryId == 'all'
+                                      ? Colors.white
+                                      : (isDark
+                                            ? AppColors.darkTextPrimary
+                                            : AppColors.textPrimary),
+                                ),
                                 selected: state.selectedCategoryId == 'all',
+                                selectedColor: AppColors.primaryNavy,
+                                backgroundColor: isDark
+                                    ? AppColors.darkSurface
+                                    : AppColors.cardWhite,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: BorderSide(
+                                    color: state.selectedCategoryId == 'all'
+                                        ? AppColors.primaryNavy
+                                        : (isDark
+                                              ? AppColors.darkBorder
+                                              : AppColors.borderNeutral),
+                                  ),
+                                ),
+                                showCheckmark: false,
                                 onSelected: (_) =>
                                     notifier.setSelectedCategory('all'),
                               ),
@@ -122,6 +294,8 @@ class StudentsScreen extends ConsumerWidget {
                               ...categoriesState.categories.map((cat) {
                                 final isSelected =
                                     state.selectedCategoryId == cat.id;
+                                final catColor = _parseHex(cat.color);
+
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 8),
                                   child: FilterChip(
@@ -130,10 +304,34 @@ class StudentsScreen extends ConsumerWidget {
                                       size: 14,
                                       color: isSelected
                                           ? Colors.white
-                                          : AppColors.primaryForest,
+                                          : catColor,
                                     ),
                                     label: Text(cat.name),
+                                    labelStyle: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : (isDark
+                                                ? AppColors.darkTextPrimary
+                                                : AppColors.textPrimary),
+                                    ),
                                     selected: isSelected,
+                                    selectedColor: catColor,
+                                    backgroundColor: isDark
+                                        ? AppColors.darkSurface
+                                        : AppColors.cardWhite,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                      side: BorderSide(
+                                        color: isSelected
+                                            ? catColor
+                                            : (isDark
+                                                  ? AppColors.darkBorder
+                                                  : AppColors.borderNeutral),
+                                      ),
+                                    ),
+                                    showCheckmark: false,
                                     onSelected: (_) =>
                                         notifier.setSelectedCategory(
                                           isSelected ? 'all' : cat.id,
@@ -160,28 +358,56 @@ class StudentsScreen extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(
-                            AppConstants.radiusMedium,
+                          color: AppColors.errorSoft,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: AppColors.error.withValues(alpha: 0.3),
                           ),
                         ),
-                        child: Text(
-                          state.errorMessage!,
-                          style: const TextStyle(
-                            color: AppColors.error,
-                            fontSize: 12,
-                          ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              color: AppColors.error,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                state.errorMessage!,
+                                style: const TextStyle(
+                                  color: AppColors.error,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
 
-                // Loading
+                // Loading State
                 if (state.isLoading && state.students.isEmpty)
                   const SliverFillRemaining(
                     child: Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primaryForest,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            color: AppColors.primaryNavy,
+                          ),
+                          SizedBox(height: 14),
+                          Text(
+                            'Loading institutional student roster...',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   )
@@ -196,44 +422,79 @@ class StudentsScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(18),
-                              decoration: const BoxDecoration(
-                                color: AppColors.forestSoft,
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.darkSurfaceContainerLow
+                                    : AppColors.forestSoft,
                                 shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.primaryNavy.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  width: 1.5,
+                                ),
                               ),
                               child: const Icon(
                                 Icons.people_alt_rounded,
-                                size: 40,
-                                color: AppColors.primaryForest,
+                                size: 32,
+                                color: AppColors.primaryNavy,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 18),
                             Text(
                               state.searchQuery.isNotEmpty
                                   ? 'No students matching filter'
                                   : 'No student candidates enrolled',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 6),
-                            const Text(
-                              'Register new student admissions and assign multiple academic categories.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 12,
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 360),
+                              child: Text(
+                                'Register new student admissions and assign multiple academic categories.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.textSecondary,
+                                  fontSize: 12.5,
+                                  height: 1.4,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 22),
                             FilledButton.icon(
                               onPressed: () => context.push('/students/add'),
                               style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.primaryForest,
+                                backgroundColor: AppColors.primaryNavy,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                elevation: 0,
                               ),
-                              icon: const Icon(Icons.person_add_rounded),
-                              label: const Text('Add Student'),
+                              icon: const Icon(
+                                Icons.person_add_rounded,
+                                size: 18,
+                              ),
+                              label: const Text(
+                                'Add Student',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -249,7 +510,7 @@ class StudentsScreen extends ConsumerWidget {
                         final student = state.filteredStudents[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: _StudentCard(
+                          child: StudentCard(
                             student: student,
                             parseHex: _parseHex,
                             onTap: () =>
@@ -262,176 +523,6 @@ class StudentsScreen extends ConsumerWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StudentCard extends StatelessWidget {
-  final Student student;
-  final Color Function(String hex) parseHex;
-  final VoidCallback onTap;
-
-  const _StudentCard({
-    required this.student,
-    required this.parseHex,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return AppCard(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppColors.forestSoft,
-                  child: Text(
-                    student.fullName.isNotEmpty
-                        ? student.fullName.substring(0, 1)
-                        : 'S',
-                    style: const TextStyle(
-                      color: AppColors.primaryForest,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              student.fullName,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 2.5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: student.accountStatus == 'active'
-                                  ? AppColors.forestSoft
-                                  : Colors.grey.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              student.accountStatus,
-                              style: TextStyle(
-                                color: student.accountStatus == 'active'
-                                    ? AppColors.primaryForest
-                                    : AppColors.textSecondary,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${student.studentId} · ${student.qualification} · ${student.educationLevel}',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${student.email} · ${student.phone}',
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: AppColors.textSecondary,
-                  size: 20,
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-
-            // Multi-Category Badges
-            Row(
-              children: [
-                const Icon(
-                  Icons.school_rounded,
-                  size: 14,
-                  color: AppColors.primaryForest,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: student.assignedCategories.isEmpty
-                      ? Text(
-                          'Category: ${student.preferredCategory}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        )
-                      : Wrap(
-                          spacing: 4,
-                          runSpacing: 4,
-                          children: student.assignedCategories.map((c) {
-                            final col = parseHex(c.color);
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: col.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                c.name,
-                                style: TextStyle(
-                                  color: col,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                ),
-                Text(
-                  '${student.enrolledCourseIds.length} Courses',
-                  style: const TextStyle(
-                    color: AppColors.accentTerracotta,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11,
-                  ),
-                ),
-              ],
-            ),
-          ],
         ),
       ),
     );

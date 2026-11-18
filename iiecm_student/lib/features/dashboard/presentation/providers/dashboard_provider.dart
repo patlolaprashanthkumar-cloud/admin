@@ -14,18 +14,20 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
 });
 
 /// Riverpod StateNotifier managing the student dashboard lifecycle
-final dashboardNotifierProvider = StateNotifierProvider<DashboardNotifier, DashboardState>((ref) {
-  final repo = ref.watch(dashboardRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  final notifier = DashboardNotifier(repo, authState.student);
-  return notifier;
-});
+final dashboardNotifierProvider =
+    StateNotifierProvider<DashboardNotifier, DashboardState>((ref) {
+      final repo = ref.watch(dashboardRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      final notifier = DashboardNotifier(repo, authState.student);
+      return notifier;
+    });
 
 class DashboardNotifier extends StateNotifier<DashboardState> {
   final DashboardRepository _repository;
   final StudentProfile? _student;
 
-  DashboardNotifier(this._repository, this._student) : super(const DashboardState.initial()) {
+  DashboardNotifier(this._repository, this._student)
+    : super(const DashboardState.initial()) {
     if (_student != null) {
       loadDashboard();
     }
@@ -34,7 +36,9 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
   /// Loads or reloads dashboard data for the authenticated student
   Future<void> loadDashboard() async {
     if (_student == null) {
-      state = const DashboardState.error('No authenticated student session found.');
+      state = const DashboardState.error(
+        'No authenticated student session found.',
+      );
       return;
     }
 
@@ -62,4 +66,3 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     await loadDashboard();
   }
 }
-

@@ -54,7 +54,8 @@ class SupabaseProfileRepository implements ProfileRepository {
         'phone': trimmedPhone,
         if (qualification != null) 'qualification': qualification.trim(),
         if (educationLevel != null) 'education_level': educationLevel.trim(),
-        if (preferredCategory != null) 'preferred_category': preferredCategory.trim(),
+        if (preferredCategory != null)
+          'preferred_category': preferredCategory.trim(),
         if (city != null) 'city': city.trim(),
       };
 
@@ -91,9 +92,7 @@ class SupabaseProfileRepository implements ProfileRepository {
   }
 
   @override
-  Future<void> changePassword({
-    required String newPassword,
-  }) async {
+  Future<void> changePassword({required String newPassword}) async {
     if (!AppSupabase.isInitialized) {
       throw const UnconfiguredAuthException();
     }
@@ -105,9 +104,7 @@ class SupabaseProfileRepository implements ProfileRepository {
 
     try {
       await _client.auth
-          .updateUser(
-            sb.UserAttributes(password: newPassword.trim()),
-          )
+          .updateUser(sb.UserAttributes(password: newPassword.trim()))
           .timeout(const Duration(seconds: 15));
     } on sb.AuthException catch (e) {
       developer.log(
@@ -132,4 +129,3 @@ class SupabaseProfileRepository implements ProfileRepository {
     }
   }
 }
-

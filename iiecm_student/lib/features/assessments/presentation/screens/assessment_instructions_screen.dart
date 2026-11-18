@@ -14,10 +14,7 @@ import '../providers/assessments_provider.dart';
 class AssessmentInstructionsScreen extends ConsumerWidget {
   final String assessmentId;
 
-  const AssessmentInstructionsScreen({
-    super.key,
-    required this.assessmentId,
-  });
+  const AssessmentInstructionsScreen({super.key, required this.assessmentId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -51,52 +48,63 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
       body: state.isLoading && assessment == null
           ? _buildLoadingState(isDark)
           : state.hasError && assessment == null
-              ? _buildErrorState(context, state.errorMessage, notifier, isDark, theme)
-              : assessment == null
-                  ? _buildNotFoundState(context, isDark, theme)
-                  : RefreshIndicator(
-                      color: AppColors.primaryForest,
-                      onRefresh: () => notifier.refresh(),
-                      child: ListView(
-                        padding: const EdgeInsets.all(AppConstants.spacingMd),
-                        children: [
-                          // 1. Overview Header Card
-                          _buildHeaderCard(assessment, state.questions.length, isDark, theme),
-                          const SizedBox(height: AppConstants.spacingMd),
+          ? _buildErrorState(
+              context,
+              state.errorMessage,
+              notifier,
+              isDark,
+              theme,
+            )
+          : assessment == null
+          ? _buildNotFoundState(context, isDark, theme)
+          : RefreshIndicator(
+              color: AppColors.primaryForest,
+              onRefresh: () => notifier.refresh(),
+              child: ListView(
+                padding: const EdgeInsets.all(AppConstants.spacingMd),
+                children: [
+                  // 1. Overview Header Card
+                  _buildHeaderCard(
+                    assessment,
+                    state.questions.length,
+                    isDark,
+                    theme,
+                  ),
+                  const SizedBox(height: AppConstants.spacingMd),
 
-                          // 2. Evaluation / Result Banner (if completed)
-                          if (assessment.isCompleted) ...[
-                            _buildResultCard(assessment, isDark, theme),
-                            const SizedBox(height: AppConstants.spacingMd),
-                          ],
+                  // 2. Evaluation / Result Banner (if completed)
+                  if (assessment.isCompleted) ...[
+                    _buildResultCard(assessment, isDark, theme),
+                    const SizedBox(height: AppConstants.spacingMd),
+                  ],
 
-                          // 3. Instructions & Guidelines Card
-                          _buildInstructionsCard(assessment, isDark, theme),
-                          const SizedBox(height: AppConstants.spacingLg),
+                  // 3. Instructions & Guidelines Card
+                  _buildInstructionsCard(assessment, isDark, theme),
+                  const SizedBox(height: AppConstants.spacingLg),
 
-                          // 4. Action Button
-                          if (!assessment.isCompleted) ...[
-                            if (assessment.isAvailable)
-                              AppButton(
-                                label: 'Start Examination Attempt',
-                                icon: Icons.play_arrow_rounded,
-                                onPressed: () {
-                                  context.push('/assessments/$assessmentId/attempt');
-                                },
-                              )
-                            else
-                              AppButton(
-                                label: 'Examination Scheduled (Locked)',
-                                icon: Icons.lock_clock_rounded,
-                                variant: AppButtonVariant.outline,
-                                onPressed: null,
-                              ),
-                          ],
-
-                          const SizedBox(height: AppConstants.spacingXl),
-                        ],
+                  // 4. Action Button
+                  if (!assessment.isCompleted) ...[
+                    if (assessment.isAvailable)
+                      AppButton(
+                        label: 'Start Examination Attempt',
+                        icon: Icons.play_arrow_rounded,
+                        onPressed: () {
+                          context.push('/assessments/$assessmentId/attempt');
+                        },
+                      )
+                    else
+                      AppButton(
+                        label: 'Examination Scheduled (Locked)',
+                        icon: Icons.lock_clock_rounded,
+                        variant: AppButtonVariant.outline,
+                        onPressed: null,
                       ),
-                    ),
+                  ],
+
+                  const SizedBox(height: AppConstants.spacingXl),
+                ],
+              ),
+            ),
     );
   }
 
@@ -114,7 +122,9 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
             'Loading examination instructions...',
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -137,18 +147,26 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 44),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.error,
+                size: 44,
+              ),
               const SizedBox(height: AppConstants.spacingSm),
               Text(
                 'Unable to Load Examination',
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
                 errorMessage ?? 'A network or server error occurred.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
@@ -166,25 +184,37 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildNotFoundState(BuildContext context, bool isDark, ThemeData theme) {
+  Widget _buildNotFoundState(
+    BuildContext context,
+    bool isDark,
+    ThemeData theme,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingLg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.search_off_rounded, size: 48, color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted),
+            Icon(
+              Icons.search_off_rounded,
+              size: 48,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+            ),
             const SizedBox(height: AppConstants.spacingMd),
             Text(
               'Examination Not Found',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               'This assessment could not be located or you are not enrolled in its course.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppConstants.spacingLg),
@@ -208,7 +238,8 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
     ThemeData theme,
   ) {
     final scheduleFormatted = assessment.scheduledAt != null
-        ? DateFormat('EEEE, d MMMM yyyy • h:mm a').format(assessment.scheduledAt!)
+        ? DateFormat('EEEE, d MMMM yyyy • h:mm a')
+              .format(assessment.scheduledAt!)
         : 'Open Availability Window';
 
     final qCount = resolvedQuestionCount > 0
@@ -225,7 +256,9 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.forestSoft,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                 ),
                 child: Text(
@@ -241,7 +274,9 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkBackground : AppColors.warmCream,
+                  color: isDark
+                      ? AppColors.darkBackground
+                      : AppColors.warmCream,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                   border: Border.all(
                     color: isDark ? AppColors.darkBorder : AppColors.border,
@@ -252,7 +287,9 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -262,7 +299,9 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: assessment.isCompleted
                       ? AppColors.successSoft
-                      : (assessment.isAvailable ? AppColors.forestSoft : AppColors.warningSoft),
+                      : (assessment.isAvailable
+                            ? AppColors.forestSoft
+                            : AppColors.warningSoft),
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                 ),
                 child: Text(
@@ -272,7 +311,9 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w800,
                     color: assessment.isCompleted
                         ? AppColors.success
-                        : (assessment.isAvailable ? AppColors.primaryForest : AppColors.warning),
+                        : (assessment.isAvailable
+                              ? AppColors.primaryForest
+                              : AppColors.warning),
                   ),
                 ),
               ),
@@ -325,12 +366,19 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
 
           Row(
             children: [
-              const Icon(Icons.calendar_today_rounded, size: 13, color: AppColors.terracotta),
+              const Icon(
+                Icons.calendar_today_rounded,
+                size: 13,
+                color: AppColors.terracotta,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   'Scheduled: $scheduleFormatted',
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -350,8 +398,19 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
       children: [
         Icon(icon, size: 18, color: AppColors.primaryForest),
         const SizedBox(height: 3),
-        Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
-        Text(label, style: TextStyle(fontSize: 10, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
+          ),
+        ),
       ],
     );
   }
@@ -370,7 +429,8 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
     ThemeData theme,
   ) {
     final completedFormatted = assessment.completedAt != null
-        ? DateFormat('EEEE, d MMMM yyyy • h:mm a').format(assessment.completedAt!)
+        ? DateFormat('EEEE, d MMMM yyyy • h:mm a')
+              .format(assessment.completedAt!)
         : 'Completed';
 
     final isPassed = assessment.isPassed == true;
@@ -383,14 +443,18 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
           Row(
             children: [
               Icon(
-                isPassed ? Icons.check_circle_rounded : Icons.info_outline_rounded,
+                isPassed
+                    ? Icons.check_circle_rounded
+                    : Icons.info_outline_rounded,
                 size: 20,
                 color: isPassed ? AppColors.success : AppColors.error,
               ),
               const SizedBox(width: 8),
               Text(
                 'Evaluation Result',
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const Spacer(),
               Container(
@@ -416,7 +480,9 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
             'Completed and evaluated on $completedFormatted',
             style: TextStyle(
               fontSize: 11,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: AppConstants.spacingMd),
@@ -424,7 +490,9 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCreamLight,
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.warmCreamLight,
               borderRadius: BorderRadius.circular(AppConstants.radiusMd),
               border: Border.all(
                 color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
@@ -465,21 +533,47 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.rule_rounded, size: 18, color: AppColors.primaryForest),
+              const Icon(
+                Icons.rule_rounded,
+                size: 18,
+                color: AppColors.primaryForest,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Examination Guidelines & Protocol',
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
           const SizedBox(height: AppConstants.spacingSm),
 
-          _buildRuleItem('1', 'This is a timed assessment (${assessment.durationMinutes} minutes). A real-time timer will count down once started.', isDark),
-          _buildRuleItem('2', 'Select one option per question. You can navigate back and forth to revise answers before final submission.', isDark),
-          _buildRuleItem('3', 'Ensure a stable internet connection. If the timer reaches 00:00, the examination will automatically submit all answered questions.', isDark),
-          _buildRuleItem('4', 'Passing threshold is ${assessment.passingMarks} out of ${assessment.totalMarks} marks (${((assessment.passingMarks / (assessment.totalMarks > 0 ? assessment.totalMarks : 100)) * 100).toStringAsFixed(0)}%).', isDark),
-          _buildRuleItem('5', 'Only one official attempt is permitted. Submissions are permanently saved to your academic transcript.', isDark),
+          _buildRuleItem(
+            '1',
+            'This is a timed assessment (${assessment.durationMinutes} minutes). A real-time timer will count down once started.',
+            isDark,
+          ),
+          _buildRuleItem(
+            '2',
+            'Select one option per question. You can navigate back and forth to revise answers before final submission.',
+            isDark,
+          ),
+          _buildRuleItem(
+            '3',
+            'Ensure a stable internet connection. If the timer reaches 00:00, the examination will automatically submit all answered questions.',
+            isDark,
+          ),
+          _buildRuleItem(
+            '4',
+            'Passing threshold is ${assessment.passingMarks} out of ${assessment.totalMarks} marks (${((assessment.passingMarks / (assessment.totalMarks > 0 ? assessment.totalMarks : 100)) * 100).toStringAsFixed(0)}%).',
+            isDark,
+          ),
+          _buildRuleItem(
+            '5',
+            'Only one official attempt is permitted. Submissions are permanently saved to your academic transcript.',
+            isDark,
+          ),
         ],
       ),
     );
@@ -495,13 +589,19 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
             width: 18,
             height: 18,
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.forestSoft,
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 num,
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primaryForest),
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryForest,
+                ),
               ),
             ),
           ),
@@ -512,7 +612,9 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 12,
                 height: 1.35,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
               ),
             ),
           ),
@@ -521,4 +623,3 @@ class AssessmentInstructionsScreen extends ConsumerWidget {
     );
   }
 }
-

@@ -7,6 +7,11 @@ import '../../../categories/domain/models/course_category.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../domain/models/course.dart';
 
+/// Modal bottom sheet for creating and updating curricula courses
+///
+/// Organized into distinct institutional sections (Basic Information,
+/// Academic Metadata, and Tuition & Delivery Format) matching the
+/// IIECM LEARNING HUB Modern Academic design system.
 class CourseFormSheet extends ConsumerStatefulWidget {
   final Course? initialCourse;
   final Future<dynamic> Function({
@@ -194,6 +199,98 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
     }
   }
 
+  InputDecoration _inputDecoration({
+    required String hintText,
+    required IconData prefixIcon,
+    required bool isDark,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(
+        fontSize: 13,
+        color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+      ),
+      prefixIcon: Icon(
+        prefixIcon,
+        color: isDark ? AppColors.accentOrangeLight : AppColors.primaryNavy,
+        size: 18,
+      ),
+      filled: true,
+      fillColor: isDark ? AppColors.darkBackground : AppColors.surfaceWarmWhite,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: AppColors.primaryNavy, width: 1.5),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool isDark,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.darkSurfaceContainerLow
+                  : AppColors.forestSoft,
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(
+                color: AppColors.primaryNavy.withValues(alpha: 0.12),
+              ),
+            ),
+            child: Icon(icon, size: 15, color: AppColors.primaryNavy),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -212,72 +309,109 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
           maxHeight: effectiveHeight > 240 ? effectiveHeight : 240,
         ),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          color: isDark ? AppColors.darkSurface : AppColors.cardWhite,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.08),
+              blurRadius: 18,
+              offset: const Offset(0, -3),
+            ),
+          ],
         ),
         child: SafeArea(
           top: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Drag handle
+              // Drag Handle
               Center(
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   width: 44,
-                  height: 5,
+                  height: 4.5,
                   decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.3),
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : Colors.grey.withValues(alpha: 0.35),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
-              // Header
+
+              // Header Row
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.fromLTRB(20, 4, 16, 12),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.forestSoft,
+                        color: isDark
+                            ? AppColors.darkSurfaceContainerLow
+                            : AppColors.forestSoft,
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: AppColors.primaryNavy.withValues(alpha: 0.12),
+                        ),
                       ),
                       child: const Icon(
                         Icons.menu_book_rounded,
-                        color: AppColors.primaryForest,
+                        color: AppColors.primaryNavy,
                         size: 20,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        isEdit ? 'Edit Curriculum Course' : 'Create New Course',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isEdit
+                                ? 'Edit Curriculum Course'
+                                : 'Create New Course',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            isEdit
+                                ? 'Update specifications and publishing parameters'
+                                : 'Define academic program and cohort settings',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close_rounded, size: 20),
+                      tooltip: 'Close',
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+              ),
 
-              // Content
+              // Form Content Area
               _isLoadingLookups
                   ? const Padding(
                       padding: EdgeInsets.all(40),
                       child: Center(
                         child: CircularProgressIndicator(
-                          color: AppColors.primaryForest,
+                          color: AppColors.primaryNavy,
                         ),
                       ),
                     )
@@ -286,88 +420,136 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                         physics: const AlwaysScrollableScrollPhysics(),
                         keyboardDismissBehavior:
                             ScrollViewKeyboardDismissBehavior.onDrag,
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
                         child: Form(
                           key: _formKey,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Error Alert Banner
                               if (_errorMessage != null)
                                 Container(
                                   padding: const EdgeInsets.all(12),
                                   margin: const EdgeInsets.only(bottom: 16),
                                   decoration: BoxDecoration(
                                     color: AppColors.error.withValues(
-                                      alpha: 0.1,
+                                      alpha: 0.08,
                                     ),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: AppColors.error),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: AppColors.error.withValues(
+                                        alpha: 0.35,
+                                      ),
+                                    ),
                                   ),
-                                  child: Text(
-                                    _errorMessage!,
-                                    style: const TextStyle(
-                                      color: AppColors.error,
-                                      fontSize: 12,
-                                    ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.error_outline_rounded,
+                                        color: AppColors.error,
+                                        size: 18,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _errorMessage!,
+                                          style: const TextStyle(
+                                            color: AppColors.error,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
 
-                              // Title
+                              // SECTION 1: Basic Information
+                              _buildSectionHeader(
+                                icon: Icons.info_outline_rounded,
+                                title: 'Basic Information',
+                                subtitle: 'Course title and curriculum syllabus summary',
+                                isDark: isDark,
+                              ),
                               Text(
                                 'Course Title *',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
+                                  fontSize: 12.5,
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _titleController,
-                                decoration: const InputDecoration(
+                                decoration: _inputDecoration(
                                   hintText:
                                       'e.g. Advanced Emergency Resuscitation',
-                                  prefixIcon: Icon(Icons.school_outlined),
+                                  prefixIcon: Icons.school_outlined,
+                                  isDark: isDark,
                                 ),
                                 validator: (v) => v == null || v.trim().isEmpty
                                     ? 'Enter course title'
                                     : null,
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 14),
 
-                              // Description
                               Text(
                                 'Course Description *',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
+                                  fontSize: 12.5,
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _descController,
                                 maxLines: 3,
-                                decoration: const InputDecoration(
+                                decoration: _inputDecoration(
                                   hintText: 'Syllabus breakdown and clinical training aims...',
+                                  prefixIcon: Icons.description_outlined,
+                                  isDark: isDark,
                                 ),
                                 validator: (v) => v == null || v.trim().isEmpty
                                     ? 'Enter course description'
                                     : null,
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 20),
 
-                              // Category Picker (Loaded dynamically from Supabase)
+                              // SECTION 2: Academic Metadata
+                              _buildSectionHeader(
+                                icon: Icons.account_balance_outlined,
+                                title: 'Academic Metadata',
+                                subtitle: 'Discipline category stream and supervising faculty lead',
+                                isDark: isDark,
+                              ),
                               Text(
                                 'Course Category *',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
+                                  fontSize: 12.5,
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 6),
                               DropdownButtonFormField<String>(
                                 isExpanded: true,
                                 initialValue: _selectedCategoryId,
-                                decoration: const InputDecoration(
-                                  prefixIcon: Icon(Icons.category_outlined),
+                                decoration: _inputDecoration(
                                   hintText: 'Select active category stream',
+                                  prefixIcon: Icons.category_outlined,
+                                  isDark: isDark,
                                 ),
+                                dropdownColor: isDark
+                                    ? AppColors.darkSurface
+                                    : AppColors.cardWhite,
                                 items: _categories.map((cat) {
                                   return DropdownMenuItem<String>(
                                     value: cat.id,
@@ -390,23 +572,30 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                                     ? 'Please select a category'
                                     : null,
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 14),
 
-                              // Lead Instructor (Loaded dynamically from Supabase)
                               Text(
                                 'Assigned Faculty Lead (Optional)',
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
+                                  fontSize: 12.5,
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 6),
                               DropdownButtonFormField<String?>(
                                 isExpanded: true,
                                 initialValue: _selectedInstructorId,
-                                decoration: const InputDecoration(
-                                  prefixIcon: Icon(Icons.person_pin_outlined),
+                                decoration: _inputDecoration(
                                   hintText: 'Unassigned',
+                                  prefixIcon: Icons.person_pin_outlined,
+                                  isDark: isDark,
                                 ),
+                                dropdownColor: isDark
+                                    ? AppColors.darkSurface
+                                    : AppColors.cardWhite,
                                 items: [
                                   const DropdownMenuItem<String?>(
                                     value: null,
@@ -425,9 +614,15 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                                 onChanged: (id) =>
                                     setState(() => _selectedInstructorId = id),
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 20),
 
-                              // Duration & Fee in Row
+                              // SECTION 3: Tuition & Delivery Format
+                              _buildSectionHeader(
+                                icon: Icons.monetization_on_outlined,
+                                title: 'Tuition & Delivery Format',
+                                subtitle: 'Training timeline, tuition fee, and publication state',
+                                isDark: isDark,
+                              ),
                               Row(
                                 children: [
                                   Expanded(
@@ -440,16 +635,20 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                                           style: theme.textTheme.bodyMedium
                                               ?.copyWith(
                                                 fontWeight: FontWeight.w700,
+                                                fontSize: 12.5,
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : AppColors.textPrimary,
                                               ),
                                         ),
                                         const SizedBox(height: 6),
                                         TextFormField(
                                           controller: _durationController,
                                           keyboardType: TextInputType.number,
-                                          decoration: const InputDecoration(
-                                            prefixIcon: Icon(
-                                              Icons.schedule_rounded,
-                                            ),
+                                          decoration: _inputDecoration(
+                                            hintText: '8',
+                                            prefixIcon: Icons.schedule_rounded,
+                                            isDark: isDark,
                                           ),
                                         ),
                                       ],
@@ -466,16 +665,21 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                                           style: theme.textTheme.bodyMedium
                                               ?.copyWith(
                                                 fontWeight: FontWeight.w700,
+                                                fontSize: 12.5,
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : AppColors.textPrimary,
                                               ),
                                         ),
                                         const SizedBox(height: 6),
                                         TextFormField(
                                           controller: _feeController,
                                           keyboardType: TextInputType.number,
-                                          decoration: const InputDecoration(
-                                            prefixIcon: Icon(
-                                              Icons.currency_rupee_rounded,
-                                            ),
+                                          decoration: _inputDecoration(
+                                            hintText: '4999',
+                                            prefixIcon:
+                                                Icons.currency_rupee_rounded,
+                                            isDark: isDark,
                                           ),
                                         ),
                                       ],
@@ -483,9 +687,8 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 14),
 
-                              // Format & Status in Row
                               Row(
                                 children: [
                                   Expanded(
@@ -498,18 +701,24 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                                           style: theme.textTheme.bodyMedium
                                               ?.copyWith(
                                                 fontWeight: FontWeight.w700,
+                                                fontSize: 12.5,
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : AppColors.textPrimary,
                                               ),
                                         ),
                                         const SizedBox(height: 6),
                                         DropdownButtonFormField<String>(
                                           isExpanded: true,
                                           initialValue: _selectedFormat,
-                                          decoration: const InputDecoration(
-                                            contentPadding:
-                                                EdgeInsets.symmetric(
-                                                  horizontal: 10,
-                                                  vertical: 12,
-                                                ),
+                                          dropdownColor: isDark
+                                              ? AppColors.darkSurface
+                                              : AppColors.cardWhite,
+                                          decoration: _inputDecoration(
+                                            hintText: 'Select format',
+                                            prefixIcon: Icons
+                                                .video_camera_front_outlined,
+                                            isDark: isDark,
                                           ),
                                           items: const [
                                             DropdownMenuItem(
@@ -544,18 +753,24 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                                           style: theme.textTheme.bodyMedium
                                               ?.copyWith(
                                                 fontWeight: FontWeight.w700,
+                                                fontSize: 12.5,
+                                                color: isDark
+                                                    ? Colors.white
+                                                    : AppColors.textPrimary,
                                               ),
                                         ),
                                         const SizedBox(height: 6),
                                         DropdownButtonFormField<String>(
                                           isExpanded: true,
                                           initialValue: _selectedStatus,
-                                          decoration: const InputDecoration(
-                                            contentPadding:
-                                                EdgeInsets.symmetric(
-                                                  horizontal: 10,
-                                                  vertical: 12,
-                                                ),
+                                          dropdownColor: isDark
+                                              ? AppColors.darkSurface
+                                              : AppColors.cardWhite,
+                                          decoration: _inputDecoration(
+                                            hintText: 'Status',
+                                            prefixIcon:
+                                                Icons.visibility_outlined,
+                                            isDark: isDark,
                                           ),
                                           items: const [
                                             DropdownMenuItem(
@@ -588,14 +803,17 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                       ),
                     ),
 
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+              ),
 
               // Sticky Bottom Action Bar
               SafeArea(
                 top: false,
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                  color: isDark ? AppColors.darkSurface : Colors.white,
+                  color: isDark ? AppColors.darkSurface : AppColors.cardWhite,
                   child: Row(
                     children: [
                       Expanded(
@@ -603,7 +821,21 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                           onPressed: _isSaving
                               ? null
                               : () => Navigator.of(context).pop(),
-                          child: const Text('Cancel'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            side: BorderSide(
+                              color: isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.borderNeutral,
+                            ),
+                          ),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -612,7 +844,13 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                         child: FilledButton(
                           onPressed: _isSaving ? null : _submit,
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primaryForest,
+                            backgroundColor: AppColors.primaryNavy,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
                           ),
                           child: _isSaving
                               ? const SizedBox(
@@ -623,7 +861,13 @@ class _CourseFormSheetState extends ConsumerState<CourseFormSheet> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : Text(isEdit ? 'Save Changes' : 'Create Course'),
+                              : Text(
+                                  isEdit ? 'Save Changes' : 'Create Course',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
                         ),
                       ),
                     ],

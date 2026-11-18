@@ -71,7 +71,10 @@ void main() {
       expect(result.type, ResultType.assignment);
       expect(result.isAssignment, isTrue);
       expect(result.feedback, 'Excellent clinical rationale provided.');
-      expect(result.submissionNotes, 'Case study analysis on myocardial infarction.');
+      expect(
+        result.submissionNotes,
+        'Case study analysis on myocardial infarction.',
+      );
       expect(result.isEvaluated, isTrue);
       expect(result.passed, isTrue);
       expect(result.displayStatus, 'PASSED');
@@ -149,25 +152,33 @@ void main() {
     );
 
     test('Filters by assessments', () {
-      final filtered = state.copyWith(filter: ResultFilterType.assessments).filteredResults;
+      final filtered = state
+          .copyWith(filter: ResultFilterType.assessments)
+          .filteredResults;
       expect(filtered.length, 2);
       expect(filtered.every((r) => r.isAssessment), isTrue);
     });
 
     test('Filters by assignments', () {
-      final filtered = state.copyWith(filter: ResultFilterType.assignments).filteredResults;
+      final filtered = state
+          .copyWith(filter: ResultFilterType.assignments)
+          .filteredResults;
       expect(filtered.length, 1);
       expect(filtered.first.id, '3');
     });
 
     test('Filters by passed status', () {
-      final filtered = state.copyWith(filter: ResultFilterType.passed).filteredResults;
+      final filtered = state
+          .copyWith(filter: ResultFilterType.passed)
+          .filteredResults;
       expect(filtered.length, 2);
       expect(filtered.every((r) => r.passed), isTrue);
     });
 
     test('Filters by failed status', () {
-      final filtered = state.copyWith(filter: ResultFilterType.failed).filteredResults;
+      final filtered = state
+          .copyWith(filter: ResultFilterType.failed)
+          .filteredResults;
       expect(filtered.length, 1);
       expect(filtered.first.id, '2');
     });
@@ -187,7 +198,9 @@ void main() {
   });
 
   group('Result Widgets Tests', () {
-    testWidgets('ResultCard renders title, course, score and status badge', (tester) async {
+    testWidgets('ResultCard renders title, course, score and status badge', (
+      tester,
+    ) async {
       final result = StudentResult(
         id: 'r1',
         assessmentId: 'a1',
@@ -206,10 +219,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ResultCard(
-              result: result,
-              onTap: () => tapped = true,
-            ),
+            body: ResultCard(result: result, onTap: () => tapped = true),
           ),
         ),
       );
@@ -248,4 +258,3 @@ void main() {
     });
   });
 }
-

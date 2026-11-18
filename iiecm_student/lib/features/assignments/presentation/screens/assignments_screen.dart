@@ -43,14 +43,18 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
               'Assignments & Case Studies',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
               ),
             ),
             Text(
               'Clinical Tasks & Practical Deliverables',
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 11,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -85,7 +89,9 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                         hintText: 'Search assignment title, course, topic...',
                         hintStyle: TextStyle(
                           fontSize: 13,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textMuted,
                         ),
                         prefixIcon: const Icon(Icons.search_rounded, size: 20),
                         suffixIcon: _searchController.text.isNotEmpty
@@ -98,22 +104,37 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                               )
                             : null,
                         filled: true,
-                        fillColor: isDark ? AppColors.darkSurface : AppColors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        fillColor: isDark
+                            ? AppColors.darkSurface
+                            : AppColors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           borderSide: BorderSide(
-                            color: isDark ? AppColors.darkBorder : AppColors.border,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.border,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           borderSide: BorderSide(
-                            color: isDark ? AppColors.darkBorder : AppColors.border,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.border,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           borderSide: const BorderSide(
                             color: AppColors.primaryForest,
                             width: 1.5,
@@ -130,33 +151,46 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                         children: [
                           _buildFilterChip(
                             label: 'All (${state.assignments.length})',
-                            isSelected: state.activeFilter == AssignmentFilter.all,
-                            onTap: () => notifier.setFilter(AssignmentFilter.all),
+                            isSelected:
+                                state.activeFilter == AssignmentFilter.all,
+                            onTap: () =>
+                                notifier.setFilter(AssignmentFilter.all),
                             isDark: isDark,
                           ),
                           _buildFilterChip(
                             label: 'Pending (${state.pendingCount})',
-                            isSelected: state.activeFilter == AssignmentFilter.pending,
-                            onTap: () => notifier.setFilter(AssignmentFilter.pending),
+                            isSelected:
+                                state.activeFilter == AssignmentFilter.pending,
+                            onTap: () =>
+                                notifier.setFilter(AssignmentFilter.pending),
                             isDark: isDark,
                           ),
                           _buildFilterChip(
                             label: 'Submitted (${state.submittedCount})',
-                            isSelected: state.activeFilter == AssignmentFilter.submitted,
-                            onTap: () => notifier.setFilter(AssignmentFilter.submitted),
+                            isSelected:
+                                state.activeFilter ==
+                                AssignmentFilter.submitted,
+                            onTap: () =>
+                                notifier.setFilter(AssignmentFilter.submitted),
                             isDark: isDark,
                           ),
                           _buildFilterChip(
                             label: 'Evaluated (${state.evaluatedCount})',
-                            isSelected: state.activeFilter == AssignmentFilter.evaluated,
-                            onTap: () => notifier.setFilter(AssignmentFilter.evaluated),
+                            isSelected:
+                                state.activeFilter ==
+                                AssignmentFilter.evaluated,
+                            onTap: () =>
+                                notifier.setFilter(AssignmentFilter.evaluated),
                             isDark: isDark,
                           ),
                           if (state.overdueCount > 0)
                             _buildFilterChip(
                               label: 'Overdue (${state.overdueCount})',
-                              isSelected: state.activeFilter == AssignmentFilter.overdue,
-                              onTap: () => notifier.setFilter(AssignmentFilter.overdue),
+                              isSelected:
+                                  state.activeFilter ==
+                                  AssignmentFilter.overdue,
+                              onTap: () =>
+                                  notifier.setFilter(AssignmentFilter.overdue),
                               isDark: isDark,
                               isWarning: true,
                             ),
@@ -170,12 +204,16 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
 
             // Content Area
             if (state.isLoading && state.assignments.isEmpty)
-              SliverFillRemaining(
-                child: _buildLoadingState(isDark),
-              )
+              SliverFillRemaining(child: _buildLoadingState(isDark))
             else if (state.hasError && state.assignments.isEmpty)
               SliverFillRemaining(
-                child: _buildErrorState(context, state.errorMessage, notifier, isDark, theme),
+                child: _buildErrorState(
+                  context,
+                  state.errorMessage,
+                  notifier,
+                  isDark,
+                  theme,
+                ),
               )
             else if (state.assignments.isEmpty)
               SliverFillRemaining(
@@ -187,18 +225,18 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingMd),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.spacingMd,
+                ),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final assignment = state.filteredAssignments[index];
-                      return AssignmentCard(
-                        assignment: assignment,
-                        onTap: () => context.push('/assignments/${assignment.id}'),
-                      );
-                    },
-                    childCount: state.filteredAssignments.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final assignment = state.filteredAssignments[index];
+                    return AssignmentCard(
+                      assignment: assignment,
+                      onTap: () =>
+                          context.push('/assignments/${assignment.id}'),
+                    );
+                  }, childCount: state.filteredAssignments.length),
                 ),
               ),
 
@@ -260,7 +298,9 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
             'Loading course assignments...',
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -283,7 +323,11 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 44),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.error,
+                size: 44,
+              ),
               const SizedBox(height: AppConstants.spacingSm),
               Text(
                 'Unable to Load Assignments',
@@ -293,10 +337,13 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                errorMessage ?? 'A network or server error occurred. Please try again.',
+                errorMessage ??
+                    'A network or server error occurred. Please try again.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
@@ -331,7 +378,9 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
               Icon(
                 Icons.task_alt_rounded,
                 size: 48,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textMuted,
               ),
               const SizedBox(height: AppConstants.spacingMd),
               Text(
@@ -345,7 +394,9 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
                 'You do not have any pending practical assignments or project submissions in your enrolled courses.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                   height: 1.4,
                 ),
               ),
@@ -394,7 +445,9 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
               'No assignments match the selected filter criteria.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppConstants.spacingMd),
@@ -413,4 +466,3 @@ class _AssignmentsScreenState extends ConsumerState<AssignmentsScreen> {
     );
   }
 }
-

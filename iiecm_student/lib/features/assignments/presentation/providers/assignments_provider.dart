@@ -15,18 +15,20 @@ final assignmentsRepositoryProvider = Provider<AssignmentsRepository>((ref) {
 
 /// StateNotifierProvider managing the assignments list for the authenticated student
 final studentAssignmentsNotifierProvider =
-    StateNotifierProvider<StudentAssignmentsNotifier, AssignmentsListState>((ref) {
-  final repo = ref.watch(assignmentsRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  return StudentAssignmentsNotifier(repo, authState.student);
-});
+    StateNotifierProvider<StudentAssignmentsNotifier, AssignmentsListState>((
+      ref,
+    ) {
+      final repo = ref.watch(assignmentsRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      return StudentAssignmentsNotifier(repo, authState.student);
+    });
 
 class StudentAssignmentsNotifier extends StateNotifier<AssignmentsListState> {
   final AssignmentsRepository _repository;
   final StudentProfile? _student;
 
   StudentAssignmentsNotifier(this._repository, this._student)
-      : super(const AssignmentsListState()) {
+    : super(const AssignmentsListState()) {
     if (_student != null) {
       loadAssignments();
     }
@@ -45,8 +47,9 @@ class StudentAssignmentsNotifier extends StateNotifier<AssignmentsListState> {
     state = state.copyWith(status: AssignmentsListStatus.loading);
 
     try {
-      final assignments =
-          await _repository.getStudentAssignments(_student.studentRecordId);
+      final assignments = await _repository.getStudentAssignments(
+        _student.studentRecordId,
+      );
       state = state.copyWith(
         status: AssignmentsListStatus.loaded,
         assignments: assignments,
@@ -61,8 +64,7 @@ class StudentAssignmentsNotifier extends StateNotifier<AssignmentsListState> {
       );
       state = state.copyWith(
         status: AssignmentsListStatus.error,
-        errorMessage:
-            'Unable to load your assignments. Please check connection and retry.',
+        errorMessage: 'Unable to load your assignments. Please check connection and retry.',
       );
     }
   }
@@ -84,13 +86,17 @@ class StudentAssignmentsNotifier extends StateNotifier<AssignmentsListState> {
 }
 
 /// Family StateNotifierProvider managing details and submission for a specific assignment
-final assignmentDetailProvider = StateNotifierProvider.family<
-    AssignmentDetailNotifier, AssignmentDetailState, String>((ref, assignmentId) {
-  final repo = ref.watch(assignmentsRepositoryProvider);
-  final authState = ref.watch(authNotifierProvider);
-  final studentRecordId = authState.student?.studentRecordId ?? '';
-  return AssignmentDetailNotifier(repo, assignmentId, studentRecordId);
-});
+final assignmentDetailProvider =
+    StateNotifierProvider.family<
+      AssignmentDetailNotifier,
+      AssignmentDetailState,
+      String
+    >((ref, assignmentId) {
+      final repo = ref.watch(assignmentsRepositoryProvider);
+      final authState = ref.watch(authNotifierProvider);
+      final studentRecordId = authState.student?.studentRecordId ?? '';
+      return AssignmentDetailNotifier(repo, assignmentId, studentRecordId);
+    });
 
 class AssignmentDetailNotifier extends StateNotifier<AssignmentDetailState> {
   final AssignmentsRepository _repository;
@@ -137,8 +143,7 @@ class AssignmentDetailNotifier extends StateNotifier<AssignmentDetailState> {
       );
       state = state.copyWith(
         status: AssignmentDetailStatus.error,
-        errorMessage:
-            'Unable to load assignment details. Please check network and retry.',
+        errorMessage: 'Unable to load assignment details. Please check network and retry.',
       );
     }
   }
@@ -161,10 +166,7 @@ class AssignmentDetailNotifier extends StateNotifier<AssignmentDetailState> {
       );
 
       if (success) {
-        state = state.copyWith(
-          isSubmitting: false,
-          submissionSuccess: true,
-        );
+        state = state.copyWith(isSubmitting: false, submissionSuccess: true);
         // Reload assignment to reflect submission status
         await loadAssignment();
         return true;
@@ -195,4 +197,3 @@ class AssignmentDetailNotifier extends StateNotifier<AssignmentDetailState> {
     await loadAssignment();
   }
 }
-

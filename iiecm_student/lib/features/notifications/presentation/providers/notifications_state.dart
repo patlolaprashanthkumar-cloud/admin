@@ -1,11 +1,6 @@
 import '../../domain/models/student_notification.dart';
 
-enum NotificationsStatus {
-  initial,
-  loading,
-  loaded,
-  error,
-}
+enum NotificationsStatus { initial, loading, loaded, error }
 
 class NotificationsState {
   final NotificationsStatus status;
@@ -44,10 +39,12 @@ class NotificationsState {
         return notifications.where((n) => !isNotificationRead(n)).toList();
       case NotificationCategory.academic:
         return notifications
-            .where((n) =>
-                n.type == NotificationType.course ||
-                n.type == NotificationType.liveClass ||
-                n.type == NotificationType.instructor)
+            .where(
+              (n) =>
+                  n.type == NotificationType.course ||
+                  n.type == NotificationType.liveClass ||
+                  n.type == NotificationType.instructor,
+            )
             .toList();
       case NotificationCategory.payments:
         return notifications
@@ -55,9 +52,11 @@ class NotificationsState {
             .toList();
       case NotificationCategory.system:
         return notifications
-            .where((n) =>
-                n.type == NotificationType.system ||
-                n.type == NotificationType.student)
+            .where(
+              (n) =>
+                  n.type == NotificationType.system ||
+                  n.type == NotificationType.student,
+            )
             .toList();
       case NotificationCategory.all:
         return notifications;

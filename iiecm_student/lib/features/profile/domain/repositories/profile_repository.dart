@@ -15,8 +15,5 @@ abstract class ProfileRepository {
   });
 
   /// Changes the authenticated student's password using Supabase Auth
-  Future<void> changePassword({
-    required String newPassword,
-  });
+  Future<void> changePassword({required String newPassword});
 }
-

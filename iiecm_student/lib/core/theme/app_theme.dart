@@ -101,7 +101,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusMd),
           borderSide: const BorderSide(color: AppColors.border),
@@ -112,16 +115,16 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusMd),
-          borderSide: const BorderSide(color: AppColors.primaryForest, width: 1.5),
+          borderSide: const BorderSide(
+            color: AppColors.primaryForest,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusMd),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        hintStyle: const TextStyle(
-          color: AppColors.textMuted,
-          fontSize: 14,
-        ),
+        hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 14),
         labelStyle: const TextStyle(
           color: AppColors.textSecondary,
           fontSize: 14,
@@ -138,10 +141,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.radiusMd),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -153,22 +153,22 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.radiusMd),
           ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         elevation: 0,
         backgroundColor: AppColors.white,
-        indicatorColor: AppColors.forestSoft,
+        indicatorColor: AppColors.primaryNavy.withValues(alpha: 0.1),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.primaryForest,
+              color: AppColors.primaryNavy,
             );
           }
           return const TextStyle(
@@ -179,7 +179,7 @@ class AppTheme {
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: AppColors.primaryForest, size: 24);
+            return const IconThemeData(color: AppColors.primaryNavy, size: 24);
           }
           return const IconThemeData(color: AppColors.textSecondary, size: 24);
         }),
@@ -193,7 +193,9 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
-    final baseTypography = GoogleFonts.plusJakartaSansTextTheme(ThemeData.dark().textTheme);
+    final baseTypography = GoogleFonts.plusJakartaSansTextTheme(
+      ThemeData.dark().textTheme,
+    );
 
     return ThemeData(
       useMaterial3: true,
@@ -282,10 +284,12 @@ class AppTheme {
           if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: AppColors.forestLight, size: 24);
           }
-          return const IconThemeData(color: AppColors.darkTextSecondary, size: 24);
+          return const IconThemeData(
+            color: AppColors.darkTextSecondary,
+            size: 24,
+          );
         }),
       ),
     );
   }
 }
-

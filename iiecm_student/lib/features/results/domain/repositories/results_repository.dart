@@ -11,4 +11,3 @@ abstract class ResultsRepository {
     required String studentRecordId,
   });
 }
-

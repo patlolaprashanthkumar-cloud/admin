@@ -14,8 +14,5 @@ abstract class NotificationsRepository {
   });
 
   /// Marks all personal notifications for the student as read
-  Future<void> markAllAsRead({
-    required String userId,
-  });
+  Future<void> markAllAsRead({required String userId});
 }
-

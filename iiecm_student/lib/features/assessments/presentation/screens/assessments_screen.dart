@@ -43,14 +43,18 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
               'Examinations & Checkpoints',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
               ),
             ),
             Text(
               'Clinical Quizzes & MCQ Assessments',
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 11,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -85,7 +89,9 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
                         hintText: 'Search exam title, course, topic...',
                         hintStyle: TextStyle(
                           fontSize: 13,
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textMuted,
                         ),
                         prefixIcon: const Icon(Icons.search_rounded, size: 20),
                         suffixIcon: _searchController.text.isNotEmpty
@@ -98,22 +104,37 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
                               )
                             : null,
                         filled: true,
-                        fillColor: isDark ? AppColors.darkSurface : AppColors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        fillColor: isDark
+                            ? AppColors.darkSurface
+                            : AppColors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           borderSide: BorderSide(
-                            color: isDark ? AppColors.darkBorder : AppColors.border,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.border,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           borderSide: BorderSide(
-                            color: isDark ? AppColors.darkBorder : AppColors.border,
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.border,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           borderSide: const BorderSide(
                             color: AppColors.primaryForest,
                             width: 1.5,
@@ -130,26 +151,37 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
                         children: [
                           _buildFilterChip(
                             label: 'All (${state.assessments.length})',
-                            isSelected: state.activeFilter == AssessmentFilter.all,
-                            onTap: () => notifier.setFilter(AssessmentFilter.all),
+                            isSelected:
+                                state.activeFilter == AssessmentFilter.all,
+                            onTap: () =>
+                                notifier.setFilter(AssessmentFilter.all),
                             isDark: isDark,
                           ),
                           _buildFilterChip(
                             label: 'Available (${state.availableCount})',
-                            isSelected: state.activeFilter == AssessmentFilter.available,
-                            onTap: () => notifier.setFilter(AssessmentFilter.available),
+                            isSelected:
+                                state.activeFilter ==
+                                AssessmentFilter.available,
+                            onTap: () =>
+                                notifier.setFilter(AssessmentFilter.available),
                             isDark: isDark,
                           ),
                           _buildFilterChip(
                             label: 'Scheduled (${state.scheduledCount})',
-                            isSelected: state.activeFilter == AssessmentFilter.scheduled,
-                            onTap: () => notifier.setFilter(AssessmentFilter.scheduled),
+                            isSelected:
+                                state.activeFilter ==
+                                AssessmentFilter.scheduled,
+                            onTap: () =>
+                                notifier.setFilter(AssessmentFilter.scheduled),
                             isDark: isDark,
                           ),
                           _buildFilterChip(
                             label: 'Completed (${state.completedCount})',
-                            isSelected: state.activeFilter == AssessmentFilter.completed,
-                            onTap: () => notifier.setFilter(AssessmentFilter.completed),
+                            isSelected:
+                                state.activeFilter ==
+                                AssessmentFilter.completed,
+                            onTap: () =>
+                                notifier.setFilter(AssessmentFilter.completed),
                             isDark: isDark,
                           ),
                         ],
@@ -162,12 +194,16 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
 
             // Content Area
             if (state.isLoading && state.assessments.isEmpty)
-              SliverFillRemaining(
-                child: _buildLoadingState(isDark),
-              )
+              SliverFillRemaining(child: _buildLoadingState(isDark))
             else if (state.hasError && state.assessments.isEmpty)
               SliverFillRemaining(
-                child: _buildErrorState(context, state.errorMessage, notifier, isDark, theme),
+                child: _buildErrorState(
+                  context,
+                  state.errorMessage,
+                  notifier,
+                  isDark,
+                  theme,
+                ),
               )
             else if (state.assessments.isEmpty)
               SliverFillRemaining(
@@ -179,18 +215,18 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingMd),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppConstants.spacingMd,
+                ),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final assessment = state.filteredAssessments[index];
-                      return AssessmentCard(
-                        assessment: assessment,
-                        onTap: () => context.push('/assessments/${assessment.id}'),
-                      );
-                    },
-                    childCount: state.filteredAssessments.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final assessment = state.filteredAssessments[index];
+                    return AssessmentCard(
+                      assessment: assessment,
+                      onTap: () =>
+                          context.push('/assessments/${assessment.id}'),
+                    );
+                  }, childCount: state.filteredAssessments.length),
                 ),
               ),
 
@@ -251,7 +287,9 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
             'Loading examinations...',
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -274,7 +312,11 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 44),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.error,
+                size: 44,
+              ),
               const SizedBox(height: AppConstants.spacingSm),
               Text(
                 'Unable to Load Examinations',
@@ -284,10 +326,13 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                errorMessage ?? 'A network or server error occurred. Please try again.',
+                errorMessage ??
+                    'A network or server error occurred. Please try again.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
@@ -322,7 +367,9 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
               Icon(
                 Icons.assignment_outlined,
                 size: 48,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textMuted,
               ),
               const SizedBox(height: AppConstants.spacingMd),
               Text(
@@ -336,7 +383,9 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
                 'There are no upcoming or active MCQ examinations for your enrolled courses. Examination schedules published by the registry will appear here.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                   height: 1.4,
                 ),
               ),
@@ -385,7 +434,9 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
               'No examinations match the selected filter criteria.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppConstants.spacingMd),
@@ -404,4 +455,3 @@ class _AssessmentsScreenState extends ConsumerState<AssessmentsScreen> {
     );
   }
 }
-

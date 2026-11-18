@@ -1,10 +1,4 @@
-enum NotificationCategory {
-  all,
-  unread,
-  academic,
-  payments,
-  system,
-}
+enum NotificationCategory { all, unread, academic, payments, system }
 
 enum NotificationPriority {
   low,
@@ -152,4 +146,3 @@ class StudentNotification {
     );
   }
 }
-

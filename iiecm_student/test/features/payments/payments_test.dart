@@ -21,9 +21,7 @@ void main() {
         'payment_method': 'razorpay',
         'status': 'verified',
         'payment_date': '2026-11-05T12:00:00Z',
-        'raw_provider_payload': {
-          'receipt_number': 'IIECM-REC-2026-991',
-        },
+        'raw_provider_payload': {'receipt_number': 'IIECM-REC-2026-991'},
       });
 
       expect(payment.id, 'pay-001');
@@ -37,30 +35,39 @@ void main() {
       expect(payment.isPending, isFalse);
       expect(payment.displayStatus, 'VERIFIED');
       expect(payment.formattedMethod, 'Razorpay / Online');
-      expect(payment.purposeDescription, contains('Course Tuition: Emergency Critical Care Fellowship'));
+      expect(
+        payment.purposeDescription,
+        contains('Course Tuition: Emergency Critical Care Fellowship'),
+      );
     });
 
-    test('Derives deterministic receipt number when payload receipt is absent', () {
-      final payment = StudentPayment.fromJson({
-        'id': 'pay-002',
-        'transaction_ref': 'TXN_987654_ABC',
-        'student_id': 'stu-uuid-2',
-        'student_name': 'Rohan Patel',
-        'subscription_plan': 'premium',
-        'amount': 9999.00,
-        'currency': 'INR',
-        'payment_method': 'upi',
-        'status': 'pending',
-        'payment_date': '2026-11-12T08:30:00Z',
-      });
+    test(
+      'Derives deterministic receipt number when payload receipt is absent',
+      () {
+        final payment = StudentPayment.fromJson({
+          'id': 'pay-002',
+          'transaction_ref': 'TXN_987654_ABC',
+          'student_id': 'stu-uuid-2',
+          'student_name': 'Rohan Patel',
+          'subscription_plan': 'premium',
+          'amount': 9999.00,
+          'currency': 'INR',
+          'payment_method': 'upi',
+          'status': 'pending',
+          'payment_date': '2026-11-12T08:30:00Z',
+        });
 
-      expect(payment.receiptNumber, 'REC-TXN987654ABC');
-      expect(payment.isPending, isTrue);
-      expect(payment.isVerified, isFalse);
-      expect(payment.displayStatus, 'PENDING');
-      expect(payment.formattedMethod, 'UPI');
-      expect(payment.purposeDescription, contains('Academic Subscription: Premium Plan'));
-    });
+        expect(payment.receiptNumber, 'REC-TXN987654ABC');
+        expect(payment.isPending, isTrue);
+        expect(payment.isVerified, isFalse);
+        expect(payment.displayStatus, 'PENDING');
+        expect(payment.formattedMethod, 'UPI');
+        expect(
+          payment.purposeDescription,
+          contains('Academic Subscription: Premium Plan'),
+        );
+      },
+    );
   });
 
   group('PaymentsState Filtering Tests', () {
@@ -118,31 +125,41 @@ void main() {
     );
 
     test('Filters by verified payments', () {
-      final filtered = state.copyWith(filter: PaymentFilterType.verified).filteredPayments;
+      final filtered = state
+          .copyWith(filter: PaymentFilterType.verified)
+          .filteredPayments;
       expect(filtered.length, 1);
       expect(filtered.first.id, '1');
     });
 
     test('Filters by pending payments', () {
-      final filtered = state.copyWith(filter: PaymentFilterType.pending).filteredPayments;
+      final filtered = state
+          .copyWith(filter: PaymentFilterType.pending)
+          .filteredPayments;
       expect(filtered.length, 1);
       expect(filtered.first.id, '2');
     });
 
     test('Filters by failed payments', () {
-      final filtered = state.copyWith(filter: PaymentFilterType.failed).filteredPayments;
+      final filtered = state
+          .copyWith(filter: PaymentFilterType.failed)
+          .filteredPayments;
       expect(filtered.length, 1);
       expect(filtered.first.id, '3');
     });
 
     test('Filters by refunded payments', () {
-      final filtered = state.copyWith(filter: PaymentFilterType.refunded).filteredPayments;
+      final filtered = state
+          .copyWith(filter: PaymentFilterType.refunded)
+          .filteredPayments;
       expect(filtered.length, 1);
       expect(filtered.first.id, '4');
     });
 
     test('Filters by search query matching course or ref', () {
-      final filtered = state.copyWith(searchQuery: 'Neurology').filteredPayments;
+      final filtered = state
+          .copyWith(searchQuery: 'Neurology')
+          .filteredPayments;
       expect(filtered.length, 1);
       expect(filtered.first.courseName, 'Neurology');
     });
@@ -156,7 +173,9 @@ void main() {
   });
 
   group('Payment Widgets Tests', () {
-    testWidgets('PaymentCard renders receipt number, amount and method', (tester) async {
+    testWidgets('PaymentCard renders receipt number, amount and method', (
+      tester,
+    ) async {
       final payment = StudentPayment(
         id: 'p-1',
         transactionRef: 'PAY123456',
@@ -174,10 +193,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: PaymentCard(
-              payment: payment,
-              onTap: () => tapped = true,
-            ),
+            body: PaymentCard(payment: payment, onTap: () => tapped = true),
           ),
         ),
       );
@@ -191,7 +207,9 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('PaymentReceiptCard renders institutional receipt details', (tester) async {
+    testWidgets('PaymentReceiptCard renders institutional receipt details', (
+      tester,
+    ) async {
       final payment = StudentPayment(
         id: 'p-1',
         transactionRef: 'PAY_998877',
@@ -207,14 +225,15 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: PaymentReceiptCard(payment: payment),
-          ),
+          home: Scaffold(body: PaymentReceiptCard(payment: payment)),
         ),
       );
 
       expect(find.text('OFFICIAL FEE RECEIPT'), findsOneWidget);
-      expect(find.text('Indian Institute of Emergency & Critical Care Medicine'), findsOneWidget);
+      expect(
+        find.text('Indian Institute of Emergency & Critical Care Medicine'),
+        findsOneWidget,
+      );
       expect(find.text('Dr. Aditi Sharma'), findsOneWidget);
       expect(find.text('STU-2026-089'), findsOneWidget);
       expect(find.text('₹19999.00'), findsOneWidget);
@@ -222,4 +241,3 @@ void main() {
     });
   });
 }
-

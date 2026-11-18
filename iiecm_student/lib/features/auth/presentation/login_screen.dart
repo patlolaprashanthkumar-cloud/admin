@@ -35,7 +35,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // Dismiss keyboard
     FocusScope.of(context).unfocus();
 
-    final success = await ref.read(authNotifierProvider.notifier).login(
+    final success = await ref
+        .read(authNotifierProvider.notifier)
+        .login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
@@ -65,7 +67,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _showForgotPasswordSheet() {
-    final resetEmailController = TextEditingController(text: _emailController.text.trim());
+    final resetEmailController = TextEditingController(
+      text: _emailController.text.trim(),
+    );
     bool isSending = false;
     String? resetError;
     String? resetSuccess;
@@ -102,7 +106,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         height: 4,
                         decoration: BoxDecoration(
                           color: AppColors.border,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusFull),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusFull,
+                          ),
                         ),
                       ),
                     ),
@@ -113,9 +119,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: AppColors.forestSoft,
-                            borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.radiusMd,
+                            ),
                           ),
-                          child: const Icon(Icons.lock_reset_rounded, color: AppColors.primaryForest),
+                          child: const Icon(
+                            Icons.lock_reset_rounded,
+                            color: AppColors.primaryForest,
+                          ),
                         ),
                         const SizedBox(width: AppConstants.spacingSm),
                         Expanded(
@@ -132,7 +143,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       'Enter your registered student email address. We will send a secure password reset link pointing to the IIECM Authentication Portal (auth.iiecm.org).',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -143,17 +156,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         padding: const EdgeInsets.all(AppConstants.spacingSm),
                         decoration: BoxDecoration(
                           color: AppColors.forestSoft,
-                          borderRadius: BorderRadius.circular(AppConstants.radiusSm),
-                          border: Border.all(color: AppColors.primaryForest.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusSm,
+                          ),
+                          border: Border.all(
+                            color: AppColors.primaryForest.withValues(
+                              alpha: 0.3,
+                            ),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.check_circle_rounded, color: AppColors.primaryForest, size: 20),
+                            const Icon(
+                              Icons.check_circle_rounded,
+                              color: AppColors.primaryForest,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 resetSuccess!,
-                                style: const TextStyle(color: AppColors.primaryForest, fontSize: 13),
+                                style: const TextStyle(
+                                  color: AppColors.primaryForest,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ],
@@ -167,17 +193,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         padding: const EdgeInsets.all(AppConstants.spacingSm),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFDE8E8),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusSm),
-                          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusSm,
+                          ),
+                          border: Border.all(
+                            color: AppColors.error.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.error_outline, color: AppColors.error, size: 20),
+                            const Icon(
+                              Icons.error_outline,
+                              color: AppColors.error,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 resetError!,
-                                style: const TextStyle(color: AppColors.error, fontSize: 13),
+                                style: const TextStyle(
+                                  color: AppColors.error,
+                                  fontSize: 13,
+                                ),
                               ),
                             ),
                           ],
@@ -198,7 +235,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: AppConstants.spacingLg),
 
                     AppButton(
-                      label: isSending ? 'Sending Link...' : 'Send Password Reset Link',
+                      label: isSending
+                          ? 'Sending Link...'
+                          : 'Send Password Reset Link',
                       isLoading: isSending,
                       icon: Icons.send_rounded,
                       onPressed: isSending
@@ -219,10 +258,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               });
 
                               try {
-                                await ref.read(authNotifierProvider.notifier).sendPasswordReset(email);
+                                await ref
+                                    .read(authNotifierProvider.notifier)
+                                    .sendPasswordReset(email);
                                 setModalState(() {
                                   isSending = false;
-                                  resetSuccess = 'Password reset instructions have been dispatched to $email.';
+                                  resetSuccess =
+                                      'Password reset instructions have been dispatched to $email.';
                                 });
                               } catch (e) {
                                 setModalState(() {
@@ -275,7 +317,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   height: 4,
                   decoration: BoxDecoration(
                     color: AppColors.border,
-                    borderRadius: BorderRadius.circular(AppConstants.radiusFull),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.radiusFull,
+                    ),
                   ),
                 ),
               ),
@@ -286,9 +330,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: AppColors.forestSoft,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusMd,
+                      ),
                     ),
-                    child: const Icon(Icons.help_outline_rounded, color: AppColors.primaryForest),
+                    child: const Icon(
+                      Icons.help_outline_rounded,
+                      color: AppColors.primaryForest,
+                    ),
                   ),
                   const SizedBox(width: AppConstants.spacingSm),
                   Expanded(
@@ -308,7 +357,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 '• If you recently received an invitation email, click the link to set your password at auth.iiecm.org first.\n'
                 '• If you require assistance, contact the Registrar Office at registrar@iiecm.org.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                   height: 1.5,
                 ),
               ),
@@ -355,19 +406,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         width: 72,
                         height: 72,
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.forestDark : AppColors.forestSoft,
+                          color: isDark
+                              ? AppColors.forestDark
+                              : AppColors.forestSoft,
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: isDark
                                 ? AppColors.forestLight
-                                : AppColors.primaryForest.withValues(alpha: 0.2),
+                                : AppColors.primaryForest.withValues(
+                                    alpha: 0.2,
+                                  ),
                             width: 2,
                           ),
                         ),
                         child: Icon(
                           Icons.school_rounded,
                           size: 36,
-                          color: isDark ? AppColors.forestLight : AppColors.primaryForest,
+                          color: isDark
+                              ? AppColors.forestLight
+                              : AppColors.primaryForest,
                         ),
                       ),
                     ),
@@ -397,7 +454,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       'Sign in with your registered student email address to access your courses, timetable, and clinical assessments.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -409,13 +468,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         padding: const EdgeInsets.all(AppConstants.spacingMd),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFFBEB),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           border: Border.all(color: const Color(0xFFFDE68A)),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 20),
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              color: Color(0xFFD97706),
+                              size: 20,
+                            ),
                             const SizedBox(width: AppConstants.spacingSm),
                             Expanded(
                               child: Text(
@@ -438,7 +503,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         padding: const EdgeInsets.all(AppConstants.spacingMd),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEF2F2),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           border: Border.all(color: const Color(0xFFFECACA)),
                         ),
                         child: Column(
@@ -446,7 +513,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.wifi_off_rounded, color: AppColors.error, size: 20),
+                                const Icon(
+                                  Icons.wifi_off_rounded,
+                                  color: AppColors.error,
+                                  size: 20,
+                                ),
                                 const SizedBox(width: AppConstants.spacingSm),
                                 Expanded(
                                   child: Text(
@@ -464,24 +535,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               label: 'Retry Connection',
                               icon: Icons.refresh_rounded,
                               variant: AppButtonVariant.outline,
-                              onPressed: () => ref.read(authNotifierProvider.notifier).retryVerification(),
+                              onPressed: () => ref
+                                  .read(authNotifierProvider.notifier)
+                                  .retryVerification(),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(height: AppConstants.spacingMd),
-                    ] else if (authState.errorMessage != null && !authState.isUnconfigured) ...[
+                    ] else if (authState.errorMessage != null &&
+                        !authState.isUnconfigured) ...[
                       // Error message banner
                       Container(
                         padding: const EdgeInsets.all(AppConstants.spacingMd),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEF2F2),
-                          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
                           border: Border.all(color: const Color(0xFFFECACA)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20),
+                            const Icon(
+                              Icons.error_outline_rounded,
+                              color: AppColors.error,
+                              size: 20,
+                            ),
                             const SizedBox(width: AppConstants.spacingSm),
                             Expanded(
                               child: Text(
@@ -509,7 +589,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             'Registered Email',
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: AppConstants.spacingSm),
@@ -526,7 +608,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 return 'Please enter your registered student email';
                               }
                               final trimmed = val.trim();
-                              if (!trimmed.contains('@') || !trimmed.contains('.')) {
+                              if (!trimmed.contains('@') ||
+                                  !trimmed.contains('.')) {
                                 return 'Please enter a valid email address';
                               }
                               return null;
@@ -539,7 +622,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             'Password',
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: AppConstants.spacingSm),
@@ -550,14 +635,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             onFieldSubmitted: (_) => _handleSignIn(),
                             decoration: InputDecoration(
                               hintText: 'Enter your student portal password',
-                              prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
+                              prefixIcon: const Icon(
+                                Icons.lock_outline_rounded,
+                                size: 20,
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                  _obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
                                   size: 20,
                                 ),
                                 onPressed: () {
-                                  setState(() => _obscurePassword = !_obscurePassword);
+                                  setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  );
                                 },
                               ),
                             ),
@@ -589,7 +681,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       onChanged: (val) {
-                                        setState(() => _rememberMe = val ?? true);
+                                        setState(
+                                          () => _rememberMe = val ?? true,
+                                        );
                                       },
                                     ),
                                   ),
@@ -607,7 +701,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                 ),
                                 child: Text(
                                   'Forgot Password?',
@@ -640,7 +735,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         icon: const Icon(Icons.help_outline_rounded, size: 16),
                         label: const Text('New Student or Need Help?'),
                         style: TextButton.styleFrom(
-                          foregroundColor: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                          foregroundColor: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
                         ),
                       ),
                     ),

@@ -12,6 +12,11 @@ import '../../../payments/presentation/widgets/record_payment_sheet.dart';
 import '../../domain/models/student.dart';
 import '../providers/students_provider.dart';
 
+/// StudentProfileScreen
+///
+/// Comprehensive institutional dossier for an enrolled student.
+/// Displays academic credentials, learning delivery format, timetable cohort,
+/// multi-category stream assignments, fee settlement ledger, and active LMS cohorts.
 class StudentProfileScreen extends ConsumerWidget {
   final String studentId;
 
@@ -24,7 +29,7 @@ class StudentProfileScreen extends ConsumerWidget {
       buffer.write(hex.replaceFirst('#', ''));
       return Color(int.parse(buffer.toString(), radix: 16));
     } catch (_) {
-      return AppColors.primaryForest;
+      return AppColors.primaryNavy;
     }
   }
 
@@ -104,7 +109,7 @@ class StudentProfileScreen extends ConsumerWidget {
                 ),
                 FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primaryForest,
+                    backgroundColor: AppColors.primaryNavy,
                   ),
                   onPressed: () async {
                     await ref
@@ -136,60 +141,125 @@ class StudentProfileScreen extends ConsumerWidget {
     final lmsGroupsAsync = ref.watch(studentLmsDetailsFamily(studentId));
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.warmCream,
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.backgroundWarmOffWhite,
       appBar: AppBar(
         title: const Text('Student Academic Profile'),
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.warmCream,
+        backgroundColor: isDark
+            ? AppColors.darkSurface
+            : AppColors.backgroundWarmOffWhite,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
         actions: [
           IconButton(
-            tooltip: 'Refresh',
-            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Refresh Profile',
+            icon: Icon(
+              Icons.refresh_rounded,
+              color: isDark ? Colors.white : AppColors.primaryNavy,
+            ),
             onPressed: () {
               ref.invalidate(studentDetailFamily(studentId));
               ref.invalidate(studentLmsDetailsFamily(studentId));
+              ref.invalidate(studentFeeProfileProvider(studentId));
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: studentAsync.when(
         loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.primaryForest),
+          child: CircularProgressIndicator(color: AppColors.primaryNavy),
         ),
-        error: (err, _) => Center(child: Text('Error loading student: $err')),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'Error loading student: $err',
+              style: const TextStyle(color: AppColors.error),
+            ),
+          ),
+        ),
         data: (student) {
           if (student == null) {
             return const Center(child: Text('Student record not found'));
           }
 
+          final isActive = student.accountStatus.toLowerCase() == 'active';
+
           return ResponsiveLayout(
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. Student Header Card
-                  AppCard(
+                  // 1. Student Academic Header Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.darkSurface
+                          : AppColors.cardWhite,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.darkBorder
+                            : AppColors.borderNeutral,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.25 : 0.04,
+                          ),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(18),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CircleAvatar(
-                              radius: 26,
-                              backgroundColor: AppColors.forestSoft,
-                              child: Text(
-                                student.fullName.isNotEmpty
-                                    ? student.fullName.substring(0, 1)
-                                    : 'S',
-                                style: const TextStyle(
-                                  color: AppColors.primaryForest,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 22,
+                            // Avatar
+                            Container(
+                              width: 54,
+                              height: 54,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.primaryNavy.withValues(
+                                        alpha: 0.35,
+                                      )
+                                    : AppColors.forestSoft,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.primaryNavy.withValues(
+                                    alpha: 0.18,
+                                  ),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  student.fullName.isNotEmpty
+                                      ? student.fullName
+                                            .substring(0, 1)
+                                            .toUpperCase()
+                                      : 'S',
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? AppColors.accentOrangeLight
+                                        : AppColors.primaryNavy,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 22,
+                                  ),
                                 ),
                               ),
                             ),
                             const SizedBox(width: 14),
+
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,7 +272,10 @@ class StudentProfileScreen extends ConsumerWidget {
                                           style: theme.textTheme.titleMedium
                                               ?.copyWith(
                                                 fontWeight: FontWeight.w800,
-                                                color: AppColors.textPrimary,
+                                                fontSize: 17,
+                                                color: isDark
+                                                    ? AppColors.darkTextPrimary
+                                                    : AppColors.textPrimary,
                                               ),
                                         ),
                                       ),
@@ -212,24 +285,44 @@ class StudentProfileScreen extends ConsumerWidget {
                                           vertical: 3,
                                         ),
                                         decoration: BoxDecoration(
-                                          color:
-                                              student.accountStatus == 'active'
-                                              ? AppColors.forestSoft
-                                              : Colors.grey.withValues(
-                                                  alpha: 0.15,
-                                                ),
+                                          color: isActive
+                                              ? (isDark
+                                                    ? AppColors.success
+                                                          .withValues(
+                                                            alpha: 0.2,
+                                                          )
+                                                    : AppColors.successSoft)
+                                              : (isDark
+                                                    ? Colors.white.withValues(
+                                                        alpha: 0.08,
+                                                      )
+                                                    : Colors.grey.withValues(
+                                                        alpha: 0.15,
+                                                      )),
                                           borderRadius: BorderRadius.circular(
                                             6,
+                                          ),
+                                          border: Border.all(
+                                            color: isActive
+                                                ? AppColors.success.withValues(
+                                                    alpha: 0.35,
+                                                  )
+                                                : AppColors.borderNeutral,
+                                            width: 0.8,
                                           ),
                                         ),
                                         child: Text(
                                           student.accountStatus,
                                           style: TextStyle(
-                                            color:
-                                                student.accountStatus ==
-                                                    'active'
-                                                ? AppColors.primaryForest
-                                                : AppColors.textSecondary,
+                                            color: isActive
+                                                ? (isDark
+                                                      ? const Color(0xFF34D399)
+                                                      : AppColors.success)
+                                                : (isDark
+                                                      ? AppColors
+                                                            .darkTextSecondary
+                                                      : AppColors
+                                                            .textSecondary),
                                             fontSize: 10,
                                             fontWeight: FontWeight.w800,
                                           ),
@@ -237,22 +330,34 @@ class StudentProfileScreen extends ConsumerWidget {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 3),
+
+                                  // Student ID & Qualifications
                                   Text(
                                     '${student.studentId} · ${student.qualification} · ${student.educationLevel}',
-                                    style: const TextStyle(
-                                      color: AppColors.textSecondary,
+                                    style: TextStyle(
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.textSecondary,
                                       fontSize: 12,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 3),
+
+                                  // Contact
                                   Text(
                                     '${student.email} · ${student.phone} · ${student.city ?? "India"}',
-                                    style: const TextStyle(
-                                      color: AppColors.textSecondary,
+                                    style: TextStyle(
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                                .withValues(alpha: 0.8)
+                                          : AppColors.textMuted,
                                       fontSize: 11,
                                     ),
                                   ),
+
+                                  // Learning Format & Timetable Badges (Preserved for tests)
                                   if ((student.learningFormat != null &&
                                           student.learningFormat!
                                               .trim()
@@ -261,10 +366,10 @@ class StudentProfileScreen extends ConsumerWidget {
                                           student.preferredSlot!
                                               .trim()
                                               .isNotEmpty)) ...[
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: 8),
                                     Wrap(
                                       spacing: 8,
-                                      runSpacing: 4,
+                                      runSpacing: 6,
                                       children: [
                                         if (student.learningFormat != null &&
                                             student.learningFormat!
@@ -273,36 +378,43 @@ class StudentProfileScreen extends ConsumerWidget {
                                           Container(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 8,
-                                              vertical: 3,
+                                              vertical: 3.5,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: AppColors.forestSoft,
+                                              color: isDark
+                                                  ? AppColors.primaryNavy
+                                                        .withValues(alpha: 0.25)
+                                                  : AppColors.forestSoft,
                                               borderRadius:
                                                   BorderRadius.circular(6),
                                               border: Border.all(
-                                                color: AppColors.primaryForest
+                                                color: AppColors.primaryNavy
                                                     .withValues(alpha: 0.25),
                                               ),
                                             ),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                const Icon(
+                                                Icon(
                                                   Icons.school_outlined,
                                                   size: 13,
-                                                  color:
-                                                      AppColors.primaryForest,
+                                                  color: isDark
+                                                      ? AppColors
+                                                            .accentOrangeLight
+                                                      : AppColors.primaryNavy,
                                                 ),
-                                                const SizedBox(width: 4),
+                                                const SizedBox(width: 5),
                                                 Text(
                                                   _formatLearningFormat(
                                                     student.learningFormat!,
                                                   ),
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 11,
-                                                    fontWeight: FontWeight.w600,
-                                                    color:
-                                                        AppColors.primaryForest,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: isDark
+                                                        ? AppColors
+                                                              .accentOrangeLight
+                                                        : AppColors.primaryNavy,
                                                   ),
                                                 ),
                                               ],
@@ -315,12 +427,14 @@ class StudentProfileScreen extends ConsumerWidget {
                                           Container(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 8,
-                                              vertical: 3,
+                                              vertical: 3.5,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: AppColors.info.withValues(
-                                                alpha: 0.1,
-                                              ),
+                                              color: isDark
+                                                  ? AppColors.info.withValues(
+                                                      alpha: 0.2,
+                                                    )
+                                                  : AppColors.infoSoft,
                                               borderRadius:
                                                   BorderRadius.circular(6),
                                               border: Border.all(
@@ -336,12 +450,12 @@ class StudentProfileScreen extends ConsumerWidget {
                                                   size: 13,
                                                   color: AppColors.info,
                                                 ),
-                                                const SizedBox(width: 4),
+                                                const SizedBox(width: 5),
                                                 Text(
                                                   student.preferredSlot!.trim(),
                                                   style: const TextStyle(
                                                     fontSize: 11,
-                                                    fontWeight: FontWeight.w600,
+                                                    fontWeight: FontWeight.w700,
                                                     color: AppColors.info,
                                                   ),
                                                 ),
@@ -357,7 +471,12 @@ class StudentProfileScreen extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 14),
-                        const Divider(height: 1),
+                        Divider(
+                          height: 1,
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.borderNeutral,
+                        ),
                         const SizedBox(height: 12),
 
                         // Assigned Multi-Categories Header Row
@@ -366,9 +485,12 @@ class StudentProfileScreen extends ConsumerWidget {
                           children: [
                             Text(
                               'Assigned Academic Streams (${student.assignedCategories.length})',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w800,
-                                fontSize: 12,
+                                fontSize: 12.5,
+                                color: isDark
+                                    ? AppColors.darkTextPrimary
+                                    : AppColors.textPrimary,
                               ),
                             ),
                             TextButton.icon(
@@ -377,10 +499,20 @@ class StudentProfileScreen extends ConsumerWidget {
                                 ref,
                                 student,
                               ),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.primaryNavy,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                              ),
                               icon: const Icon(Icons.edit_rounded, size: 14),
                               label: const Text(
                                 'Manage Streams',
-                                style: TextStyle(fontSize: 11),
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ],
@@ -389,8 +521,10 @@ class StudentProfileScreen extends ConsumerWidget {
                         if (student.assignedCategories.isEmpty)
                           Text(
                             'Legacy category: ${student.preferredCategory}',
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
                               fontSize: 12,
                             ),
                           )
@@ -407,7 +541,7 @@ class StudentProfileScreen extends ConsumerWidget {
                                   color: catColor,
                                 ),
                                 backgroundColor: catColor.withValues(
-                                  alpha: 0.12,
+                                  alpha: isDark ? 0.2 : 0.12,
                                 ),
                                 label: Text(
                                   c.name,
@@ -415,6 +549,12 @@ class StudentProfileScreen extends ConsumerWidget {
                                     color: catColor,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 11,
+                                  ),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                  side: BorderSide(
+                                    color: catColor.withValues(alpha: 0.3),
                                   ),
                                 ),
                               );
@@ -429,13 +569,13 @@ class StudentProfileScreen extends ConsumerWidget {
                   _buildStudentFeeCard(context, ref, student, theme, isDark),
                   const SizedBox(height: 20),
 
-                  // 3. CRITICAL REQUIREMENT: Information Organized by Category
+                  // 3. Curriculum Streams & LMS Cohorts
                   Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryForest,
+                          color: AppColors.primaryNavy,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -449,7 +589,9 @@ class StudentProfileScreen extends ConsumerWidget {
                         'Curriculum Streams & LMS Cohorts',
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                          color: isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -460,7 +602,9 @@ class StudentProfileScreen extends ConsumerWidget {
                     loading: () => const Center(
                       child: Padding(
                         padding: EdgeInsets.all(24),
-                        child: CircularProgressIndicator(),
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryNavy,
+                        ),
                       ),
                     ),
                     error: (err, _) => AppCard(
@@ -515,7 +659,7 @@ class StudentProfileScreen extends ConsumerWidget {
               width: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppColors.primaryForest,
+                color: AppColors.primaryNavy,
               ),
             ),
           ),
@@ -530,22 +674,36 @@ class StudentProfileScreen extends ConsumerWidget {
       data: (profile) {
         if (profile == null) return const SizedBox.shrink();
 
-        Color statusColor = AppColors.primaryForest;
+        Color statusColor = AppColors.success;
         if (profile.derivedStatus == 'partially_paid') {
-          statusColor = AppColors.accentTerracotta;
+          statusColor = AppColors.accentOrange;
         } else if (profile.derivedStatus == 'overdue') {
-          statusColor = Colors.red[700]!;
+          statusColor = AppColors.error;
         } else if (profile.derivedStatus == 'pending') {
-          statusColor = AppColors.accentTerracotta;
+          statusColor = AppColors.accentOrange;
         } else if (profile.derivedStatus.contains('refund')) {
           statusColor = Colors.indigo[700]!;
         }
 
-        return AppCard(
-          borderSide: BorderSide(
-            color: AppColors.primaryForest.withValues(alpha: 0.3),
-            width: 1.2,
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : AppColors.cardWhite,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.primaryNavy.withValues(
+                alpha: isDark ? 0.4 : 0.25,
+              ),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -557,13 +715,17 @@ class StudentProfileScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: AppColors.forestSoft,
+                          color: isDark
+                              ? AppColors.primaryNavy.withValues(alpha: 0.3)
+                              : AppColors.forestSoft,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.account_balance_wallet_rounded,
                           size: 16,
-                          color: AppColors.primaryForest,
+                          color: isDark
+                              ? AppColors.accentOrangeLight
+                              : AppColors.primaryNavy,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -584,7 +746,7 @@ class StudentProfileScreen extends ConsumerWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.12),
+                      color: statusColor.withValues(alpha: isDark ? 0.2 : 0.12),
                       borderRadius: BorderRadius.circular(6),
                       border: Border.all(
                         color: statusColor.withValues(alpha: 0.3),
@@ -608,12 +770,14 @@ class StudentProfileScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: profile.paymentCompletionPercentage / 100,
-                  backgroundColor: Colors.grey.withValues(alpha: 0.15),
+                  backgroundColor: isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.grey.withValues(alpha: 0.15),
                   valueColor: AlwaysStoppedAnimation<Color>(statusColor),
-                  minHeight: 5,
+                  minHeight: 6,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
               // 3 Figures
               Row(
@@ -622,24 +786,30 @@ class StudentProfileScreen extends ConsumerWidget {
                   _buildFeeStat(
                     'Total Fees',
                     CurrencyFormatter.format(profile.totalCourseFee),
+                    isDark: isDark,
                   ),
                   _buildFeeStat(
                     'Paid To Date',
                     CurrencyFormatter.format(profile.totalPaid),
-                    color: AppColors.primaryForest,
+                    color: AppColors.success,
+                    isDark: isDark,
                   ),
                   _buildFeeStat(
                     'Outstanding',
                     CurrencyFormatter.format(profile.outstandingBalance),
                     color: profile.outstandingBalance > 0
-                        ? AppColors.accentTerracotta
-                        : AppColors.primaryForest,
+                        ? AppColors.accentOrange
+                        : AppColors.success,
                     isBold: true,
+                    isDark: isDark,
                   ),
                 ],
               ),
               const SizedBox(height: 14),
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+              ),
               const SizedBox(height: 10),
 
               // Actions Row
@@ -648,19 +818,22 @@ class StudentProfileScreen extends ConsumerWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 9),
                         side: BorderSide(
-                          color: AppColors.primaryForest.withValues(alpha: 0.4),
+                          color: AppColors.primaryNavy.withValues(alpha: 0.4),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       onPressed: () => StudentPaymentHistorySheet.show(
                         context,
                         studentId: student.id,
                       ),
-                      icon: const Icon(Icons.history_rounded, size: 14),
+                      icon: const Icon(Icons.history_rounded, size: 15),
                       label: const Text(
                         'View Full Ledger',
-                        style: TextStyle(fontSize: 11),
+                        style: TextStyle(fontSize: 11.5),
                       ),
                     ),
                   ),
@@ -669,17 +842,25 @@ class StudentProfileScreen extends ConsumerWidget {
                     Expanded(
                       child: FilledButton.icon(
                         style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.primaryForest,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          backgroundColor: AppColors.primaryNavy,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 9),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 0,
                         ),
                         onPressed: () => RecordPaymentSheet.show(
                           context,
                           initialStudentId: student.id,
                         ),
-                        icon: const Icon(Icons.add_card_rounded, size: 14),
+                        icon: const Icon(Icons.add_card_rounded, size: 15),
                         label: const Text(
                           'Record Fee',
-                          style: TextStyle(fontSize: 11),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
@@ -698,24 +879,30 @@ class StudentProfileScreen extends ConsumerWidget {
     String value, {
     Color? color,
     bool isBold = false,
+    bool isDark = false,
   }) {
     return Column(
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 9,
-            color: AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
             fontWeight: FontWeight.w600,
+            letterSpacing: 0.4,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
           style: TextStyle(
-            fontSize: 12.5,
+            fontSize: 13,
             fontWeight: isBold ? FontWeight.w800 : FontWeight.w700,
-            color: color ?? AppColors.textPrimary,
+            color:
+                color ??
+                (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
           ),
         ),
       ],
@@ -735,21 +922,34 @@ class _CategoryLmsCard extends StatelessWidget {
       buffer.write(hex.replaceFirst('#', ''));
       return Color(int.parse(buffer.toString(), radix: 16));
     } catch (_) {
-      return AppColors.primaryForest;
+      return AppColors.primaryNavy;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final catColor = _parseHex(group.category.color);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: AppCard(
-        borderSide: BorderSide(
-          color: catColor.withValues(alpha: 0.4),
-          width: 1.5,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : AppColors.cardWhite,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: catColor.withValues(alpha: isDark ? 0.45 : 0.35),
+            width: 1.4,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -759,7 +959,7 @@ class _CategoryLmsCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: catColor.withValues(alpha: 0.15),
+                    color: catColor.withValues(alpha: isDark ? 0.2 : 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -785,13 +985,17 @@ class _CategoryLmsCard extends StatelessWidget {
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.forestSoft,
+                    color: isDark
+                        ? AppColors.primaryNavy.withValues(alpha: 0.3)
+                        : AppColors.forestSoft,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     '${group.courses.length} Courses Enrolled',
-                    style: const TextStyle(
-                      color: AppColors.primaryForest,
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.accentOrangeLight
+                          : AppColors.primaryNavy,
                       fontWeight: FontWeight.w800,
                       fontSize: 10,
                     ),
@@ -802,15 +1006,26 @@ class _CategoryLmsCard extends StatelessWidget {
             const SizedBox(height: 12),
 
             // Courses under this Category
-            const Text(
+            Text(
               'Courses in Stream',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 6),
             if (group.courses.isEmpty)
-              const Text(
+              Text(
                 'No courses enrolled under this stream yet',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                  fontSize: 11,
+                ),
               )
             else
               ...group.courses.map(
@@ -819,31 +1034,45 @@ class _CategoryLmsCard extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.forestSoft.withValues(alpha: 0.3),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : AppColors.forestSoft.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColors.darkBorder
+                            : AppColors.borderSubtle,
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.book_rounded,
                           size: 14,
-                          color: AppColors.primaryForest,
+                          color: isDark
+                              ? AppColors.accentOrangeLight
+                              : AppColors.primaryNavy,
                         ),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             c['title']?.toString() ?? 'Course',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
                             ),
                           ),
                         ),
                         Text(
                           '${c['duration_weeks'] ?? 8} wks · Fee: ${CurrencyFormatter.format((c['fee'] as num?)?.toDouble() ?? 0)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
-                            color: AppColors.textSecondary,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -855,9 +1084,15 @@ class _CategoryLmsCard extends StatelessWidget {
 
             // Assigned Instructors for this Category
             if (group.instructors.isNotEmpty) ...[
-              const Text(
+              Text(
                 'Assigned Stream Instructors',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 4),
               Wrap(
@@ -868,7 +1103,7 @@ class _CategoryLmsCard extends StatelessWidget {
                     avatar: const Icon(
                       Icons.person_pin_rounded,
                       size: 14,
-                      color: AppColors.accentTerracotta,
+                      color: AppColors.accentOrange,
                     ),
                     label: Text(
                       '${ins['full_name']} (${ins['specialization']})',
@@ -877,7 +1112,15 @@ class _CategoryLmsCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    backgroundColor: AppColors.terracottaSoft,
+                    backgroundColor: isDark
+                        ? AppColors.accentOrange.withValues(alpha: 0.15)
+                        : AppColors.accentOrangeSoft,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                      side: BorderSide(
+                        color: AppColors.accentOrange.withValues(alpha: 0.25),
+                      ),
+                    ),
                   );
                 }).toList(),
               ),
@@ -886,9 +1129,15 @@ class _CategoryLmsCard extends StatelessWidget {
 
             // Timetable & Live Classes
             if (group.liveClasses.isNotEmpty) ...[
-              const Text(
+              Text(
                 'Live Clinical Lectures & Timetable',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 4),
               ...group.liveClasses.map(
@@ -896,23 +1145,32 @@ class _CategoryLmsCard extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.videocam_rounded,
                         size: 14,
-                        color: AppColors.primaryForest,
+                        color: isDark
+                            ? AppColors.accentOrangeLight
+                            : AppColors.primaryNavy,
                       ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           '${lc['title']} (${lc['course_name']})',
-                          style: const TextStyle(fontSize: 11),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
+                          ),
                         ),
                       ),
                       Text(
                         lc['scheduled_at']?.toString().substring(0, 10) ?? '',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.textSecondary,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -924,9 +1182,15 @@ class _CategoryLmsCard extends StatelessWidget {
 
             // Assessments & Assignments
             if (group.assessments.isNotEmpty) ...[
-              const Text(
+              Text(
                 'Stream Assessments & Evaluations',
-                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 4),
               ...group.assessments.map(
@@ -937,13 +1201,18 @@ class _CategoryLmsCard extends StatelessWidget {
                       const Icon(
                         Icons.assignment_turned_in_rounded,
                         size: 14,
-                        color: AppColors.accentTerracotta,
+                        color: AppColors.accentOrange,
                       ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           '${asm['title']} · ${asm['total_marks'] ?? 100} Marks',
-                          style: const TextStyle(fontSize: 11),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
+                          ),
                         ),
                       ),
                     ],

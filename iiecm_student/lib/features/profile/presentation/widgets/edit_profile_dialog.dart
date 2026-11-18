@@ -10,10 +10,7 @@ import '../providers/profile_provider.dart';
 class EditProfileDialog extends ConsumerStatefulWidget {
   final StudentProfile student;
 
-  const EditProfileDialog({
-    super.key,
-    required this.student,
-  });
+  const EditProfileDialog({super.key, required this.student});
 
   @override
   ConsumerState<EditProfileDialog> createState() => _EditProfileDialogState();
@@ -33,12 +30,15 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
     super.initState();
     _nameController = TextEditingController(text: widget.student.fullName);
     _phoneController = TextEditingController(text: widget.student.phone ?? '');
-    _qualificationController =
-        TextEditingController(text: widget.student.qualification ?? '');
-    _educationLevelController =
-        TextEditingController(text: widget.student.educationLevel ?? '');
-    _categoryController =
-        TextEditingController(text: widget.student.preferredCategory ?? '');
+    _qualificationController = TextEditingController(
+      text: widget.student.qualification ?? '',
+    );
+    _educationLevelController = TextEditingController(
+      text: widget.student.educationLevel ?? '',
+    );
+    _categoryController = TextEditingController(
+      text: widget.student.preferredCategory ?? '',
+    );
   }
 
   @override
@@ -54,14 +54,15 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final success =
-        await ref.read(profileNotifierProvider.notifier).updateProfile(
-              fullName: _nameController.text.trim(),
-              phone: _phoneController.text.trim(),
-              qualification: _qualificationController.text.trim(),
-              educationLevel: _educationLevelController.text.trim(),
-              preferredCategory: _categoryController.text.trim(),
-            );
+    final success = await ref
+        .read(profileNotifierProvider.notifier)
+        .updateProfile(
+          fullName: _nameController.text.trim(),
+          phone: _phoneController.text.trim(),
+          qualification: _qualificationController.text.trim(),
+          educationLevel: _educationLevelController.text.trim(),
+          preferredCategory: _categoryController.text.trim(),
+        );
 
     if (!mounted) return;
 
@@ -105,8 +106,10 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
               // Dialog Header
               Row(
                 children: [
-                  const Icon(Icons.edit_note_rounded,
-                      color: AppColors.primaryForest),
+                  const Icon(
+                    Icons.edit_note_rounded,
+                    color: AppColors.primaryForest,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -287,8 +290,11 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
               ],
             ),
           ),
-          const Icon(Icons.lock_outline_rounded,
-              size: 14, color: AppColors.textSecondary),
+          const Icon(
+            Icons.lock_outline_rounded,
+            size: 14,
+            color: AppColors.textSecondary,
+          ),
         ],
       ),
     );
@@ -314,8 +320,10 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
         prefixIcon: Icon(icon, size: 18),
         filled: true,
         fillColor: isDark ? AppColors.darkSurface : AppColors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusSm),
           borderSide: BorderSide(

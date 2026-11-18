@@ -9,7 +9,8 @@ void main() {
       final json = {
         'id': 'exam-1',
         'title': 'Advanced Airway Clinical MCQ Examination',
-        'description': 'Online MCQ checkpoint for endotracheal and surgical airway.',
+        'description':
+            'Online MCQ checkpoint for endotracheal and surgical airway.',
         'type': 'mcq',
         'total_marks': 50,
         'passing_marks': 25,
@@ -92,8 +93,16 @@ void main() {
         'marks': 2,
         'type': 'mcq',
         'options': [
-          {'id': 'opt-1', 'text': 'Intravenous Diphenhydramine', 'is_correct': false},
-          {'id': 'opt-2', 'text': 'Intramuscular Epinephrine (1:1000)', 'is_correct': true},
+          {
+            'id': 'opt-1',
+            'text': 'Intravenous Diphenhydramine',
+            'is_correct': false,
+          },
+          {
+            'id': 'opt-2',
+            'text': 'Intramuscular Epinephrine (1:1000)',
+            'is_correct': true,
+          },
           {'id': 'opt-3', 'text': 'Oral Prednisolone', 'is_correct': false},
           {'id': 'opt-4', 'text': 'Inhaled Salbutamol', 'is_correct': false},
         ],
@@ -169,4 +178,3 @@ void main() {
     });
   });
 }
-

@@ -45,17 +45,22 @@ class AppBottomNavScaffold extends StatelessWidget {
           child: NavigationBarTheme(
             data: NavigationBarThemeData(
               backgroundColor: barBackground,
-              indicatorColor: AppColors.forestSoft,
+              indicatorColor: isDark
+                  ? AppColors.deepNavy
+                  : AppColors.primaryNavy,
+              indicatorShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
                 states,
               ) {
                 final isSelected = states.contains(WidgetState.selected);
                 return TextStyle(
                   fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                   color: isSelected
-                      ? AppColors.primaryForest
-                      : AppColors.textMuted,
+                      ? AppColors.primaryNavy
+                      : AppColors.textSecondary,
                   letterSpacing: -0.1,
                 );
               }),
@@ -66,8 +71,8 @@ class AppBottomNavScaffold extends StatelessWidget {
                 return IconThemeData(
                   size: 22,
                   color: isSelected
-                      ? AppColors.primaryForest
-                      : AppColors.textMuted,
+                      ? Colors.white
+                      : AppColors.textSecondary,
                 );
               }),
             ),

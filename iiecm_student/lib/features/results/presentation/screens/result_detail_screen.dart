@@ -12,10 +12,7 @@ import '../providers/results_provider.dart';
 class ResultDetailScreen extends ConsumerWidget {
   final String resultId;
 
-  const ResultDetailScreen({
-    super.key,
-    required this.resultId,
-  });
+  const ResultDetailScreen({super.key, required this.resultId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,28 +21,30 @@ class ResultDetailScreen extends ConsumerWidget {
 
     // First check in-memory list from studentResultsNotifierProvider for instant display
     final resultsState = ref.watch(studentResultsNotifierProvider);
-    final cachedResult = resultsState.results.where((r) => r.id == resultId).firstOrNull;
+    final cachedResult = resultsState.results
+        .where((r) => r.id == resultId)
+        .firstOrNull;
 
     final asyncResult = ref.watch(studentResultDetailProvider(resultId));
 
     final StudentResult? result = cachedResult ?? asyncResult.valueOrNull;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Examination Transcript'),
-      ),
+      appBar: AppBar(title: const Text('Examination Transcript')),
       body: SafeArea(
         child: asyncResult.isLoading && result == null
             ? const Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryForest),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryForest,
+                  ),
                 ),
               )
             : asyncResult.hasError && result == null
-                ? _buildErrorView(context, ref, asyncResult.error.toString())
-                : result == null
-                    ? _buildNotFoundView(context)
-                    : _buildContent(context, result, isDark, theme),
+            ? _buildErrorView(context, ref, asyncResult.error.toString())
+            : result == null
+            ? _buildNotFoundView(context)
+            : _buildContent(context, result, isDark, theme),
       ),
     );
   }
@@ -57,18 +56,22 @@ class ResultDetailScreen extends ConsumerWidget {
     ThemeData theme,
   ) {
     final isPassed = result.passed;
-    final dateFormatted =
-        DateFormat('dd MMMM yyyy, hh:mm a').format(result.completedAt);
+    final dateFormatted = DateFormat('dd MMMM yyyy, hh:mm a')
+        .format(result.completedAt);
 
     final statusColor = isPassed ? AppColors.success : AppColors.error;
-    final statusBgColor = isPassed ? AppColors.successSoft : AppColors.errorSoft;
+    final statusBgColor = isPassed
+        ? AppColors.successSoft
+        : AppColors.errorSoft;
 
     return ListView(
       padding: const EdgeInsets.all(AppConstants.spacingMd),
       children: [
         // 1. Performance Hero Banner
         AppCard(
-          backgroundColor: isDark ? AppColors.darkSurfaceElevated : AppColors.white,
+          backgroundColor: isDark
+              ? AppColors.darkSurfaceElevated
+              : AppColors.white,
           child: Column(
             children: [
               // Type and Status Header
@@ -76,10 +79,17 @@ class ResultDetailScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkSurface : AppColors.forestSoft,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                      color: isDark
+                          ? AppColors.darkSurface
+                          : AppColors.forestSoft,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusSm,
+                      ),
                     ),
                     child: Text(
                       result.type.displayName.toUpperCase(),
@@ -91,16 +101,23 @@ class ResultDetailScreen extends ConsumerWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusBgColor,
-                      borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusSm,
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isPassed ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                          isPassed
+                              ? Icons.check_circle_rounded
+                              : Icons.cancel_rounded,
                           size: 14,
                           color: statusColor,
                         ),
@@ -128,7 +145,9 @@ class ResultDetailScreen extends ConsumerWidget {
                   shape: BoxShape.circle,
                   color: isDark ? AppColors.darkSurface : AppColors.forestSoft,
                   border: Border.all(
-                    color: isPassed ? AppColors.primaryForest : AppColors.terracotta,
+                    color: isPassed
+                        ? AppColors.primaryForest
+                        : AppColors.terracotta,
                     width: 3,
                   ),
                 ),
@@ -141,7 +160,9 @@ class ResultDetailScreen extends ConsumerWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
-                          color: isPassed ? AppColors.primaryForest : AppColors.terracotta,
+                          color: isPassed
+                              ? AppColors.primaryForest
+                              : AppColors.terracotta,
                         ),
                       ),
                       const Text(
@@ -194,15 +215,31 @@ class ResultDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
-              _buildMetricRow('Marks Obtained', result.score.toStringAsFixed(1), statusColor),
+              _buildMetricRow(
+                'Marks Obtained',
+                result.score.toStringAsFixed(1),
+                statusColor,
+              ),
               _buildDivider(),
-              _buildMetricRow('Total Possible Marks', result.totalMarks.toStringAsFixed(0), null),
+              _buildMetricRow(
+                'Total Possible Marks',
+                result.totalMarks.toStringAsFixed(0),
+                null,
+              ),
               if (result.passingMarks != null) ...[
                 _buildDivider(),
-                _buildMetricRow('Passing Threshold', '${result.passingMarks} Marks', null),
+                _buildMetricRow(
+                  'Passing Threshold',
+                  '${result.passingMarks} Marks',
+                  null,
+                ),
               ],
               _buildDivider(),
-              _buildMetricRow('Overall Percentage', result.formattedPercentage, null),
+              _buildMetricRow(
+                'Overall Percentage',
+                result.formattedPercentage,
+                null,
+              ),
               _buildDivider(),
               _buildMetricRow('Date Recorded', dateFormatted, null),
             ],
@@ -213,14 +250,20 @@ class ResultDetailScreen extends ConsumerWidget {
         // 3. Faculty Feedback Section (if present)
         if (result.feedback != null && result.feedback!.isNotEmpty) ...[
           AppCard(
-            backgroundColor: isDark ? AppColors.darkSurfaceElevated : const Color(0xFFF0F7F4),
+            backgroundColor: isDark
+                ? AppColors.darkSurfaceElevated
+                : const Color(0xFFF0F7F4),
             borderColor: AppColors.primaryForest,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.feedback_outlined, size: 18, color: AppColors.primaryForest),
+                    Icon(
+                      Icons.feedback_outlined,
+                      size: 18,
+                      color: AppColors.primaryForest,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Faculty Mentor Feedback',
@@ -235,9 +278,7 @@ class ResultDetailScreen extends ConsumerWidget {
                 const SizedBox(height: AppConstants.spacingSm),
                 Text(
                   result.feedback!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    height: 1.4,
-                  ),
+                  style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
                 ),
               ],
             ),
@@ -246,25 +287,36 @@ class ResultDetailScreen extends ConsumerWidget {
         ],
 
         // 4. Student Submission Notes (for assignments if present)
-        if (result.submissionNotes != null && result.submissionNotes!.isNotEmpty) ...[
+        if (result.submissionNotes != null &&
+            result.submissionNotes!.isNotEmpty) ...[
           AppCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Row(
                   children: [
-                    Icon(Icons.notes_rounded, size: 18, color: AppColors.textSecondary),
+                    Icon(
+                      Icons.notes_rounded,
+                      size: 18,
+                      color: AppColors.textSecondary,
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Student Submission Remarks',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacingSm),
                 Text(
                   result.submissionNotes!,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -362,7 +414,11 @@ class ResultDetailScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline_rounded, size: 44, color: AppColors.error),
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 44,
+              color: AppColors.error,
+            ),
             const SizedBox(height: AppConstants.spacingSm),
             const Text(
               'Error Loading Result',
@@ -372,7 +428,10 @@ class ResultDetailScreen extends ConsumerWidget {
             Text(
               error,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
             ),
             const SizedBox(height: AppConstants.spacingMd),
             AppButton(
@@ -380,7 +439,8 @@ class ResultDetailScreen extends ConsumerWidget {
               icon: Icons.refresh_rounded,
               isFullWidth: false,
               height: 38,
-              onPressed: () => ref.refresh(studentResultDetailProvider(resultId)),
+              onPressed: () =>
+                  ref.refresh(studentResultDetailProvider(resultId)),
             ),
           ],
         ),
@@ -395,7 +455,11 @@ class ResultDetailScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.search_off_rounded, size: 44, color: AppColors.textSecondary),
+            const Icon(
+              Icons.search_off_rounded,
+              size: 44,
+              color: AppColors.textSecondary,
+            ),
             const SizedBox(height: AppConstants.spacingSm),
             const Text(
               'Result Record Not Found',
@@ -421,4 +485,3 @@ class ResultDetailScreen extends ConsumerWidget {
     );
   }
 }
-

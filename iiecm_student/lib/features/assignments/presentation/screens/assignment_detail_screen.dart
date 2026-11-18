@@ -14,10 +14,7 @@ import '../providers/assignments_state.dart';
 class AssignmentDetailScreen extends ConsumerStatefulWidget {
   final String assignmentId;
 
-  const AssignmentDetailScreen({
-    super.key,
-    required this.assignmentId,
-  });
+  const AssignmentDetailScreen({super.key, required this.assignmentId});
 
   @override
   ConsumerState<AssignmentDetailScreen> createState() =>
@@ -37,9 +34,7 @@ class _AssignmentDetailScreenState
     super.dispose();
   }
 
-  void _showSubmitConfirmation(
-    AssignmentDetailNotifier notifier,
-  ) {
+  void _showSubmitConfirmation(AssignmentDetailNotifier notifier) {
     if (!_formKey.currentState!.validate()) return;
 
     showDialog(
@@ -81,7 +76,11 @@ class _AssignmentDetailScreenState
                   const SnackBar(
                     content: Row(
                       children: [
-                        Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                        Icon(
+                          Icons.check_circle_rounded,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                         SizedBox(width: 8),
                         Text('Assignment submitted successfully'),
                       ],
@@ -112,8 +111,9 @@ class _AssignmentDetailScreenState
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final state = ref.watch(assignmentDetailProvider(widget.assignmentId));
-    final notifier =
-        ref.read(assignmentDetailProvider(widget.assignmentId).notifier);
+    final notifier = ref.read(
+      assignmentDetailProvider(widget.assignmentId).notifier,
+    );
 
     final assignment = state.assignment;
 
@@ -140,44 +140,50 @@ class _AssignmentDetailScreenState
       body: state.isLoading && assignment == null
           ? _buildLoadingState(isDark)
           : state.hasError && assignment == null
-              ? _buildErrorState(context, state.errorMessage, notifier, isDark, theme)
-              : assignment == null
-                  ? _buildNotFoundState(context, isDark, theme)
-                  : RefreshIndicator(
-                      color: AppColors.primaryForest,
-                      onRefresh: () => notifier.refresh(),
-                      child: ListView(
-                        padding: const EdgeInsets.all(AppConstants.spacingMd),
-                        children: [
-                          // 1. Header Overview Card
-                          _buildHeaderCard(assignment, isDark, theme),
-                          const SizedBox(height: AppConstants.spacingMd),
+          ? _buildErrorState(
+              context,
+              state.errorMessage,
+              notifier,
+              isDark,
+              theme,
+            )
+          : assignment == null
+          ? _buildNotFoundState(context, isDark, theme)
+          : RefreshIndicator(
+              color: AppColors.primaryForest,
+              onRefresh: () => notifier.refresh(),
+              child: ListView(
+                padding: const EdgeInsets.all(AppConstants.spacingMd),
+                children: [
+                  // 1. Header Overview Card
+                  _buildHeaderCard(assignment, isDark, theme),
+                  const SizedBox(height: AppConstants.spacingMd),
 
-                          // 2. Instructions & Deliverables Card
-                          _buildInstructionsCard(assignment, isDark, theme),
-                          const SizedBox(height: AppConstants.spacingMd),
+                  // 2. Instructions & Deliverables Card
+                  _buildInstructionsCard(assignment, isDark, theme),
+                  const SizedBox(height: AppConstants.spacingMd),
 
-                          // 3. Existing Submission & Evaluation Card (if submitted)
-                          if (assignment.isSubmitted) ...[
-                            _buildEvaluationCard(assignment, isDark, theme),
-                            const SizedBox(height: AppConstants.spacingMd),
-                          ],
+                  // 3. Existing Submission & Evaluation Card (if submitted)
+                  if (assignment.isSubmitted) ...[
+                    _buildEvaluationCard(assignment, isDark, theme),
+                    const SizedBox(height: AppConstants.spacingMd),
+                  ],
 
-                          // 4. Submission Form (if not graded yet)
-                          if (!assignment.isGraded)
-                            _buildSubmissionFormCard(
-                              context,
-                              assignment,
-                              state,
-                              notifier,
-                              isDark,
-                              theme,
-                            ),
-
-                          const SizedBox(height: AppConstants.spacingXl),
-                        ],
-                      ),
+                  // 4. Submission Form (if not graded yet)
+                  if (!assignment.isGraded)
+                    _buildSubmissionFormCard(
+                      context,
+                      assignment,
+                      state,
+                      notifier,
+                      isDark,
+                      theme,
                     ),
+
+                  const SizedBox(height: AppConstants.spacingXl),
+                ],
+              ),
+            ),
     );
   }
 
@@ -195,7 +201,9 @@ class _AssignmentDetailScreenState
             'Loading assignment details...',
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -218,18 +226,26 @@ class _AssignmentDetailScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 44),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.error,
+                size: 44,
+              ),
               const SizedBox(height: AppConstants.spacingSm),
               Text(
                 'Unable to Load Assignment',
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
                 errorMessage ?? 'A network or server error occurred.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
@@ -247,25 +263,37 @@ class _AssignmentDetailScreenState
     );
   }
 
-  Widget _buildNotFoundState(BuildContext context, bool isDark, ThemeData theme) {
+  Widget _buildNotFoundState(
+    BuildContext context,
+    bool isDark,
+    ThemeData theme,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingLg),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.search_off_rounded, size: 48, color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted),
+            Icon(
+              Icons.search_off_rounded,
+              size: 48,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+            ),
             const SizedBox(height: AppConstants.spacingMd),
             Text(
               'Assignment Not Found',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               'This assignment could not be located or you are not enrolled in its course.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppConstants.spacingLg),
@@ -301,7 +329,9 @@ class _AssignmentDetailScreenState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.forestSoft,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                 ),
                 child: Text(
@@ -317,7 +347,9 @@ class _AssignmentDetailScreenState
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkBackground : AppColors.warmCream,
+                  color: isDark
+                      ? AppColors.darkBackground
+                      : AppColors.warmCream,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                   border: Border.all(
                     color: isDark ? AppColors.darkBorder : AppColors.border,
@@ -328,7 +360,9 @@ class _AssignmentDetailScreenState
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -338,7 +372,9 @@ class _AssignmentDetailScreenState
                 decoration: BoxDecoration(
                   color: assignment.isSubmitted
                       ? AppColors.successSoft
-                      : (assignment.isOverdue ? AppColors.errorSoft : AppColors.warningSoft),
+                      : (assignment.isOverdue
+                            ? AppColors.errorSoft
+                            : AppColors.warningSoft),
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                 ),
                 child: Text(
@@ -348,7 +384,9 @@ class _AssignmentDetailScreenState
                     fontWeight: FontWeight.w800,
                     color: assignment.isSubmitted
                         ? AppColors.success
-                        : (assignment.isOverdue ? AppColors.error : AppColors.warning),
+                        : (assignment.isOverdue
+                              ? AppColors.error
+                              : AppColors.warning),
                   ),
                 ),
               ),
@@ -374,7 +412,9 @@ class _AssignmentDetailScreenState
               Icon(
                 Icons.alarm_rounded,
                 size: 14,
-                color: assignment.isOverdue ? AppColors.error : AppColors.terracotta,
+                color: assignment.isOverdue
+                    ? AppColors.error
+                    : AppColors.terracotta,
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -383,7 +423,9 @@ class _AssignmentDetailScreenState
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: assignment.isOverdue ? AppColors.error : AppColors.terracotta,
+                    color: assignment.isOverdue
+                        ? AppColors.error
+                        : AppColors.terracotta,
                   ),
                 ),
               ),
@@ -393,11 +435,18 @@ class _AssignmentDetailScreenState
 
           Row(
             children: [
-              const Icon(Icons.grade_outlined, size: 14, color: AppColors.primaryForest),
+              const Icon(
+                Icons.grade_outlined,
+                size: 14,
+                color: AppColors.primaryForest,
+              ),
               const SizedBox(width: 6),
               Text(
                 'Total Marks: ${assignment.totalMarks}   •   Passing Criteria: ${assignment.passingMarks} Marks',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -418,19 +467,23 @@ class _AssignmentDetailScreenState
         children: [
           Row(
             children: [
-              const Icon(Icons.description_outlined, size: 18, color: AppColors.primaryForest),
+              const Icon(
+                Icons.description_outlined,
+                size: 18,
+                color: AppColors.primaryForest,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Instructions & Case Deliverables',
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
           const SizedBox(height: AppConstants.spacingSm),
           Text(
-            assignment.description.isNotEmpty
-                ? assignment.description
-                : 'Follow clinical case study guidelines provided during emergency department ward rounds. Prepare your findings and submit your case synthesis below.',
+            assignment.description.isNotEmpty ? assignment.description : 'Follow clinical case study guidelines provided during emergency department ward rounds. Prepare your findings and submit your case synthesis below.',
             style: theme.textTheme.bodyMedium?.copyWith(
               height: 1.45,
               color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
@@ -447,7 +500,8 @@ class _AssignmentDetailScreenState
     ThemeData theme,
   ) {
     final submittedFormatted = assignment.submittedAt != null
-        ? DateFormat('EEEE, d MMMM yyyy • h:mm a').format(assignment.submittedAt!)
+        ? DateFormat('EEEE, d MMMM yyyy • h:mm a')
+              .format(assignment.submittedAt!)
         : 'Submitted';
 
     return AppCard(
@@ -458,35 +512,47 @@ class _AssignmentDetailScreenState
           Row(
             children: [
               Icon(
-                assignment.isGraded ? Icons.verified_rounded : Icons.pending_actions_rounded,
+                assignment.isGraded
+                    ? Icons.verified_rounded
+                    : Icons.pending_actions_rounded,
                 size: 18,
                 color: assignment.isGraded
-                    ? (assignment.isPassed == true ? AppColors.success : AppColors.error)
+                    ? (assignment.isPassed == true
+                          ? AppColors.success
+                          : AppColors.error)
                     : AppColors.info,
               ),
               const SizedBox(width: 8),
               Text(
                 assignment.isGraded ? 'Evaluation Result' : 'Submission Status',
-                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: assignment.isGraded
-                      ? (assignment.isPassed == true ? AppColors.successSoft : AppColors.errorSoft)
+                      ? (assignment.isPassed == true
+                            ? AppColors.successSoft
+                            : AppColors.errorSoft)
                       : AppColors.infoSoft,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                 ),
                 child: Text(
                   assignment.isGraded
-                      ? (assignment.isPassed == true ? 'PASSED' : 'NEEDS REVISION')
+                      ? (assignment.isPassed == true
+                            ? 'PASSED'
+                            : 'NEEDS REVISION')
                       : 'PENDING REVIEW',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     color: assignment.isGraded
-                        ? (assignment.isPassed == true ? AppColors.success : AppColors.error)
+                        ? (assignment.isPassed == true
+                              ? AppColors.success
+                              : AppColors.error)
                         : AppColors.info,
                   ),
                 ),
@@ -499,7 +565,9 @@ class _AssignmentDetailScreenState
             'Submitted on $submittedFormatted',
             style: TextStyle(
               fontSize: 11,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
 
@@ -508,7 +576,9 @@ class _AssignmentDetailScreenState
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCreamLight,
+                color: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.warmCreamLight,
                 borderRadius: BorderRadius.circular(AppConstants.radiusMd),
                 border: Border.all(
                   color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
@@ -522,19 +592,25 @@ class _AssignmentDetailScreenState
                     children: [
                       const Text(
                         'Score Awarded:',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
                       ),
                       Text(
                         '${assignment.score?.toStringAsFixed(1) ?? "0"} / ${assignment.totalMarks} (${assignment.percentage?.toStringAsFixed(0) ?? "0"}%)',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
-                          color: assignment.isPassed == true ? AppColors.success : AppColors.error,
+                          color: assignment.isPassed == true
+                              ? AppColors.success
+                              : AppColors.error,
                         ),
                       ),
                     ],
                   ),
-                  if (assignment.feedback != null && assignment.feedback!.isNotEmpty) ...[
+                  if (assignment.feedback != null &&
+                      assignment.feedback!.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     const Divider(height: 1),
                     const SizedBox(height: 6),
@@ -543,7 +619,9 @@ class _AssignmentDetailScreenState
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -552,7 +630,9 @@ class _AssignmentDetailScreenState
                       style: TextStyle(
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
                         height: 1.35,
                       ),
                     ),
@@ -562,14 +642,17 @@ class _AssignmentDetailScreenState
             ),
           ],
 
-          if (assignment.submissionNotes != null && assignment.submissionNotes!.isNotEmpty) ...[
+          if (assignment.submissionNotes != null &&
+              assignment.submissionNotes!.isNotEmpty) ...[
             const SizedBox(height: AppConstants.spacingMd),
             Text(
               'Your Submitted Solution:',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 4),
@@ -611,12 +694,19 @@ class _AssignmentDetailScreenState
           children: [
             Row(
               children: [
-                const Icon(Icons.drive_file_rename_outline_rounded,
-                    size: 18, color: AppColors.primaryForest),
+                const Icon(
+                  Icons.drive_file_rename_outline_rounded,
+                  size: 18,
+                  color: AppColors.primaryForest,
+                ),
                 const SizedBox(width: 8),
                 Text(
-                  assignment.isSubmitted ? 'Update Submission' : 'Submit Clinical Deliverable',
-                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                  assignment.isSubmitted
+                      ? 'Update Submission'
+                      : 'Submit Clinical Deliverable',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -626,7 +716,9 @@ class _AssignmentDetailScreenState
               'Provide your clinical case summary, discussion, and solutions below:',
               style: TextStyle(
                 fontSize: 12,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppConstants.spacingMd),
@@ -644,10 +736,14 @@ class _AssignmentDetailScreenState
                 hintText: 'Enter clinical observations, patient care analysis, or assignment write-up...',
                 hintStyle: TextStyle(
                   fontSize: 12,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textMuted,
                 ),
                 filled: true,
-                fillColor: isDark ? AppColors.darkSurfaceElevated : AppColors.white,
+                fillColor: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.white,
                 contentPadding: const EdgeInsets.all(12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppConstants.radiusMd),
@@ -676,11 +772,17 @@ class _AssignmentDetailScreenState
               controller: _attachmentUrlController,
               decoration: InputDecoration(
                 labelText: 'External Document Link / Reference (Optional)',
-                hintText: 'e.g. Google Drive, hospital protocol link, or PDF URL',
+                hintText:
+                    'e.g. Google Drive, hospital protocol link, or PDF URL',
                 prefixIcon: const Icon(Icons.link_rounded, size: 20),
                 filled: true,
-                fillColor: isDark ? AppColors.darkSurfaceElevated : AppColors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                fillColor: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.white,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppConstants.radiusMd),
                   borderSide: BorderSide(
@@ -705,7 +807,9 @@ class _AssignmentDetailScreenState
             const SizedBox(height: AppConstants.spacingLg),
 
             AppButton(
-              label: assignment.isSubmitted ? 'Update Submission' : 'Submit Assignment',
+              label: assignment.isSubmitted
+                  ? 'Update Submission'
+                  : 'Submit Assignment',
               icon: Icons.check_circle_outline_rounded,
               isLoading: state.isSubmitting,
               onPressed: () => _showSubmitConfirmation(notifier),
@@ -716,4 +820,3 @@ class _AssignmentDetailScreenState
     );
   }
 }
-

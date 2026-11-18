@@ -32,7 +32,9 @@ class AppButton extends StatelessWidget {
 
     Widget buttonContent;
     if (isLoading) {
-      final spinnerColor = (variant == AppButtonVariant.primary || variant == AppButtonVariant.secondary)
+      final spinnerColor =
+          (variant == AppButtonVariant.primary ||
+              variant == AppButtonVariant.secondary)
           ? AppColors.white
           : AppColors.primaryForest;
       buttonContent = SizedBox(
@@ -75,7 +77,9 @@ class AppButton extends StatelessWidget {
         button = ElevatedButton(
           onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: isDark ? AppColors.forestLight : AppColors.primaryForest,
+            backgroundColor: isDark
+                ? AppColors.forestLight
+                : AppColors.primaryForest,
             foregroundColor: AppColors.white,
             minimumSize: Size(isFullWidth ? double.infinity : 0, height),
             shape: RoundedRectangleBorder(
@@ -102,7 +106,9 @@ class AppButton extends StatelessWidget {
         break;
 
       case AppButtonVariant.outline:
-        final borderColor = isDark ? AppColors.forestLight : AppColors.primaryForest;
+        final borderColor = isDark
+            ? AppColors.forestLight
+            : AppColors.primaryForest;
         button = OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
@@ -121,7 +127,9 @@ class AppButton extends StatelessWidget {
         button = TextButton(
           onPressed: isLoading ? null : onPressed,
           style: TextButton.styleFrom(
-            foregroundColor: isDark ? AppColors.forestLight : AppColors.primaryForest,
+            foregroundColor: isDark
+                ? AppColors.forestLight
+                : AppColors.primaryForest,
             minimumSize: Size(isFullWidth ? double.infinity : 0, height),
           ),
           child: buttonContent,
@@ -132,4 +140,3 @@ class AppButton extends StatelessWidget {
     return button;
   }
 }
-

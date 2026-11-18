@@ -34,9 +34,13 @@ class PaymentFilterChips extends StatelessWidget {
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                 color: isSelected
                     ? Colors.white
-                    : (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
+                    : (isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary),
               ),
-              backgroundColor: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
+              backgroundColor: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.warmCream,
               selectedColor: AppColors.primaryForest,
               checkmarkColor: Colors.white,
               showCheckmark: false,
@@ -57,4 +61,3 @@ class PaymentFilterChips extends StatelessWidget {
     );
   }
 }
-

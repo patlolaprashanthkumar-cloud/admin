@@ -15,10 +15,7 @@ import '../widgets/lesson_tile.dart';
 class CourseDetailScreen extends ConsumerStatefulWidget {
   final String courseId;
 
-  const CourseDetailScreen({
-    super.key,
-    required this.courseId,
-  });
+  const CourseDetailScreen({super.key, required this.courseId});
 
   @override
   ConsumerState<CourseDetailScreen> createState() => _CourseDetailScreenState();
@@ -75,12 +72,19 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             child: TabBar(
               controller: _tabController,
               labelColor: AppColors.primaryForest,
-              unselectedLabelColor:
-                  isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              unselectedLabelColor: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
               indicatorColor: AppColors.primaryForest,
               indicatorWeight: 3,
-              labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
               tabs: const [
                 Tab(
                   icon: Icon(Icons.menu_book_rounded, size: 18),
@@ -98,19 +102,32 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
       body: detailState.isLoading && course == null
           ? _buildLoadingState(isDark)
           : detailState.hasError && course == null
-              ? _buildErrorState(context, detailState.errorMessage, notifier, isDark, theme)
-              : course == null
-                  ? _buildNotFoundState(context, isDark, theme)
-                  : TabBarView(
-                      controller: _tabController,
-                      children: [
-                        // Tab 1: Curriculum & Lessons
-                        _buildCurriculumTab(context, course, detailState, notifier, isDark, theme),
+          ? _buildErrorState(
+              context,
+              detailState.errorMessage,
+              notifier,
+              isDark,
+              theme,
+            )
+          : course == null
+          ? _buildNotFoundState(context, isDark, theme)
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab 1: Curriculum & Lessons
+                _buildCurriculumTab(
+                  context,
+                  course,
+                  detailState,
+                  notifier,
+                  isDark,
+                  theme,
+                ),
 
-                        // Tab 2: Overview & Objectives
-                        _buildOverviewTab(context, course, isDark, theme),
-                      ],
-                    ),
+                // Tab 2: Overview & Objectives
+                _buildOverviewTab(context, course, isDark, theme),
+              ],
+            ),
     );
   }
 
@@ -128,7 +145,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             'Loading course curriculum...',
             style: TextStyle(
               fontSize: 13,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -151,7 +170,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 44),
+              const Icon(
+                Icons.error_outline_rounded,
+                color: AppColors.error,
+                size: 44,
+              ),
               const SizedBox(height: AppConstants.spacingSm),
               Text(
                 'Unable to Load Curriculum',
@@ -161,10 +184,13 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               ),
               const SizedBox(height: 6),
               Text(
-                errorMessage ?? 'A network or server error occurred. Please try again.',
+                errorMessage ??
+                    'A network or server error occurred. Please try again.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
@@ -182,7 +208,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     );
   }
 
-  Widget _buildNotFoundState(BuildContext context, bool isDark, ThemeData theme) {
+  Widget _buildNotFoundState(
+    BuildContext context,
+    bool isDark,
+    ThemeData theme,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingLg),
@@ -197,14 +227,18 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             const SizedBox(height: AppConstants.spacingMd),
             Text(
               'Course Not Found',
-              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               'This course either does not exist or you do not have an active enrollment assigned.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: AppConstants.spacingLg),
@@ -242,14 +276,19 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           // Syllabus Section Title
           Row(
             children: [
-              const Icon(Icons.format_list_bulleted_rounded,
-                  size: 18, color: AppColors.primaryForest),
+              const Icon(
+                Icons.format_list_bulleted_rounded,
+                size: 18,
+                color: AppColors.primaryForest,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Modules & Lessons',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
                 ),
               ),
               const Spacer(),
@@ -258,7 +297,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -298,7 +339,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.forestSoft,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                 ),
                 child: Text(
@@ -315,7 +358,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkBackground : AppColors.warmCream,
+                  color: isDark
+                      ? AppColors.darkBackground
+                      : AppColors.warmCream,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                   border: Border.all(
                     color: isDark ? AppColors.darkBorder : AppColors.border,
@@ -326,7 +371,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -360,12 +407,16 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             ),
           ),
 
-          if (course.instructorName != null && course.instructorName!.isNotEmpty) ...[
+          if (course.instructorName != null &&
+              course.instructorName!.isNotEmpty) ...[
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.person_outline_rounded,
-                    size: 14, color: AppColors.primaryForest),
+                const Icon(
+                  Icons.person_outline_rounded,
+                  size: 14,
+                  color: AppColors.primaryForest,
+                ),
                 const SizedBox(width: 5),
                 Text(
                   'Lead Faculty: ${course.instructorName!}',
@@ -426,16 +477,15 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
         const SizedBox(height: 3),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-          ),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 10,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
         ),
       ],
@@ -472,7 +522,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.forestSoft,
               borderRadius: BorderRadius.circular(AppConstants.radiusSm),
             ),
             child: Center(
@@ -499,7 +551,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               '${module.lessons.length} Lessons${module.totalDurationMinutes > 0 ? " • ${module.totalDurationMinutes} min" : ""}',
               style: TextStyle(
                 fontSize: 11,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ),
@@ -511,7 +565,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 child: Text(
                   module.description!,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                     height: 1.35,
                   ),
                 ),
@@ -525,16 +581,16 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                   style: TextStyle(
                     fontSize: 11,
                     fontStyle: FontStyle.italic,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textMuted,
                   ),
                 ),
               )
             else
               ...module.lessons.map(
-                (lesson) => LessonTile(
-                  lesson: lesson,
-                  moduleTitle: module.title,
-                ),
+                (lesson) =>
+                    LessonTile(lesson: lesson, moduleTitle: module.title),
               ),
           ],
         ),
@@ -562,7 +618,9 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             'The syllabus modules for this training program are currently being published by the department.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
             ),
           ),
         ],
@@ -587,8 +645,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             children: [
               Row(
                 children: [
-                  const Icon(Icons.description_outlined,
-                      size: 18, color: AppColors.primaryForest),
+                  const Icon(
+                    Icons.description_outlined,
+                    size: 18,
+                    color: AppColors.primaryForest,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Program Description',
@@ -600,12 +661,12 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               ),
               const SizedBox(height: AppConstants.spacingSm),
               Text(
-                course.description.isNotEmpty
-                    ? course.description
-                    : 'Comprehensive institutional curriculum tailored for clinical emergency and healthcare management fellows.',
+                course.description.isNotEmpty ? course.description : 'Comprehensive institutional curriculum tailored for clinical emergency and healthcare management fellows.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   height: 1.45,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
                 ),
               ),
             ],
@@ -622,8 +683,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.track_changes_rounded,
-                        size: 18, color: AppColors.primaryForest),
+                    const Icon(
+                      Icons.track_changes_rounded,
+                      size: 18,
+                      color: AppColors.primaryForest,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Learning Objectives & Competencies',
@@ -693,8 +757,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.assignment_turned_in_outlined,
-                        size: 18, color: AppColors.terracotta),
+                    const Icon(
+                      Icons.assignment_turned_in_outlined,
+                      size: 18,
+                      color: AppColors.terracotta,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Prerequisites & Eligibility',
@@ -711,8 +778,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.check_rounded,
-                            size: 16, color: AppColors.terracotta),
+                        const Icon(
+                          Icons.check_rounded,
+                          size: 16,
+                          color: AppColors.terracotta,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -740,8 +810,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.verified_user_outlined,
-                  size: 22, color: AppColors.primaryForest),
+              const Icon(
+                Icons.verified_user_outlined,
+                size: 22,
+                color: AppColors.primaryForest,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -749,7 +822,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                   children: [
                     const Text(
                       'Official Course Enrollment',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -772,4 +848,3 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     );
   }
 }
-

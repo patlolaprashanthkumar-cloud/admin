@@ -68,7 +68,8 @@ final sampleNotifications = [
     id: 'notif-3',
     userId: null, // Broadcast
     title: 'Institutional Notice: Campus Maintenance',
-    message: 'The online simulation lab will undergo server maintenance on Sunday.',
+    message:
+        'The online simulation lab will undergo server maintenance on Sunday.',
     type: NotificationType.system,
     priority: NotificationPriority.low,
     read: false,
@@ -113,23 +114,26 @@ void main() {
       expect(notif.actionUrl, '/assignments/a-1');
     });
 
-    test('Correctly identifies broadcast notification when user_id is null', () {
-      final map = {
-        'id': 'broadcast-1',
-        'user_id': null,
-        'title': 'Registry Announcement',
-        'message': 'All students must verify their clinical logbooks.',
-        'type': 'system',
-        'priority': 'low',
-        'read': false,
-        'created_at': '2026-11-13T10:00:00Z',
-      };
+    test(
+      'Correctly identifies broadcast notification when user_id is null',
+      () {
+        final map = {
+          'id': 'broadcast-1',
+          'user_id': null,
+          'title': 'Registry Announcement',
+          'message': 'All students must verify their clinical logbooks.',
+          'type': 'system',
+          'priority': 'low',
+          'read': false,
+          'created_at': '2026-11-13T10:00:00Z',
+        };
 
-      final notif = StudentNotification.fromMap(map);
-      expect(notif.isBroadcast, isTrue);
-      expect(notif.userId, isNull);
-      expect(notif.type, NotificationType.system);
-    });
+        final notif = StudentNotification.fromMap(map);
+        expect(notif.isBroadcast, isTrue);
+        expect(notif.userId, isNull);
+        expect(notif.type, NotificationType.system);
+      },
+    );
   });
 
   group('NotificationsState Unit Tests', () {
@@ -148,36 +152,44 @@ void main() {
     });
 
     test('Filters notifications by category tabs', () {
-      final state = NotificationsState(
-        notifications: sampleNotifications,
-      );
+      final state = NotificationsState(notifications: sampleNotifications);
 
       // All
       expect(state.filteredNotifications.length, 3);
 
       // Unread
-      final unreadState = state.copyWith(selectedCategory: NotificationCategory.unread);
+      final unreadState = state.copyWith(
+        selectedCategory: NotificationCategory.unread,
+      );
       expect(unreadState.filteredNotifications.length, 2);
 
       // Academic (course + class)
-      final academicState = state.copyWith(selectedCategory: NotificationCategory.academic);
+      final academicState = state.copyWith(
+        selectedCategory: NotificationCategory.academic,
+      );
       expect(academicState.filteredNotifications.length, 1);
       expect(academicState.filteredNotifications.first.id, 'notif-1');
 
       // Payments
-      final paymentsState = state.copyWith(selectedCategory: NotificationCategory.payments);
+      final paymentsState = state.copyWith(
+        selectedCategory: NotificationCategory.payments,
+      );
       expect(paymentsState.filteredNotifications.length, 1);
       expect(paymentsState.filteredNotifications.first.id, 'notif-2');
 
       // System / Institutional
-      final systemState = state.copyWith(selectedCategory: NotificationCategory.system);
+      final systemState = state.copyWith(
+        selectedCategory: NotificationCategory.system,
+      );
       expect(systemState.filteredNotifications.length, 1);
       expect(systemState.filteredNotifications.first.id, 'notif-3');
     });
   });
 
   group('Notification Widgets Tests', () {
-    testWidgets('NotificationCard renders details, badges, and read status', (tester) async {
+    testWidgets('NotificationCard renders details, badges, and read status', (
+      tester,
+    ) async {
       bool markedRead = false;
 
       await tester.pumpWidget(
@@ -196,7 +208,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Urgent: Trauma Protocol Workshop'), findsOneWidget);
-      expect(find.textContaining('Your practical live session has been scheduled'), findsOneWidget);
+      expect(
+        find.textContaining('Your practical live session has been scheduled'),
+        findsOneWidget,
+      );
       expect(find.text('Class Schedule'), findsOneWidget);
       expect(find.text('URGENT'), findsOneWidget);
       expect(find.text('Mark Read'), findsOneWidget);
@@ -207,85 +222,105 @@ void main() {
       expect(markedRead, isTrue);
     });
 
-    testWidgets('NotificationsScreen displays unread count, list, and filter chips', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+    testWidgets(
+      'NotificationsScreen displays unread count, list, and filter chips',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      final fakeRepo = FakeNotificationsRepository()..items = sampleNotifications;
+        final fakeRepo = FakeNotificationsRepository()
+          ..items = sampleNotifications;
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            authNotifierProvider.overrideWith(
-              (ref) => AuthNotifier(ref.watch(authRepositoryProvider))
-                ..state = const AuthState.authenticated(mockStudent),
-            ),
-            notificationsRepositoryProvider.overrideWithValue(fakeRepo),
-          ],
-          child: const MaterialApp(
-            home: NotificationsScreen(),
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              authNotifierProvider.overrideWith(
+                (ref) =>
+                    AuthNotifier(ref.watch(authRepositoryProvider))
+                      ..state = const AuthState.authenticated(mockStudent),
+              ),
+              notificationsRepositoryProvider.overrideWithValue(fakeRepo),
+            ],
+            child: const MaterialApp(home: NotificationsScreen()),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Bulletins & Notifications'), findsOneWidget);
-      expect(find.textContaining('unread institutional alert'), findsOneWidget);
-      expect(find.text('Mark All Read'), findsOneWidget);
+        expect(find.text('Bulletins & Notifications'), findsOneWidget);
+        expect(
+          find.textContaining('unread institutional alert'),
+          findsOneWidget,
+        );
+        expect(find.text('Mark All Read'), findsOneWidget);
 
-      // Verify category chips
-      expect(find.text('All (3)'), findsOneWidget);
-      expect(find.text('Unread (2)'), findsOneWidget);
-      expect(find.text('Curriculum & Classes'), findsOneWidget);
-      expect(find.widgetWithText(FilterChip, 'Fee & Receipts'), findsOneWidget);
-      expect(find.text('Institutional Alerts'), findsOneWidget);
+        // Verify category chips
+        expect(find.text('All (3)'), findsOneWidget);
+        expect(find.text('Unread (2)'), findsOneWidget);
+        expect(find.text('Curriculum & Classes'), findsOneWidget);
+        expect(
+          find.widgetWithText(FilterChip, 'Fee & Receipts'),
+          findsOneWidget,
+        );
+        expect(find.text('Institutional Alerts'), findsOneWidget);
 
-      // Verify notification items rendered
-      expect(find.text('Urgent: Trauma Protocol Workshop'), findsOneWidget);
-      expect(find.text('Tuition Receipt Generated'), findsOneWidget);
-      expect(find.text('Institutional Notice: Campus Maintenance'), findsOneWidget);
+        // Verify notification items rendered
+        expect(find.text('Urgent: Trauma Protocol Workshop'), findsOneWidget);
+        expect(find.text('Tuition Receipt Generated'), findsOneWidget);
+        expect(
+          find.text('Institutional Notice: Campus Maintenance'),
+          findsOneWidget,
+        );
 
-      // Tap 'Unread (2)' filter
-      await tester.tap(find.text('Unread (2)'));
-      await tester.pumpAndSettle();
+        // Tap 'Unread (2)' filter
+        await tester.tap(find.text('Unread (2)'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Urgent: Trauma Protocol Workshop'), findsOneWidget);
-      expect(find.text('Institutional Notice: Campus Maintenance'), findsOneWidget);
-      expect(find.text('Tuition Receipt Generated'), findsNothing);
+        expect(find.text('Urgent: Trauma Protocol Workshop'), findsOneWidget);
+        expect(
+          find.text('Institutional Notice: Campus Maintenance'),
+          findsOneWidget,
+        );
+        expect(find.text('Tuition Receipt Generated'), findsNothing);
 
-      // Tap 'Mark All Read'
-      await tester.tap(find.text('Mark All Read'));
-      await tester.pumpAndSettle();
+        // Tap 'Mark All Read'
+        await tester.tap(find.text('Mark All Read'));
+        await tester.pumpAndSettle();
 
-      expect(fakeRepo.allMarkedRead, isTrue);
-    });
+        expect(fakeRepo.allMarkedRead, isTrue);
+      },
+    );
 
-    testWidgets('NotificationsScreen displays empty view when no notifications', (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(() => tester.view.resetPhysicalSize());
+    testWidgets(
+      'NotificationsScreen displays empty view when no notifications',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.0;
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      final fakeRepo = FakeNotificationsRepository()..items = [];
+        final fakeRepo = FakeNotificationsRepository()..items = [];
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            authNotifierProvider.overrideWith(
-              (ref) => AuthNotifier(ref.watch(authRepositoryProvider))
-                ..state = const AuthState.authenticated(mockStudent),
-            ),
-            notificationsRepositoryProvider.overrideWithValue(fakeRepo),
-          ],
-          child: const MaterialApp(
-            home: NotificationsScreen(),
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              authNotifierProvider.overrideWith(
+                (ref) =>
+                    AuthNotifier(ref.watch(authRepositoryProvider))
+                      ..state = const AuthState.authenticated(mockStudent),
+              ),
+              notificationsRepositoryProvider.overrideWithValue(fakeRepo),
+            ],
+            child: const MaterialApp(home: NotificationsScreen()),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('No Bulletins Found'), findsOneWidget);
-      expect(find.textContaining('There are currently no institutional bulletins'), findsOneWidget);
-    });
+        expect(find.text('No Bulletins Found'), findsOneWidget);
+        expect(
+          find.textContaining('There are currently no institutional bulletins'),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

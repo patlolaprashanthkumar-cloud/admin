@@ -105,7 +105,8 @@ class StudentAssessment {
       type: assessmentJson['type']?.toString() ?? 'mcq',
       totalMarks: (assessmentJson['total_marks'] as num?)?.toInt() ?? 100,
       passingMarks: (assessmentJson['passing_marks'] as num?)?.toInt() ?? 40,
-      durationMinutes: (assessmentJson['duration_minutes'] as num?)?.toInt() ?? 60,
+      durationMinutes:
+          (assessmentJson['duration_minutes'] as num?)?.toInt() ?? 60,
       status: assessmentJson['status']?.toString() ?? 'active',
       scheduledAt: parseDate(assessmentJson['scheduled_at']),
       createdAt: parseDate(assessmentJson['created_at']) ?? DateTime.now(),
@@ -116,9 +117,10 @@ class StudentAssessment {
       resultId: resultJson?['id']?.toString(),
       score: scoreVal,
       percentage: pctVal,
-      isPassed: resultJson?['passed'] is bool ? resultJson!['passed'] as bool : null,
+      isPassed: resultJson?['passed'] is bool
+          ? resultJson!['passed'] as bool
+          : null,
       completedAt: parseDate(resultJson?['completed_at']),
     );
   }
 }
-

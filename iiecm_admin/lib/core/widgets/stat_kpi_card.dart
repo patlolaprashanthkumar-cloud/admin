@@ -30,12 +30,13 @@ class StatKpiCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     final cardContent = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: isDark ? theme.colorScheme.surfaceContainerLow : Colors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
-          width: 1,
+          width: 0.8,
         ),
         boxShadow: [
           BoxShadow(
@@ -45,125 +46,67 @@ class StatKpiCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Stack(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Subtle top brand accent bar
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 3.5,
-            child: Container(
-              decoration: BoxDecoration(
-                color: accentColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(AppConstants.radiusLarge),
-                  topRight: Radius.circular(AppConstants.radiusLarge),
-                ),
-              ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
+            child: Icon(icon, size: 22, color: accentColor),
           ),
-          Padding(
-            padding: const EdgeInsets.all(15.0),
+          const SizedBox(width: 12),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(7.5),
-                      decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.radiusMedium,
-                        ),
-                      ),
-                      child: Icon(icon, size: 20, color: accentColor),
-                    ),
-                    if (onTap != null)
-                      Icon(
-                        Icons.arrow_outward_rounded,
-                        size: 15,
-                        color: AppColors.textMuted,
-                      ),
-                  ],
+                Text(
+                  value,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                    letterSpacing: -0.3,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      value,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                        color: isDark ? Colors.white : AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      label,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 if (trendLabel != null) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                  const SizedBox(height: 2),
+                  Text(
+                    trendLabel!,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: isTrendPositive ? AppColors.success : AppColors.warning,
                     ),
-                    decoration: BoxDecoration(
-                      color: isTrendPositive
-                          ? AppColors.forestSoft
-                          : AppColors.terracottaSoft,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isTrendPositive
-                              ? Icons.trending_up_rounded
-                              : Icons.info_outline_rounded,
-                          size: 12,
-                          color: isTrendPositive
-                              ? AppColors.primaryForest
-                              : AppColors.accentTerracotta,
-                        ),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            trendLabel!,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: isTrendPositive
-                                  ? AppColors.primaryForest
-                                  : AppColors.accentTerracotta,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 10,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ],
             ),
           ),
+          if (onTap != null)
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 16,
+              color: AppColors.textMuted.withValues(alpha: 0.6),
+            ),
         ],
       ),
     );

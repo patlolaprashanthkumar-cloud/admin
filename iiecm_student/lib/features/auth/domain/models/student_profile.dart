@@ -73,20 +73,43 @@ class StudentProfile {
     required Map<String, dynamic> studentMap,
     String? emailFallback,
   }) {
-    final userId = profileMap['id']?.toString() ?? studentMap['profile_id']?.toString() ?? '';
-    final email = (profileMap['email']?.toString() ?? studentMap['email']?.toString() ?? emailFallback ?? '').trim();
-    final fullName = (studentMap['full_name']?.toString() ?? profileMap['full_name']?.toString() ?? 'Student').trim();
-    final studentId = (studentMap['student_id']?.toString() ?? 'STU-$userId').trim();
+    final userId =
+        profileMap['id']?.toString() ??
+        studentMap['profile_id']?.toString() ??
+        '';
+    final email =
+        (profileMap['email']?.toString() ??
+                studentMap['email']?.toString() ??
+                emailFallback ??
+                '')
+            .trim();
+    final fullName =
+        (studentMap['full_name']?.toString() ??
+                profileMap['full_name']?.toString() ??
+                'Student')
+            .trim();
+    final studentId = (studentMap['student_id']?.toString() ?? 'STU-$userId')
+        .trim();
     final studentRecordId = studentMap['id']?.toString() ?? '';
-    final role = (profileMap['role']?.toString() ?? 'student').toLowerCase().trim();
-    final phone = (studentMap['phone']?.toString() ?? profileMap['phone']?.toString())?.trim();
+    final role = (profileMap['role']?.toString() ?? 'student')
+        .toLowerCase()
+        .trim();
+    final phone =
+        (studentMap['phone']?.toString() ?? profileMap['phone']?.toString())
+            ?.trim();
     final avatarUrl = profileMap['avatar_url']?.toString().trim();
-    final accountStatus = (studentMap['account_status']?.toString() ?? 'active').toLowerCase().trim();
+    final accountStatus = (studentMap['account_status']?.toString() ?? 'active')
+        .toLowerCase()
+        .trim();
     final educationLevel = studentMap['education_level']?.toString().trim();
     final qualification = studentMap['qualification']?.toString().trim();
-    final preferredCategory = studentMap['preferred_category']?.toString().trim();
+    final preferredCategory = studentMap['preferred_category']
+        ?.toString()
+        .trim();
     final subscriptionPlan = studentMap['subscription_plan']?.toString().trim();
-    final subscriptionStatus = studentMap['subscription_status']?.toString().trim();
+    final subscriptionStatus = studentMap['subscription_status']
+        ?.toString()
+        .trim();
 
     DateTime? parseDateTime(dynamic value) {
       if (value == null) return null;
@@ -95,7 +118,9 @@ class StudentProfile {
     }
 
     final lastLoginAt = parseDateTime(profileMap['last_login_at']);
-    final createdAt = parseDateTime(studentMap['created_at'] ?? profileMap['created_at']);
+    final createdAt = parseDateTime(
+      studentMap['created_at'] ?? profileMap['created_at'],
+    );
 
     return StudentProfile(
       userId: userId,
@@ -127,4 +152,3 @@ class StudentProfile {
   /// Whether the student account is currently active
   bool get isActive => accountStatus == 'active';
 }
-

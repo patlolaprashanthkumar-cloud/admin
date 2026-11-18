@@ -1,49 +1,58 @@
 import 'package:flutter/material.dart';
 
-/// Institutional Brand Colors for IIECM Student Application
+/// Institutional Brand Colors for IIECM LEARNING HUB Student Application
 class AppColors {
   AppColors._();
 
-  // Primary Institutional Palette
-  static const Color primaryForest = Color(0xFF245B43);
-  static const Color forestDark = Color(0xFF1A4331);
-  static const Color forestLight = Color(0xFF337357);
-  static const Color forestSoft = Color(0xFFE8F1EC);
+  // Core Brand Tokens (IIECM LEARNING HUB)
+  static const Color primaryNavy = Color(0xFF063B56);
+  static const Color deepNavy = Color(0xFF082F49);
+  static const Color secondaryBlue = Color(0xFF155B78);
+  static const Color accentOrange = Color(0xFFFF9B38);
+  static const Color accentOrangeLight = Color(0xFFFFB266);
+  static const Color accentOrangeSoft = Color(0xFFFFF4E8);
 
   // Background & Surface Warm Neutrals
-  static const Color warmCream = Color(0xFFF5F0E5);
-  static const Color warmCreamLight = Color(0xFFFAF7F0);
+  static const Color warmOffWhite = Color(0xFFFAF8F4);
+  static const Color backgroundWarmOffWhite = Color(0xFFFAF8F4);
   static const Color white = Color(0xFFFFFFFF);
 
-  // Accent & Call-to-Action Palette
-  static const Color terracotta = Color(0xFFC87552);
-  static const Color terracottaSoft = Color(0xFFF8EDE8);
+  // Backward-Compatibility Aliases (Preserves all existing references)
+  static const Color primaryForest = primaryNavy;
+  static const Color forestDark = deepNavy;
+  static const Color forestLight = secondaryBlue;
+  static const Color forestSoft = Color(0xFFE6EFF5);
+
+  static const Color warmCream = backgroundWarmOffWhite;
+  static const Color warmCreamLight = Color(0xFFFAF7F0);
+
+  static const Color terracotta = accentOrange;
+  static const Color terracottaSoft = accentOrangeSoft;
 
   // Typography & Content Neutrals
-  static const Color textPrimary = Color(0xFF292D29);
-  static const Color textSecondary = Color(0xFF5F665E);
-  static const Color textMuted = Color(0xFF8E958D);
+  static const Color textPrimary = Color(0xFF102D46);
+  static const Color textSecondary = Color(0xFF637487);
+  static const Color textMuted = Color(0xFF8A9BA8);
 
   // Borders & Dividers
-  static const Color border = Color(0xFFE2DDD1);
-  static const Color borderSubtle = Color(0xFFEBE6DC);
+  static const Color border = Color(0xFFE2E8F0);
+  static const Color borderSubtle = Color(0xFFEDE8DF);
 
   // Status & Feedback Accents
-  static const Color success = Color(0xFF2E7D32);
-  static const Color successSoft = Color(0xFFE8F5E9);
-  static const Color warning = Color(0xFFED6C02);
-  static const Color warningSoft = Color(0xFFFFF4E5);
-  static const Color error = Color(0xFFD32F2F);
-  static const Color errorSoft = Color(0xFFFFEBEE);
-  static const Color info = Color(0xFF0288D1);
-  static const Color infoSoft = Color(0xFFE1F5FE);
+  static const Color success = Color(0xFF10B981);
+  static const Color successSoft = Color(0xFFECFDF5);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color warningSoft = Color(0xFFFFFBEB);
+  static const Color error = Color(0xFFEF4444);
+  static const Color errorSoft = Color(0xFFFEF2F2);
+  static const Color info = Color(0xFF155B78);
+  static const Color infoSoft = Color(0xFFE0F2FE);
 
   // Dark Theme Palette Variants
-  static const Color darkBackground = Color(0xFF141715);
-  static const Color darkSurface = Color(0xFF1D221F);
-  static const Color darkSurfaceElevated = Color(0xFF252B27);
-  static const Color darkBorder = Color(0xFF2E3631);
-  static const Color darkTextPrimary = Color(0xFFF0EFEB);
-  static const Color darkTextSecondary = Color(0xFFA6ABA5);
+  static const Color darkBackground = Color(0xFF041824);
+  static const Color darkSurface = Color(0xFF082538);
+  static const Color darkSurfaceElevated = Color(0xFF0C3149);
+  static const Color darkBorder = Color(0xFF1E3A4C);
+  static const Color darkTextPrimary = Color(0xFFF0F4F8);
+  static const Color darkTextSecondary = Color(0xFF94A3B8);
 }
-

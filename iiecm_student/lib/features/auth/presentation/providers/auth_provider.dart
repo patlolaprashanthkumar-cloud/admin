@@ -16,7 +16,9 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 /// Riverpod StateNotifier managing the student authentication lifecycle
-final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((
+  ref,
+) {
   final repo = ref.watch(authRepositoryProvider);
   return AuthNotifier(repo);
 });
@@ -112,7 +114,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return false;
     }
 
-    final emailFallback = state.pendingEmail ?? _repository.currentSession?.user.email;
+    final emailFallback =
+        state.pendingEmail ?? _repository.currentSession?.user.email;
     state = const AuthState.authenticating();
 
     try {
@@ -134,7 +137,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = AuthState.unauthenticated(errorMessage: e.message);
       return false;
     } catch (e) {
-      state = AuthState.unauthenticated(errorMessage: 'Verification failed: $e');
+      state = AuthState.unauthenticated(
+        errorMessage: 'Verification failed: $e',
+      );
       return false;
     }
   }
@@ -154,7 +159,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Sends password reset email
   Future<void> sendPasswordReset(String email) async {
     if (email.trim().isEmpty) {
-      throw const GenericAuthException('Please enter a valid registered email address.');
+      throw const GenericAuthException(
+        'Please enter a valid registered email address.',
+      );
     }
     await _repository.sendPasswordResetEmail(email.trim());
   }
@@ -165,4 +172,3 @@ class AuthNotifier extends StateNotifier<AuthState> {
     super.dispose();
   }
 }
-

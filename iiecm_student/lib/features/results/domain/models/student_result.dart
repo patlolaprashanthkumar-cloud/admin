@@ -117,8 +117,12 @@ class StudentResult {
 
   /// Formatted score display (e.g. "85.0 / 100")
   String get formattedScore {
-    final sStr = score % 1 == 0 ? score.toInt().toString() : score.toStringAsFixed(1);
-    final tStr = totalMarks % 1 == 0 ? totalMarks.toInt().toString() : totalMarks.toStringAsFixed(0);
+    final sStr = score % 1 == 0
+        ? score.toInt().toString()
+        : score.toStringAsFixed(1);
+    final tStr = totalMarks % 1 == 0
+        ? totalMarks.toInt().toString()
+        : totalMarks.toStringAsFixed(0);
     return '$sStr / $tStr';
   }
 
@@ -150,7 +154,8 @@ class StudentResult {
 
     final rawScore = (resultJson['score'] as num?)?.toDouble() ?? 0.0;
     final rawTotal = (resultJson['total_marks'] as num?)?.toDouble() ?? 100.0;
-    final rawPct = (resultJson['percentage'] as num?)?.toDouble() ??
+    final rawPct =
+        (resultJson['percentage'] as num?)?.toDouble() ??
         (rawTotal > 0 ? ((rawScore / rawTotal) * 100).clamp(0.0, 100.0) : 0.0);
     final isPassed = resultJson['passed'] is bool
         ? resultJson['passed'] as bool
@@ -169,10 +174,12 @@ class StudentResult {
     int? answeredCount;
 
     if (answers is Map<String, dynamic>) {
-      feedbackText = answers['feedback']?.toString() ??
+      feedbackText =
+          answers['feedback']?.toString() ??
           answers['instructor_feedback']?.toString() ??
           answers['review']?.toString();
-      submissionNotesText = answers['submission_text']?.toString() ??
+      submissionNotesText =
+          answers['submission_text']?.toString() ??
           answers['notes']?.toString();
       if (resultType.isAssessment) {
         answeredCount = answers.length;
@@ -188,7 +195,8 @@ class StudentResult {
     if (resultType.isAssessment) {
       evaluated = true;
     } else {
-      evaluated = (feedbackText != null && feedbackText.isNotEmpty) ||
+      evaluated =
+          (feedbackText != null && feedbackText.isNotEmpty) ||
           rawScore > 0 ||
           rawPct > 0 ||
           isPassed;
@@ -199,7 +207,8 @@ class StudentResult {
     return StudentResult(
       id: resultJson['id']?.toString() ?? '',
       assessmentId: resultJson['assessment_id']?.toString() ?? '',
-      title: assessmentJson?['title']?.toString() ??
+      title:
+          assessmentJson?['title']?.toString() ??
           resultJson['assessment_title']?.toString() ??
           'Assessment Result',
       type: resultType,
@@ -209,7 +218,9 @@ class StudentResult {
       totalMarks: rawTotal,
       percentage: rawPct,
       passed: isPassed,
-      completedAt: parseDate(resultJson['completed_at'] ?? resultJson['created_at']),
+      completedAt: parseDate(
+        resultJson['completed_at'] ?? resultJson['created_at'],
+      ),
       passingMarks: passingMarksVal,
       feedback: feedbackText,
       submissionNotes: submissionNotesText,
@@ -223,4 +234,3 @@ class StudentResult {
     return StudentResult.fromData(resultJson: json);
   }
 }
-

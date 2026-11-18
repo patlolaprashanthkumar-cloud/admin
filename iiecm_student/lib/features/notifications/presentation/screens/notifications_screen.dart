@@ -34,7 +34,9 @@ class NotificationsScreen extends ConsumerWidget {
                   : 'All bulletins caught up',
               style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 11,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ],
@@ -46,7 +48,10 @@ class NotificationsScreen extends ConsumerWidget {
               label: const Text('Mark All Read'),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primaryForest,
-                textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
               ),
               onPressed: () => notifier.markAllAsRead(),
             ),
@@ -70,28 +75,30 @@ class NotificationsScreen extends ConsumerWidget {
                 },
                 child: state.isLoading
                     ? const Center(
-                        child: CircularProgressIndicator(color: AppColors.primaryForest),
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryForest,
+                        ),
                       )
                     : state.hasError
-                        ? _buildErrorView(context, ref, state.errorMessage)
-                        : filteredList.isEmpty
-                            ? _buildEmptyView(context, state)
-                            : ListView.separated(
-                                padding: const EdgeInsets.all(AppConstants.spacingMd),
-                                itemCount: filteredList.length,
-                                separatorBuilder: (_, _) =>
-                                    const SizedBox(height: AppConstants.spacingSm),
-                                itemBuilder: (context, index) {
-                                  final item = filteredList[index];
-                                  final isRead = state.isNotificationRead(item);
-                                  return NotificationCard(
-                                    key: Key('notification_${item.id}'),
-                                    notification: item,
-                                    isRead: isRead,
-                                    onMarkAsRead: () => notifier.markAsRead(item),
-                                  );
-                                },
-                              ),
+                    ? _buildErrorView(context, ref, state.errorMessage)
+                    : filteredList.isEmpty
+                    ? _buildEmptyView(context, state)
+                    : ListView.separated(
+                        padding: const EdgeInsets.all(AppConstants.spacingMd),
+                        itemCount: filteredList.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: AppConstants.spacingSm),
+                        itemBuilder: (context, index) {
+                          final item = filteredList[index];
+                          final isRead = state.isNotificationRead(item);
+                          return NotificationCard(
+                            key: Key('notification_${item.id}'),
+                            notification: item,
+                            isRead: isRead,
+                            onMarkAsRead: () => notifier.markAsRead(item),
+                          );
+                        },
+                      ),
               ),
             ),
           ],
@@ -124,25 +131,29 @@ class NotificationsScreen extends ConsumerWidget {
           _buildFilterChip(
             label: 'Unread (${state.unreadCount})',
             isSelected: state.selectedCategory == NotificationCategory.unread,
-            onSelected: () => notifier.selectCategory(NotificationCategory.unread),
+            onSelected: () =>
+                notifier.selectCategory(NotificationCategory.unread),
           ),
           const SizedBox(width: AppConstants.spacingSm),
           _buildFilterChip(
             label: 'Curriculum & Classes',
             isSelected: state.selectedCategory == NotificationCategory.academic,
-            onSelected: () => notifier.selectCategory(NotificationCategory.academic),
+            onSelected: () =>
+                notifier.selectCategory(NotificationCategory.academic),
           ),
           const SizedBox(width: AppConstants.spacingSm),
           _buildFilterChip(
             label: 'Fee & Receipts',
             isSelected: state.selectedCategory == NotificationCategory.payments,
-            onSelected: () => notifier.selectCategory(NotificationCategory.payments),
+            onSelected: () =>
+                notifier.selectCategory(NotificationCategory.payments),
           ),
           const SizedBox(width: AppConstants.spacingSm),
           _buildFilterChip(
             label: 'Institutional Alerts',
             isSelected: state.selectedCategory == NotificationCategory.system,
-            onSelected: () => notifier.selectCategory(NotificationCategory.system),
+            onSelected: () =>
+                notifier.selectCategory(NotificationCategory.system),
           ),
         ],
       ),
@@ -226,8 +237,11 @@ class NotificationsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final isUnreadCategory = state.selectedCategory == NotificationCategory.unread;
-    final title = isUnreadCategory ? 'All Bulletins Read' : 'No Bulletins Found';
+    final isUnreadCategory =
+        state.selectedCategory == NotificationCategory.unread;
+    final title = isUnreadCategory
+        ? 'All Bulletins Read'
+        : 'No Bulletins Found';
     final subtitle = isUnreadCategory
         ? 'You have reviewed all official notifications and reminders.'
         : 'There are currently no institutional bulletins or announcements matching your filter.';
@@ -241,7 +255,9 @@ class NotificationsScreen extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceElevated : AppColors.forestSoft,
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.forestSoft,
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -266,7 +282,9 @@ class NotificationsScreen extends ConsumerWidget {
           subtitle,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
           ),
         ),
       ],
