@@ -9,6 +9,10 @@ import '../../../../shared/widgets/app_card.dart';
 import '../../domain/models/student_result.dart';
 import '../providers/results_provider.dart';
 
+/// Modern Academic individual examination result detail and transcript screen
+///
+/// Features institutional credential styling, responsive score presentation,
+/// evaluation metric breakdown, conditional feedback panels, and academic integrity safeguards.
 class ResultDetailScreen extends ConsumerWidget {
   final String resultId;
 
@@ -30,16 +34,30 @@ class ResultDetailScreen extends ConsumerWidget {
     final StudentResult? result = cachedResult ?? asyncResult.valueOrNull;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Examination Transcript')),
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.backgroundWarmOffWhite,
+      appBar: AppBar(
+        backgroundColor: isDark
+            ? AppColors.darkSurface
+            : AppColors.backgroundWarmOffWhite,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: const Text('Examination Transcript'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            tooltip: 'Refresh Transcript',
+            icon: const Icon(Icons.refresh_rounded),
+            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+            onPressed: () => ref.refresh(studentResultDetailProvider(resultId)),
+          ),
+          const SizedBox(width: AppConstants.spacingSm),
+        ],
+      ),
       body: SafeArea(
         child: asyncResult.isLoading && result == null
-            ? const Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.primaryForest,
-                  ),
-                ),
-              )
+            ? _buildLoadingView(isDark)
             : asyncResult.hasError && result == null
             ? _buildErrorView(context, ref, asyncResult.error.toString())
             : result == null
@@ -56,13 +74,43 @@ class ResultDetailScreen extends ConsumerWidget {
     ThemeData theme,
   ) {
     final isPassed = result.passed;
+    final isEvaluated = result.isEvaluated;
     final dateFormatted = DateFormat('dd MMMM yyyy, hh:mm a')
         .format(result.completedAt);
 
-    final statusColor = isPassed ? AppColors.success : AppColors.error;
-    final statusBgColor = isPassed
-        ? AppColors.successSoft
-        : AppColors.errorSoft;
+    final Color statusColor;
+    final Color statusBgColor;
+    final Color statusBorderColor;
+    final IconData statusIcon;
+
+    if (!isEvaluated) {
+      statusColor = AppColors.warning;
+      statusBgColor = isDark
+          ? AppColors.darkSurfaceElevated
+          : AppColors.warningSoft;
+      statusBorderColor = AppColors.warning.withValues(
+        alpha: isDark ? 0.35 : 0.25,
+      );
+      statusIcon = Icons.hourglass_top_rounded;
+    } else if (isPassed) {
+      statusColor = AppColors.success;
+      statusBgColor = isDark
+          ? AppColors.darkSurfaceElevated
+          : AppColors.successSoft;
+      statusBorderColor = AppColors.success.withValues(
+        alpha: isDark ? 0.35 : 0.25,
+      );
+      statusIcon = Icons.check_circle_rounded;
+    } else {
+      statusColor = AppColors.error;
+      statusBgColor = isDark
+          ? AppColors.darkSurfaceElevated
+          : AppColors.errorSoft;
+      statusBorderColor = AppColors.error.withValues(
+        alpha: isDark ? 0.35 : 0.25,
+      );
+      statusIcon = Icons.cancel_rounded;
+    }
 
     return ListView(
       padding: const EdgeInsets.all(AppConstants.spacingMd),
@@ -72,34 +120,55 @@ class ResultDetailScreen extends ConsumerWidget {
           backgroundColor: isDark
               ? AppColors.darkSurfaceElevated
               : AppColors.white,
+          borderRadius: AppConstants.radiusLg,
+          padding: const EdgeInsets.all(AppConstants.spacingLg),
           child: Column(
             children: [
               // Type and Status Header
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkSurface
-                          : AppColors.forestSoft,
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.radiusSm,
-                      ),
-                    ),
-                    child: Text(
-                      result.type.displayName.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primaryForest,
-                      ),
+                  Expanded(
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? AppColors.darkBackground
+                                : AppColors.forestSoft,
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.radiusSm,
+                            ),
+                            border: Border.all(
+                              color: AppColors.primaryNavy.withValues(
+                                alpha: isDark ? 0.25 : 0.12,
+                              ),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Text(
+                            result.type.displayName.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
+                              color: isDark
+                                  ? AppColors.accentOrangeLight
+                                  : AppColors.primaryNavy,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
@@ -110,23 +179,19 @@ class ResultDetailScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(
                         AppConstants.radiusSm,
                       ),
+                      border: Border.all(color: statusBorderColor, width: 0.8),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          isPassed
-                              ? Icons.check_circle_rounded
-                              : Icons.cancel_rounded,
-                          size: 14,
-                          color: statusColor,
-                        ),
-                        const SizedBox(width: 4),
+                        Icon(statusIcon, size: 13, color: statusColor),
+                        const SizedBox(width: 4.5),
                         Text(
                           result.displayStatus,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 10.5,
                             fontWeight: FontWeight.w800,
+                            letterSpacing: 0.3,
                             color: statusColor,
                           ),
                         ),
@@ -137,19 +202,31 @@ class ResultDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppConstants.spacingLg),
 
-              // Large Percentage Indicator
+              // Academic Seal / Grade Indicator
               Container(
                 width: 96,
                 height: 96,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isDark ? AppColors.darkSurface : AppColors.forestSoft,
+                  color: isDark
+                      ? AppColors.darkSurface
+                      : (isPassed
+                            ? AppColors.successSoft
+                            : AppColors.terracottaSoft),
                   border: Border.all(
-                    color: isPassed
-                        ? AppColors.primaryForest
-                        : AppColors.terracotta,
+                    color: (isPassed ? AppColors.success : AppColors.terracotta)
+                        .withValues(alpha: isDark ? 0.6 : 0.75),
                     width: 3,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color:
+                          (isPassed ? AppColors.success : AppColors.terracotta)
+                              .withValues(alpha: isDark ? 0.2 : 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Column(
@@ -161,16 +238,24 @@ class ResultDetailScreen extends ConsumerWidget {
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
                           color: isPassed
-                              ? AppColors.primaryForest
-                              : AppColors.terracotta,
+                              ? (isDark
+                                    ? const Color(0xFFA5D6A7)
+                                    : AppColors.success)
+                              : (isDark
+                                    ? AppColors.accentOrangeLight
+                                    : AppColors.terracotta),
                         ),
                       ),
-                      const Text(
+                      const SizedBox(height: 1),
+                      Text(
                         'GRADE',
                         style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -179,24 +264,48 @@ class ResultDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppConstants.spacingMd),
 
-              // Title and Course
+              // Examination Title
               Text(
                 result.title,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   fontSize: 17,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
+                  height: 1.25,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                result.courseTitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
+              const SizedBox(height: 6),
+
+              // Course Taxonomy
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.school_outlined,
+                    size: 14,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      result.courseTitle,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -205,43 +314,71 @@ class ResultDetailScreen extends ConsumerWidget {
 
         // 2. Score Breakdown Card
         AppCard(
+          borderRadius: AppConstants.radiusLg,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Evaluation Metrics',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.darkBackground
+                          : AppColors.forestSoft,
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.radiusSm,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.analytics_outlined,
+                      size: 16,
+                      color: AppColors.primaryNavy,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Evaluation Metrics',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14.5,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppConstants.spacingMd),
               _buildMetricRow(
                 'Marks Obtained',
                 result.score.toStringAsFixed(1),
                 statusColor,
+                isDark,
               ),
-              _buildDivider(),
+              _buildDivider(isDark),
               _buildMetricRow(
                 'Total Possible Marks',
                 result.totalMarks.toStringAsFixed(0),
                 null,
+                isDark,
               ),
               if (result.passingMarks != null) ...[
-                _buildDivider(),
+                _buildDivider(isDark),
                 _buildMetricRow(
                   'Passing Threshold',
                   '${result.passingMarks} Marks',
                   null,
+                  isDark,
                 ),
               ],
-              _buildDivider(),
+              _buildDivider(isDark),
               _buildMetricRow(
                 'Overall Percentage',
                 result.formattedPercentage,
                 null,
+                isDark,
               ),
-              _buildDivider(),
-              _buildMetricRow('Date Recorded', dateFormatted, null),
+              _buildDivider(isDark),
+              _buildMetricRow('Date Recorded', dateFormatted, null, isDark),
             ],
           ),
         ),
@@ -250,35 +387,57 @@ class ResultDetailScreen extends ConsumerWidget {
         // 3. Faculty Feedback Section (if present)
         if (result.feedback != null && result.feedback!.isNotEmpty) ...[
           AppCard(
+            borderRadius: AppConstants.radiusLg,
             backgroundColor: isDark
                 ? AppColors.darkSurfaceElevated
-                : const Color(0xFFF0F7F4),
-            borderColor: AppColors.primaryForest,
+                : AppColors.forestSoft.withValues(alpha: 0.35),
+            borderColor: AppColors.primaryNavy.withValues(
+              alpha: isDark ? 0.3 : 0.15,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(
-                      Icons.feedback_outlined,
-                      size: 18,
-                      color: AppColors.primaryForest,
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkBackground
+                            : AppColors.forestSoft,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.feedback_outlined,
+                        size: 16,
+                        color: AppColors.primaryNavy,
+                      ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
                       'Faculty Mentor Feedback',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
-                        color: AppColors.primaryForest,
+                        color: isDark
+                            ? AppColors.accentOrangeLight
+                            : AppColors.primaryNavy,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppConstants.spacingSm),
+                const SizedBox(height: AppConstants.spacingSm + 2),
                 Text(
                   result.feedback!,
-                  style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    height: 1.45,
+                    fontSize: 13,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                  ),
                 ),
               ],
             ),
@@ -290,32 +449,50 @@ class ResultDetailScreen extends ConsumerWidget {
         if (result.submissionNotes != null &&
             result.submissionNotes!.isNotEmpty) ...[
           AppCard(
+            borderRadius: AppConstants.radiusLg,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(
-                      Icons.notes_rounded,
-                      size: 18,
-                      color: AppColors.textSecondary,
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.forestSoft,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.notes_rounded,
+                        size: 16,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
                       'Student Submission Remarks',
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                        fontSize: 13.5,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppConstants.spacingSm),
+                const SizedBox(height: AppConstants.spacingSm + 2),
                 Text(
                   result.submissionNotes!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    height: 1.4,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -329,20 +506,29 @@ class ResultDetailScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(AppConstants.spacingMd),
           decoration: BoxDecoration(
             color: isDark ? AppColors.darkSurface : AppColors.warmCreamLight,
-            borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+            borderRadius: BorderRadius.circular(AppConstants.radiusLg),
             border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.border,
+              color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
             ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.verified_user_outlined,
-                size: 20,
-                color: AppColors.primaryForest,
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.forestSoft,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.verified_user_outlined,
+                  size: 18,
+                  color: AppColors.primaryNavy,
+                ),
               ),
-              const SizedBox(width: AppConstants.spacingSm),
+              const SizedBox(width: AppConstants.spacingSm + 2),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,18 +537,20 @@ class ResultDetailScreen extends ConsumerWidget {
                       'Official Examination Record',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
-                        fontSize: 12,
-                        color: AppColors.primaryForest,
+                        fontSize: 12.5,
+                        color: AppColors.primaryNavy,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
                       result.type.isAssessment
                           ? 'This digital transcript confirms the completion of ${result.answeredQuestionsCount ?? "all"} questions in accordance with IIECM examination protocols. Secure answer keys are safeguarded by the Examination Registry.'
                           : 'This transcript confirms the evaluation of your submitted clinical assignment by the faculty examination board.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.textSecondary,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
                         height: 1.35,
                       ),
                     ),
@@ -376,26 +564,45 @@ class ResultDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricRow(String label, String value, Color? valueColor) {
+  Widget _buildMetricRow(
+    String label,
+    String value,
+    Color? valueColor,
+    bool isDark,
+  ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
+          Expanded(
+            flex: 3,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: valueColor,
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 4,
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color:
+                    valueColor ??
+                    (isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary),
+              ),
             ),
           ),
         ],
@@ -403,8 +610,36 @@ class ResultDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDivider() {
-    return const Divider(height: 1);
+  Widget _buildDivider(bool isDark) {
+    return Divider(
+      height: 1,
+      color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+    );
+  }
+
+  Widget _buildLoadingView(bool isDark) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(
+            strokeWidth: 2.2,
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryNavy),
+          ),
+          const SizedBox(height: AppConstants.spacingMd),
+          Text(
+            'Retrieving transcript...',
+            style: TextStyle(
+              fontSize: 12.5,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildErrorView(BuildContext context, WidgetRef ref, String error) {
@@ -414,31 +649,39 @@ class ResultDetailScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 44,
-              color: AppColors.error,
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: const BoxDecoration(
+                color: AppColors.errorSoft,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                size: 36,
+                color: AppColors.error,
+              ),
             ),
-            const SizedBox(height: AppConstants.spacingSm),
+            const SizedBox(height: AppConstants.spacingMd),
             const Text(
               'Error Loading Result',
               style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               error,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 12.5,
                 color: AppColors.textSecondary,
+                height: 1.35,
               ),
             ),
-            const SizedBox(height: AppConstants.spacingMd),
+            const SizedBox(height: AppConstants.spacingLg),
             AppButton(
               label: 'Retry',
               icon: Icons.refresh_rounded,
               isFullWidth: false,
-              height: 38,
+              height: 40,
               onPressed: () =>
                   ref.refresh(studentResultDetailProvider(resultId)),
             ),
@@ -455,28 +698,39 @@ class ResultDetailScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.search_off_rounded,
-              size: 44,
-              color: AppColors.textSecondary,
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: const BoxDecoration(
+                color: AppColors.terracottaSoft,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.search_off_rounded,
+                size: 36,
+                color: AppColors.terracotta,
+              ),
             ),
-            const SizedBox(height: AppConstants.spacingSm),
+            const SizedBox(height: AppConstants.spacingMd),
             const Text(
               'Result Record Not Found',
               style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             const Text(
               'The requested examination record does not exist or you do not have permission to access it.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(
+                fontSize: 12.5,
+                color: AppColors.textSecondary,
+                height: 1.35,
+              ),
             ),
-            const SizedBox(height: AppConstants.spacingMd),
+            const SizedBox(height: AppConstants.spacingLg),
             AppButton(
               label: 'Back to Results',
               icon: Icons.arrow_back_rounded,
               isFullWidth: false,
-              height: 38,
+              height: 40,
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],

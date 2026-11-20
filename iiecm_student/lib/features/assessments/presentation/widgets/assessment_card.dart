@@ -7,7 +7,11 @@ import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_card.dart';
 import '../../domain/models/student_assessment.dart';
 
-/// Clean institutional card representing a clinical examination or quiz
+/// Modern Academic card representing a clinical examination or MCQ quiz
+/// in the Student Examinations & Checkpoints directory.
+///
+/// Features institutional branding, course taxonomy badges, responsive metadata,
+/// completed evaluation banners, and responsive non-overflowing action controls.
 class AssessmentCard extends StatelessWidget {
   final StudentAssessment assessment;
   final VoidCallback onTap;
@@ -28,15 +32,18 @@ class AssessmentCard extends StatelessWidget {
         : 'Open Availability';
 
     final statusColor = _getStatusColor(assessment);
+    final statusBgColor = _getStatusBackgroundColor(assessment, isDark);
+    final statusBorderColor = _getStatusBorderColor(assessment, isDark);
 
     return AppCard(
       onTap: onTap,
       padding: const EdgeInsets.all(AppConstants.spacingMd),
       margin: const EdgeInsets.only(bottom: AppConstants.spacingMd),
+      borderRadius: AppConstants.radiusLg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row: Course Tag & Status Badge
+          // Header Row: Course Badge, Assessment Type, and Academic Status Badge
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -44,11 +51,13 @@ class AssessmentCard extends StatelessWidget {
                 child: Wrap(
                   spacing: 6,
                   runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
+                    // Institutional Course Badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
-                        vertical: 3,
+                        vertical: 3.5,
                       ),
                       decoration: BoxDecoration(
                         color: isDark
@@ -57,23 +66,33 @@ class AssessmentCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(
                           AppConstants.radiusSm,
                         ),
+                        border: Border.all(
+                          color: AppColors.primaryNavy.withValues(
+                            alpha: isDark ? 0.25 : 0.12,
+                          ),
+                          width: 0.8,
+                        ),
                       ),
                       child: Text(
                         assessment.courseTitle.toUpperCase(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
-                          color: AppColors.primaryForest,
+                          color: isDark
+                              ? AppColors.accentOrangeLight
+                              : AppColors.primaryNavy,
                         ),
                       ),
                     ),
+
+                    // Assessment Type Tag
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 7,
-                        vertical: 3,
+                        vertical: 3.5,
                       ),
                       decoration: BoxDecoration(
                         color: isDark
@@ -86,6 +105,7 @@ class AssessmentCard extends StatelessWidget {
                           color: isDark
                               ? AppColors.darkBorder
                               : AppColors.border,
+                          width: 0.8,
                         ),
                       ),
                       child: Text(
@@ -93,6 +113,7 @@ class AssessmentCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
+                          letterSpacing: 0.4,
                           color: isDark
                               ? AppColors.darkTextSecondary
                               : AppColors.textSecondary,
@@ -103,22 +124,24 @@ class AssessmentCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
+
+              // Academic Status Badge
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
+                  color: statusBgColor,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
-                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                  border: Border.all(color: statusBorderColor, width: 0.8),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       _getStatusIcon(assessment),
-                      size: 11,
+                      size: 11.5,
                       color: statusColor,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 4.5),
                     Text(
                       assessment.displayStatus,
                       style: TextStyle(
@@ -133,18 +156,20 @@ class AssessmentCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingSm),
+          const SizedBox(height: AppConstants.spacingSm + 2),
 
-          // Title
+          // Examination Title
           Text(
             assessment.title,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              fontSize: 15.5,
+              color: isDark ? Colors.white : AppColors.textPrimary,
               height: 1.25,
             ),
           ),
 
+          // Examination Description
           if (assessment.description.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
@@ -152,6 +177,7 @@ class AssessmentCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 12.5,
                 color: isDark
                     ? AppColors.darkTextSecondary
                     : AppColors.textSecondary,
@@ -162,70 +188,115 @@ class AssessmentCard extends StatelessWidget {
 
           const SizedBox(height: AppConstants.spacingMd),
 
-          // Metadata Row: Schedule, Duration & Questions
+          // Metadata Row: Schedule, Duration, Questions & Marks
           Wrap(
-            spacing: 12,
+            spacing: 14,
             runSpacing: 6,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
+              // Schedule / Availability Pill
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    Icons.calendar_today_rounded,
-                    size: 13,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.textSecondary,
+                    assessment.isUpcoming
+                        ? Icons.schedule_rounded
+                        : (assessment.isAvailable
+                              ? Icons.event_available_outlined
+                              : Icons.calendar_today_rounded),
+                    size: 13.5,
+                    color: assessment.isUpcoming
+                        ? AppColors.terracotta
+                        : (isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary),
                   ),
                   const SizedBox(width: 5),
                   Text(
                     scheduleFormatted,
                     style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary,
+                      fontSize: 11.5,
+                      fontWeight: assessment.isUpcoming
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      color: assessment.isUpcoming
+                          ? AppColors.terracotta
+                          : (isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary),
                     ),
                   ),
                 ],
               ),
+
+              // Duration Pill
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
                     Icons.timer_outlined,
-                    size: 13,
+                    size: 13.5,
                     color: AppColors.terracotta,
                   ),
                   const SizedBox(width: 4),
                   Text(
                     '${assessment.durationMinutes} min',
                     style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w600,
                       color: AppColors.terracotta,
                     ),
                   ),
                 ],
               ),
+
+              // Question Count
               if (assessment.questionCount > 0)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.quiz_outlined,
-                      size: 13,
-                      color: AppColors.primaryForest,
+                      size: 13.5,
+                      color: isDark
+                          ? AppColors.accentOrangeLight
+                          : AppColors.primaryNavy,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '${assessment.questionCount} Questions',
-                      style: const TextStyle(
-                        fontSize: 11,
+                      style: TextStyle(
+                        fontSize: 11.5,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primaryForest,
+                        color: isDark
+                            ? AppColors.accentOrangeLight
+                            : AppColors.primaryNavy,
+                      ),
+                    ),
+                  ],
+                ),
+
+              // Total Marks & Passing Threshold
+              if (assessment.totalMarks > 0)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.workspace_premium_outlined,
+                      size: 13.5,
+                      color: isDark
+                          ? AppColors.accentOrangeLight
+                          : AppColors.primaryNavy,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${assessment.totalMarks} Marks (Pass: ${assessment.passingMarks})',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppColors.accentOrangeLight
+                            : AppColors.primaryNavy,
                       ),
                     ),
                   ],
@@ -233,16 +304,26 @@ class AssessmentCard extends StatelessWidget {
             ],
           ),
 
-          // If completed, show score summary banner
+          // Completed Evaluation Score Summary Banner
           if (assessment.isCompleted) ...[
-            const SizedBox(height: AppConstants.spacingSm),
+            const SizedBox(height: AppConstants.spacingSm + 2),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
                 color: assessment.isPassed == true
-                    ? AppColors.successSoft
-                    : AppColors.errorSoft,
-                borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                    ? (isDark
+                          ? AppColors.success.withValues(alpha: 0.15)
+                          : AppColors.successSoft)
+                    : (isDark
+                          ? AppColors.error.withValues(alpha: 0.15)
+                          : AppColors.errorSoft),
+                borderRadius: BorderRadius.circular(AppConstants.radiusSm + 2),
+                border: Border.all(
+                  color: assessment.isPassed == true
+                      ? AppColors.success.withValues(alpha: 0.3)
+                      : AppColors.error.withValues(alpha: 0.3),
+                  width: 0.8,
+                ),
               ),
               child: Row(
                 children: [
@@ -250,20 +331,26 @@ class AssessmentCard extends StatelessWidget {
                     assessment.isPassed == true
                         ? Icons.check_circle_rounded
                         : Icons.info_outline_rounded,
-                    size: 14,
+                    size: 14.5,
                     color: assessment.isPassed == true
                         ? AppColors.success
                         : AppColors.error,
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Score: ${assessment.score?.toStringAsFixed(1) ?? "0"} / ${assessment.totalMarks} (${assessment.percentage?.toStringAsFixed(0) ?? "0"}%)',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: assessment.isPassed == true
-                          ? AppColors.success
-                          : AppColors.error,
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Text(
+                      'Score: ${assessment.score?.toStringAsFixed(1) ?? "0"} / ${assessment.totalMarks} (${assessment.percentage?.toStringAsFixed(0) ?? "0"}%)',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: assessment.isPassed == true
+                            ? (isDark
+                                  ? const Color(0xFF6EE7B7)
+                                  : AppColors.success)
+                            : (isDark
+                                  ? const Color(0xFFFCA5A5)
+                                  : AppColors.error),
+                      ),
                     ),
                   ),
                 ],
@@ -272,30 +359,82 @@ class AssessmentCard extends StatelessWidget {
           ],
 
           const SizedBox(height: AppConstants.spacingMd),
+          Divider(
+            height: 1,
+            color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+          ),
+          const SizedBox(height: AppConstants.spacingMd - 2),
 
-          // Action Button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              AppButton(
-                label: assessment.isCompleted
-                    ? 'View Evaluation'
-                    : (assessment.isAvailable
-                          ? 'Start Examination'
-                          : 'View Schedule'),
-                icon: assessment.isCompleted
-                    ? Icons.verified_outlined
-                    : (assessment.isAvailable
-                          ? Icons.play_arrow_rounded
-                          : Icons.event_note_rounded),
-                isFullWidth: false,
-                height: 38,
-                variant: assessment.isCompleted
-                    ? AppButtonVariant.outline
-                    : AppButtonVariant.primary,
-                onPressed: onTap,
-              ),
-            ],
+          // Action Section: Status Indicator & Button (Responsive Wrap prevents RenderFlex overflow)
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              runAlignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: AppConstants.spacingSm,
+              runSpacing: AppConstants.spacingSm + 2,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7.5,
+                      height: 7.5,
+                      decoration: BoxDecoration(
+                        color: assessment.isCompleted
+                            ? (assessment.isPassed == true
+                                  ? AppColors.success
+                                  : AppColors.info)
+                            : (assessment.isUpcoming
+                                  ? AppColors.terracotta
+                                  : (assessment.isAvailable
+                                        ? AppColors.primaryNavy
+                                        : AppColors.textSecondary)),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      assessment.isCompleted
+                          ? 'Evaluation Recorded'
+                          : (assessment.isUpcoming
+                                ? 'Scheduled Checkpoint'
+                                : (assessment.isAvailable
+                                      ? 'Examination Open'
+                                      : 'Assessment Inactive')),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Action Button: Preserves exact text labels 'View Evaluation', 'Start Examination', 'View Schedule'
+                AppButton(
+                  label: assessment.isCompleted
+                      ? 'View Evaluation'
+                      : (assessment.isAvailable
+                            ? 'Start Examination'
+                            : 'View Schedule'),
+                  icon: assessment.isCompleted
+                      ? Icons.verified_outlined
+                      : (assessment.isAvailable
+                            ? Icons.play_arrow_rounded
+                            : Icons.event_note_rounded),
+                  isFullWidth: false,
+                  height: 38,
+                  variant: assessment.isCompleted
+                      ? AppButtonVariant.outline
+                      : AppButtonVariant.primary,
+                  onPressed: onTap,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -310,9 +449,37 @@ class AssessmentCard extends StatelessWidget {
       return AppColors.terracotta;
     }
     if (assessment.isAvailable) {
-      return AppColors.primaryForest;
+      return AppColors.primaryNavy;
     }
     return AppColors.textSecondary;
+  }
+
+  Color _getStatusBackgroundColor(StudentAssessment assessment, bool isDark) {
+    if (assessment.isCompleted) {
+      return assessment.isPassed == true
+          ? (isDark
+                ? AppColors.success.withValues(alpha: 0.15)
+                : AppColors.successSoft)
+          : (isDark
+                ? AppColors.info.withValues(alpha: 0.18)
+                : AppColors.infoSoft);
+    }
+    if (assessment.isUpcoming) {
+      return isDark
+          ? AppColors.accentOrange.withValues(alpha: 0.15)
+          : AppColors.accentOrangeSoft;
+    }
+    if (assessment.isAvailable) {
+      return isDark
+          ? AppColors.primaryNavy.withValues(alpha: 0.25)
+          : AppColors.forestSoft;
+    }
+    return isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream;
+  }
+
+  Color _getStatusBorderColor(StudentAssessment assessment, bool isDark) {
+    final baseColor = _getStatusColor(assessment);
+    return baseColor.withValues(alpha: isDark ? 0.35 : 0.25);
   }
 
   IconData _getStatusIcon(StudentAssessment assessment) {

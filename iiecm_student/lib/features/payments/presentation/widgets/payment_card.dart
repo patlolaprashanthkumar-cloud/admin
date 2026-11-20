@@ -6,6 +6,8 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/app_card.dart';
 import '../../domain/models/student_payment.dart';
 
+/// Modern Academic card representing an institutional fee transaction or receipt
+/// in the Student Fee Status & Receipts portal.
 class PaymentCard extends StatelessWidget {
   final StudentPayment payment;
   final VoidCallback onTap;
@@ -18,157 +20,289 @@ class PaymentCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final dateFormatted = DateFormat('dd MMM yyyy').format(payment.paymentDate);
 
-    Color statusColor;
-    Color statusBgColor;
+    final Color statusColor;
+    final Color statusBgColor;
+    final Color statusBorderColor;
+    final IconData statusIcon;
 
     if (payment.isVerified) {
       statusColor = AppColors.success;
-      statusBgColor = AppColors.successSoft;
+      statusBgColor = isDark
+          ? AppColors.darkSurfaceElevated
+          : AppColors.successSoft;
+      statusBorderColor = AppColors.success.withValues(
+        alpha: isDark ? 0.35 : 0.25,
+      );
+      statusIcon = Icons.check_circle_rounded;
     } else if (payment.isPending) {
       statusColor = AppColors.warning;
-      statusBgColor = AppColors.warningSoft;
+      statusBgColor = isDark
+          ? AppColors.darkSurfaceElevated
+          : AppColors.warningSoft;
+      statusBorderColor = AppColors.warning.withValues(
+        alpha: isDark ? 0.35 : 0.25,
+      );
+      statusIcon = Icons.hourglass_top_rounded;
     } else if (payment.isRefunded) {
       statusColor = AppColors.info;
-      statusBgColor = AppColors.infoSoft;
+      statusBgColor = isDark
+          ? AppColors.darkSurfaceElevated
+          : AppColors.infoSoft;
+      statusBorderColor = AppColors.info.withValues(
+        alpha: isDark ? 0.35 : 0.25,
+      );
+      statusIcon = Icons.replay_rounded;
     } else {
       statusColor = AppColors.error;
-      statusBgColor = AppColors.errorSoft;
+      statusBgColor = isDark
+          ? AppColors.darkSurfaceElevated
+          : AppColors.errorSoft;
+      statusBorderColor = AppColors.error.withValues(
+        alpha: isDark ? 0.35 : 0.25,
+      );
+      statusIcon = Icons.cancel_rounded;
     }
 
     return AppCard(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingMd),
+      borderRadius: AppConstants.radiusLg,
+      padding: const EdgeInsets.all(AppConstants.spacingMd),
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Receipt Number & Status Badge
+          // Header: Receipt Number Badge & Status Badge
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Flexible(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              Expanded(
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.receipt_outlined,
-                      size: 15,
-                      color: AppColors.primaryForest,
-                    ),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        payment.receiptNumber,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          fontFamily: 'monospace',
-                          color: AppColors.primaryForest,
+                    // Receipt Number Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkBackground
+                            : AppColors.forestSoft,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        border: Border.all(
+                          color: AppColors.primaryNavy.withValues(
+                            alpha: isDark ? 0.25 : 0.12,
+                          ),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.receipt_outlined,
+                            size: 13,
+                            color: isDark
+                                ? AppColors.accentOrangeLight
+                                : AppColors.primaryNavy,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            payment.receiptNumber,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w800,
+                              fontFamily: 'monospace',
+                              color: isDark
+                                  ? AppColors.accentOrangeLight
+                                  : AppColors.primaryNavy,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
+
+              // Status Badge
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3.5,
+                ),
                 decoration: BoxDecoration(
                   color: statusBgColor,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                  border: Border.all(color: statusBorderColor, width: 0.8),
                 ),
-                child: Text(
-                  payment.displayStatus,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: statusColor,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(statusIcon, size: 11.5, color: statusColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      payment.displayStatus,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.3,
+                        color: statusColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingSm),
+          const SizedBox(height: AppConstants.spacingSm + 2),
 
-          // Amount & Method Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+          // Amount & Payment Method Row (Responsive Wrap)
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 payment.formattedAmount,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
-                  fontSize: 18,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.textPrimary,
+                  fontSize: 19,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
+                  letterSpacing: -0.2,
                 ),
               ),
-              Text(
-                payment.formattedMethod,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.warmCreamLight,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderSubtle,
+                    width: 0.8,
+                  ),
+                ),
+                child: Text(
+                  payment.formattedMethod,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingXs),
+          const SizedBox(height: 6),
 
           // Purpose / Course Name
-          Text(
-            payment.purposeDescription,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-              fontSize: 12,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppConstants.spacingSm),
-          const Divider(height: 1),
-          const SizedBox(height: AppConstants.spacingSm),
-
-          // Footer: Transaction Ref & Date
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Flexible(
+              Icon(
+                Icons.school_outlined,
+                size: 13.5,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 5),
+              Expanded(
                 child: Text(
-                  'Ref: ${payment.transactionRef}',
+                  payment.purposeDescription,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                    fontSize: 10,
-                    color: AppColors.textMuted,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
+            ],
+          ),
+          const SizedBox(height: AppConstants.spacingSm),
+          Divider(
+            height: 1,
+            color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+          ),
+          const SizedBox(height: AppConstants.spacingSm + 2),
+
+          // Footer: Transaction Ref & Date (Responsive Wrap)
+          Wrap(
+            spacing: 12,
+            runSpacing: 6,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.calendar_today_outlined,
-                    size: 12,
-                    color: AppColors.textSecondary,
+                  Text(
+                    'Ref: ',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textMuted,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  const SizedBox(width: 4),
+                  Text(
+                    payment.transactionRef,
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.calendar_today_outlined,
+                    size: 12.5,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: 4.5),
                   Text(
                     dateFormatted,
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 11,
+                      fontWeight: FontWeight.w500,
                       color: isDark
                           ? AppColors.darkTextSecondary
                           : AppColors.textSecondary,
                     ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 16,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textMuted,
                   ),
                 ],
               ),

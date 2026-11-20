@@ -7,6 +7,10 @@ import '../../../../shared/widgets/app_button.dart';
 import '../../domain/models/course_lesson.dart';
 
 /// Modal dialog providing interactive preview, playback info, and access to lesson learning resources
+///
+/// Follows the IIECM Modern Academic design language with enhanced media presentation,
+/// pinch-to-zoom interactive image viewer, responsive sizing for emulator screens, and
+/// preserved URL copying and text contracts ('Copy URL', 'Close').
 class LessonViewerDialog extends StatelessWidget {
   final CourseLesson lesson;
   final String moduleTitle;
@@ -42,7 +46,7 @@ class LessonViewerDialog extends StatelessWidget {
             Text('Resource link copied to clipboard'),
           ],
         ),
-        backgroundColor: AppColors.primaryForest,
+        backgroundColor: AppColors.primaryNavy,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
@@ -56,14 +60,23 @@ class LessonViewerDialog extends StatelessWidget {
     final hasUrl =
         lesson.contentUrl != null && lesson.contentUrl!.trim().isNotEmpty;
 
+    // Responsive dialog sizing taking screen size and keyboard insets into account
+    final screenSize = MediaQuery.sizeOf(context);
+    final viewInsets = MediaQuery.viewInsetsOf(context);
+    final maxHeight = (screenSize.height - viewInsets.bottom - 48).clamp(
+      320.0,
+      720.0,
+    );
+    final maxWidth = (screenSize.width - 32).clamp(300.0, 520.0);
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.radiusLg),
       ),
       backgroundColor: isDark ? AppColors.darkSurface : AppColors.white,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520, maxHeight: 680),
+        constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppConstants.spacingLg),
           child: Column(
@@ -81,7 +94,7 @@ class LessonViewerDialog extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
-                            vertical: 3,
+                            vertical: 3.5,
                           ),
                           decoration: BoxDecoration(
                             color: isDark
@@ -90,6 +103,11 @@ class LessonViewerDialog extends StatelessWidget {
                             borderRadius: BorderRadius.circular(
                               AppConstants.radiusSm,
                             ),
+                            border: Border.all(
+                              color: AppColors.primaryNavy.withValues(
+                                alpha: 0.15,
+                              ),
+                            ),
                           ),
                           child: Text(
                             moduleTitle.toUpperCase(),
@@ -97,9 +115,9 @@ class LessonViewerDialog extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontSize: 10,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
-                              color: AppColors.primaryForest,
+                              color: AppColors.primaryNavy,
                             ),
                           ),
                         ),
@@ -108,29 +126,50 @@ class LessonViewerDialog extends StatelessWidget {
                           lesson.title,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
+                            fontSize: 16,
                             color: isDark
                                 ? AppColors.darkTextPrimary
                                 : AppColors.textPrimary,
+                            height: 1.3,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded),
-                    tooltip: 'Close',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () => Navigator.of(context).pop(),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.warmCreamLight,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.border,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.textSecondary,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppConstants.spacingSm),
+              const SizedBox(height: AppConstants.spacingSm + 2),
 
-              // Badges Row: Type & Duration
+              // Badges Row: Type, Duration & Lesson Number
               Wrap(
-                spacing: 8,
-                runSpacing: 6,
+                spacing: 6,
+                runSpacing: 4,
                 children: [
                   _buildPill(
                     icon: _getTypeIcon(lesson.type),
@@ -142,7 +181,7 @@ class LessonViewerDialog extends StatelessWidget {
                     _buildPill(
                       icon: Icons.timer_outlined,
                       label: '${lesson.durationMinutes} min',
-                      color: AppColors.textSecondary,
+                      color: AppColors.primaryNavy,
                       isDark: isDark,
                     ),
                   _buildPill(
@@ -155,7 +194,10 @@ class LessonViewerDialog extends StatelessWidget {
               ),
               const SizedBox(height: AppConstants.spacingMd),
 
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+              ),
               const SizedBox(height: AppConstants.spacingMd),
 
               // Dynamic Media / Resource Content Section
@@ -172,17 +214,24 @@ class LessonViewerDialog extends StatelessWidget {
 
               const SizedBox(height: AppConstants.spacingLg),
 
-              // Actions Row
+              // Actions Row (Preserves exact 'Copy URL' and 'Close' text contracts)
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (hasUrl)
+                  if (hasUrl) ...[
                     TextButton.icon(
                       icon: const Icon(Icons.copy_rounded, size: 16),
-                      label: const Text('Copy URL'),
+                      label: const Text(
+                        'Copy URL',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primaryNavy,
+                      ),
                       onPressed: () => _copyContentUrl(context),
                     ),
-                  const SizedBox(width: AppConstants.spacingSm),
+                    const SizedBox(width: AppConstants.spacingSm),
+                  ],
                   AppButton(
                     label: 'Close',
                     variant: AppButtonVariant.primary,
@@ -206,7 +255,7 @@ class LessonViewerDialog extends StatelessWidget {
     required bool isDark,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppConstants.radiusSm),
@@ -215,13 +264,13 @@ class LessonViewerDialog extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: color),
-          const SizedBox(width: 5),
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 4.5),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
               color: color,
             ),
           ),
@@ -234,7 +283,9 @@ class LessonViewerDialog extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingMd),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
+        color: isDark
+            ? AppColors.darkSurfaceElevated
+            : AppColors.warmCreamLight,
         borderRadius: BorderRadius.circular(AppConstants.radiusMd),
         border: Border.all(
           color: isDark ? AppColors.darkBorder : AppColors.border,
@@ -243,19 +294,30 @@ class LessonViewerDialog extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.info_outline_rounded,
-            color: AppColors.warning,
-            size: 22,
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppColors.warningSoft,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Icon(
+              Icons.info_outline_rounded,
+              color: AppColors.warning,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Clinical In-Person or Upcoming Material',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -264,6 +326,7 @@ class LessonViewerDialog extends StatelessWidget {
                     color: isDark
                         ? AppColors.darkTextSecondary
                         : AppColors.textSecondary,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -316,7 +379,7 @@ class LessonViewerDialog extends StatelessWidget {
                   ),
                   child: const Icon(
                     Icons.play_arrow_rounded,
-                    size: 40,
+                    size: 38,
                     color: Colors.white,
                   ),
                 ),
@@ -337,7 +400,8 @@ class LessonViewerDialog extends StatelessWidget {
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.4,
                       ),
                     ),
                   ),
@@ -351,20 +415,27 @@ class LessonViewerDialog extends StatelessWidget {
             decoration: BoxDecoration(
               color: isDark
                   ? AppColors.darkSurfaceElevated
-                  : AppColors.warmCream,
+                  : AppColors.forestSoft,
               borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+              border: Border.all(
+                color: AppColors.primaryNavy.withValues(alpha: 0.15),
+              ),
             ),
             child: const Column(
               children: [
                 Icon(
                   Icons.video_camera_front_rounded,
-                  size: 48,
-                  color: AppColors.terracotta,
+                  size: 44,
+                  color: AppColors.accentOrange,
                 ),
                 SizedBox(height: 8),
                 Text(
                   'Video Lecture Stream Available',
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: AppColors.primaryNavy,
+                  ),
                 ),
               ],
             ),
@@ -383,47 +454,97 @@ class LessonViewerDialog extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppConstants.radiusMd),
-          child: Image.network(
-            lesson.contentUrl!,
-            fit: BoxFit.contain,
-            loadingBuilder: (ctx, child, progress) {
-              if (progress == null) return child;
-              return Container(
-                height: 200,
-                color: isDark
-                    ? AppColors.darkSurfaceElevated
-                    : AppColors.warmCream,
-                child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              );
-            },
-            errorBuilder: (_, _, _) => Container(
-              height: 180,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.darkSurfaceElevated
-                    : AppColors.warmCream,
-                borderRadius: BorderRadius.circular(AppConstants.radiusMd),
-              ),
-              child: const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.broken_image_rounded,
-                      size: 40,
-                      color: AppColors.error,
+        // InteractiveViewer with pinch/zoom & pan support
+        Container(
+          constraints: const BoxConstraints(maxHeight: 260),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkBackground : AppColors.warmCreamLight,
+            borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+            border: Border.all(
+              color: isDark ? AppColors.darkBorder : AppColors.border,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+            child: InteractiveViewer(
+              minScale: 0.8,
+              maxScale: 4.0,
+              child: Image.network(
+                lesson.contentUrl!,
+                fit: BoxFit.contain,
+                loadingBuilder: (ctx, child, progress) {
+                  if (progress == null) return child;
+                  return Container(
+                    height: 200,
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.forestSoft,
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryNavy,
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 6),
-                    Text('Unable to display image preview'),
-                  ],
+                  );
+                },
+                errorBuilder: (_, _, _) => Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.forestSoft,
+                    borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                  ),
+                  child: const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.broken_image_rounded,
+                          size: 38,
+                          color: AppColors.error,
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          'Unable to display image preview',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
+        ),
+        const SizedBox(height: 4),
+
+        // Zoom hint strip
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.zoom_in_rounded,
+              size: 12,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Pinch or drag to zoom / pan clinical image',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textMuted,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: AppConstants.spacingSm),
         _buildUrlDisplay(context, isDark, theme),
@@ -440,7 +561,9 @@ class LessonViewerDialog extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppConstants.spacingMd),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
+            color: isDark
+                ? AppColors.darkSurfaceElevated
+                : AppColors.warmCreamLight,
             borderRadius: BorderRadius.circular(AppConstants.radiusMd),
             border: Border.all(
               color: isDark ? AppColors.darkBorder : AppColors.border,
@@ -453,11 +576,14 @@ class LessonViewerDialog extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.errorSoft,
                   borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.2),
+                  ),
                 ),
                 child: const Icon(
                   Icons.picture_as_pdf_rounded,
                   color: AppColors.error,
-                  size: 32,
+                  size: 30,
                 ),
               ),
               const SizedBox(width: AppConstants.spacingMd),
@@ -469,16 +595,18 @@ class LessonViewerDialog extends StatelessWidget {
                       fileName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
                         fontSize: 13,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'Portable Document Format • Clinical Case Study',
+                      'Portable Document Format · Clinical Case Study',
                       style: TextStyle(
                         fontSize: 11,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -508,7 +636,9 @@ class LessonViewerDialog extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppConstants.spacingMd),
           decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
+            color: isDark
+                ? AppColors.darkSurfaceElevated
+                : AppColors.warmCreamLight,
             borderRadius: BorderRadius.circular(AppConstants.radiusMd),
             border: Border.all(
               color: isDark ? AppColors.darkBorder : AppColors.border,
@@ -521,11 +651,14 @@ class LessonViewerDialog extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.forestSoft,
                   borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                  border: Border.all(
+                    color: AppColors.primaryNavy.withValues(alpha: 0.15),
+                  ),
                 ),
                 child: const Icon(
                   Icons.attach_file_rounded,
-                  color: AppColors.primaryForest,
-                  size: 30,
+                  color: AppColors.primaryNavy,
+                  size: 28,
                 ),
               ),
               const SizedBox(width: AppConstants.spacingMd),
@@ -537,16 +670,18 @@ class LessonViewerDialog extends StatelessWidget {
                       fileName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
                         fontSize: 13,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$ext Attachment • Academic Reference Document',
+                      '$ext Attachment · Academic Reference Document',
                       style: const TextStyle(
                         fontSize: 11,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -577,7 +712,7 @@ class LessonViewerDialog extends StatelessWidget {
           const Icon(
             Icons.link_rounded,
             size: 16,
-            color: AppColors.primaryForest,
+            color: AppColors.primaryNavy,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -625,7 +760,7 @@ class LessonViewerDialog extends StatelessWidget {
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
       case 'video':
-        return AppColors.terracotta;
+        return AppColors.accentOrange;
       case 'pdf':
         return AppColors.error;
       case 'image':
@@ -633,15 +768,15 @@ class LessonViewerDialog extends StatelessWidget {
       case 'file':
       case 'document':
       case 'attachment':
-        return AppColors.primaryForest;
+        return AppColors.primaryNavy;
       case 'reading':
-        return AppColors.forestLight;
+        return AppColors.secondaryBlue;
       case 'quiz':
         return AppColors.warning;
       case 'assignment':
-        return const Color(0xFF673AB7);
+        return const Color(0xFF7C3AED);
       default:
-        return AppColors.primaryForest;
+        return AppColors.primaryNavy;
     }
   }
 }

@@ -67,9 +67,7 @@ class StudentShell extends StatelessWidget {
                 final isSelected = states.contains(WidgetState.selected);
                 return IconThemeData(
                   size: 22,
-                  color: isSelected
-                      ? Colors.white
-                      : AppColors.textSecondary,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
                 );
               }),
             ),

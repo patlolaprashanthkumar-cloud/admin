@@ -7,6 +7,11 @@ import '../../../../shared/widgets/app_button.dart';
 import '../../../auth/domain/models/student_profile.dart';
 import '../providers/profile_provider.dart';
 
+/// Institutional Profile Editing Dialog
+///
+/// Redesigned in accordance with the IIECM Modern Academic design language:
+/// Institutional navy headers, subtle borders, warm ivory input fields in light mode,
+/// clear validation states, registry-locked field presentation, and keyboard-safe scrolling.
 class EditProfileDialog extends ConsumerStatefulWidget {
   final StudentProfile student;
 
@@ -71,7 +76,7 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Profile information updated successfully.'),
-          backgroundColor: AppColors.primaryForest,
+          backgroundColor: AppColors.primaryNavy,
         ),
       );
     } else {
@@ -90,49 +95,105 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final profileState = ref.watch(profileNotifierProvider);
+    final mediaQuery = MediaQuery.of(context);
+    final availableHeight = mediaQuery.size.height;
 
     return Dialog(
+      backgroundColor: isDark ? AppColors.darkSurface : AppColors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.radiusLg),
+        side: BorderSide(
+          color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+        ),
       ),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 650),
+        constraints: BoxConstraints(
+          maxWidth: 520,
+          maxHeight: availableHeight * 0.88,
+        ),
         child: Padding(
           padding: const EdgeInsets.all(AppConstants.spacingMd),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Dialog Header
+              // 1. Institutional Dialog Header
               Row(
                 children: [
-                  const Icon(
-                    Icons.edit_note_rounded,
-                    color: AppColors.primaryForest,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Edit Contact & Profile',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.darkSurfaceElevated
+                          : AppColors.forestSoft,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.primaryNavy.withValues(alpha: 0.2),
                       ),
+                    ),
+                    child: const Icon(
+                      Icons.edit_note_rounded,
+                      color: AppColors.primaryNavy,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Edit Contact & Profile',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          'Institutional Scholar Records File',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 20),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 20,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                    tooltip: 'Close',
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
-              const Divider(),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+              ),
+              const SizedBox(height: 12),
 
-              // Form fields
+              // 2. Scrollable Form Fields with Keyboard Safety
               Expanded(
                 child: Form(
                   key: _formKey,
                   child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     children: [
                       // Non-editable Institutional ID Callout
                       _buildLockedField(
@@ -147,10 +208,35 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                       _buildLockedField(
                         label: 'Institutional Registered Email (Locked)',
                         value: widget.student.email,
-                        icon: Icons.email_outlined,
+                        icon: Icons.alternate_email_rounded,
                         isDark: isDark,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
+
+                      // Section Header: Personal Contact Information
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.contact_mail_outlined,
+                            size: 15,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.primaryNavy,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Personal Contact Details',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
 
                       // Full Legal Name
                       _buildTextField(
@@ -181,13 +267,38 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
+
+                      // Section Header: Academic Background
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.school_outlined,
+                            size: 15,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.primaryNavy,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Academic Profile & Background',
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
 
                       // Qualification
                       _buildTextField(
                         controller: _qualificationController,
                         label: 'Medical / Academic Qualification',
-                        icon: Icons.school_outlined,
+                        icon: Icons.workspace_premium_outlined,
                         isDark: isDark,
                         hint: 'e.g., MBBS, MD Emergency Medicine, B.Sc Nursing',
                       ),
@@ -197,7 +308,7 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                       _buildTextField(
                         controller: _educationLevelController,
                         label: 'Education Level',
-                        icon: Icons.workspace_premium_outlined,
+                        icon: Icons.school_outlined,
                         isDark: isDark,
                         hint: 'e.g., Postgraduate, Undergraduate, Fellow',
                       ),
@@ -211,16 +322,20 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                         isDark: isDark,
                         hint: 'e.g., Emergency Medicine, Critical Care',
                       ),
+                      const SizedBox(height: 6),
                     ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 12),
-              const Divider(),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
+              Divider(
+                height: 1,
+                color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+              ),
+              const SizedBox(height: 10),
 
-              // Actions
+              // 3. Institutional Dialog Actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -228,7 +343,15 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                     onPressed: profileState.isUpdating
                         ? null
                         : () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   AppButton(
@@ -255,45 +378,83 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
     required bool isDark,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurfaceElevated : AppColors.warmCream,
         borderRadius: BorderRadius.circular(AppConstants.radiusSm),
         border: Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.border,
+          color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
         ),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppColors.textSecondary),
-          const SizedBox(width: 8),
+          Icon(
+            icon,
+            size: 16,
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  value.isNotEmpty ? value : '—',
+                  style: TextStyle(
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(
-            Icons.lock_outline_rounded,
-            size: 14,
-            color: AppColors.textSecondary,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.primaryNavy.withValues(
+                alpha: isDark ? 0.25 : 0.08,
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.lock_outline_rounded,
+                  size: 11,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.primaryNavy,
+                ),
+                const SizedBox(width: 3),
+                Text(
+                  'Locked',
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.primaryNavy,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -313,13 +474,32 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
-      style: const TextStyle(fontSize: 13),
+      style: TextStyle(
+        fontSize: 13,
+        color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+      ),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(
+          fontSize: 12.5,
+          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+        ),
         hintText: hint,
-        prefixIcon: Icon(icon, size: 18),
+        hintStyle: TextStyle(
+          fontSize: 11.5,
+          color: isDark
+              ? AppColors.darkTextSecondary.withValues(alpha: 0.6)
+              : AppColors.textMuted,
+        ),
+        prefixIcon: Icon(
+          icon,
+          size: 18,
+          color: isDark ? AppColors.darkTextSecondary : AppColors.primaryNavy,
+        ),
         filled: true,
-        fillColor: isDark ? AppColors.darkSurface : AppColors.white,
+        fillColor: isDark
+            ? AppColors.darkSurfaceElevated
+            : AppColors.warmCreamLight,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 10,
@@ -327,21 +507,29 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusSm),
           borderSide: BorderSide(
-            color: isDark ? AppColors.darkBorder : AppColors.border,
+            color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusSm),
           borderSide: BorderSide(
-            color: isDark ? AppColors.darkBorder : AppColors.border,
+            color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusSm),
           borderSide: const BorderSide(
-            color: AppColors.primaryForest,
+            color: AppColors.primaryNavy,
             width: 1.5,
           ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
       ),
     );

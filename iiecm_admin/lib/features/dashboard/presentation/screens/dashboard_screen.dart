@@ -8,7 +8,6 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/responsive_layout.dart';
 import '../../../../core/widgets/stat_kpi_card.dart';
-import '../../../auth/domain/models/user_role.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../categories/presentation/providers/category_provider.dart';
 import '../../../categories/presentation/widgets/category_form_sheet.dart';
@@ -17,7 +16,6 @@ import '../widgets/monthly_trends_chart.dart';
 import '../widgets/operational_hubs_section.dart';
 import '../widgets/payment_breakdown_chart.dart';
 import '../widgets/quick_actions_bar.dart';
-import '../widgets/recent_activity_section.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});

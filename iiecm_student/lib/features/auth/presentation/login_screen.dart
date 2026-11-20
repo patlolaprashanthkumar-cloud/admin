@@ -8,6 +8,12 @@ import '../../../shared/widgets/app_card.dart';
 import 'providers/auth_provider.dart';
 import 'providers/auth_state.dart';
 
+/// Institutional Student Portal Login Screen
+///
+/// Designed in accordance with the IIECM Modern Academic design language:
+/// Concentric brand emblem, institutional Navy/Teal accents, terracotta highlights,
+/// warm off-white and dark surfaces, rounded input fields with clear validation,
+/// secure credential assistance modals, and responsive layout safety.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -53,13 +59,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(child: Text(error)),
               ],
             ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+            ),
           ),
         );
       }
@@ -94,6 +107,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(AppConstants.radiusXl),
                   ),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderSubtle,
+                  ),
                 ),
                 padding: const EdgeInsets.all(AppConstants.spacingLg),
                 child: Column(
@@ -105,7 +123,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: AppColors.border,
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.borderSubtle,
                           borderRadius: BorderRadius.circular(
                             AppConstants.radiusFull,
                           ),
@@ -118,35 +138,64 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColors.forestSoft,
+                            color: isDark
+                                ? AppColors.darkSurfaceElevated
+                                : AppColors.forestSoft,
                             borderRadius: BorderRadius.circular(
                               AppConstants.radiusMd,
+                            ),
+                            border: Border.all(
+                              color: AppColors.primaryNavy.withValues(
+                                alpha: 0.15,
+                              ),
                             ),
                           ),
                           child: const Icon(
                             Icons.lock_reset_rounded,
-                            color: AppColors.primaryForest,
+                            color: AppColors.primaryNavy,
+                            size: 22,
                           ),
                         ),
-                        const SizedBox(width: AppConstants.spacingSm),
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            'Reset Student Password',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Reset Student Password',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                'Institutional Credential Recovery',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppConstants.spacingSm),
+                    const SizedBox(height: AppConstants.spacingMd),
                     Text(
-                      'Enter your registered student email address. We will send a secure password reset link pointing to the IIECM Authentication Portal (auth.iiecm.org).',
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      'Enter your registered student email address. We will dispatch a secure password reset link pointing to the IIECM Authentication Portal (auth.iiecm.org).',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        height: 1.4,
                         color: isDark
                             ? AppColors.darkTextSecondary
                             : AppColors.textSecondary,
-                        height: 1.4,
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingMd),
@@ -155,30 +204,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppConstants.spacingSm),
                         decoration: BoxDecoration(
-                          color: AppColors.forestSoft,
+                          color: AppColors.success.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(
                             AppConstants.radiusSm,
                           ),
                           border: Border.all(
-                            color: AppColors.primaryForest.withValues(
-                              alpha: 0.3,
-                            ),
+                            color: AppColors.success.withValues(alpha: 0.35),
                           ),
                         ),
                         child: Row(
                           children: [
                             const Icon(
                               Icons.check_circle_rounded,
-                              color: AppColors.primaryForest,
-                              size: 20,
+                              color: AppColors.success,
+                              size: 18,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 resetSuccess!,
                                 style: const TextStyle(
-                                  color: AppColors.primaryForest,
-                                  fontSize: 13,
+                                  color: AppColors.success,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
@@ -192,20 +240,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppConstants.spacingSm),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFDE8E8),
+                          color: AppColors.error.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(
                             AppConstants.radiusSm,
                           ),
                           border: Border.all(
-                            color: AppColors.error.withValues(alpha: 0.3),
+                            color: AppColors.error.withValues(alpha: 0.35),
                           ),
                         ),
                         child: Row(
                           children: [
                             const Icon(
-                              Icons.error_outline,
+                              Icons.error_outline_rounded,
                               color: AppColors.error,
-                              size: 20,
+                              size: 18,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -213,7 +261,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 resetError!,
                                 style: const TextStyle(
                                   color: AppColors.error,
-                                  fontSize: 13,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
@@ -226,10 +275,57 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextFormField(
                       controller: resetEmailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Registered Student Email',
                         hintText: 'e.g. student@iiecm.org',
-                        prefixIcon: Icon(Icons.email_outlined, size: 20),
+                        prefixIcon: const Icon(
+                          Icons.email_outlined,
+                          size: 18,
+                          color: AppColors.primaryNavy,
+                        ),
+                        filled: true,
+                        fillColor: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.warmCreamLight,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusSm,
+                          ),
+                          borderSide: BorderSide(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.borderSubtle,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusSm,
+                          ),
+                          borderSide: BorderSide(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.borderSubtle,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusSm,
+                          ),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryNavy,
+                            width: 1.5,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingLg),
@@ -305,6 +401,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(AppConstants.radiusXl),
             ),
+            border: Border.all(
+              color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+            ),
           ),
           padding: const EdgeInsets.all(AppConstants.spacingLg),
           child: Column(
@@ -316,7 +415,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.border,
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderSubtle,
                     borderRadius: BorderRadius.circular(
                       AppConstants.radiusFull,
                     ),
@@ -329,23 +430,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.forestSoft,
+                      color: isDark
+                          ? AppColors.darkSurfaceElevated
+                          : AppColors.forestSoft,
                       borderRadius: BorderRadius.circular(
                         AppConstants.radiusMd,
+                      ),
+                      border: Border.all(
+                        color: AppColors.primaryNavy.withValues(alpha: 0.15),
                       ),
                     ),
                     child: const Icon(
                       Icons.help_outline_rounded,
-                      color: AppColors.primaryForest,
+                      color: AppColors.primaryNavy,
+                      size: 22,
                     ),
                   ),
-                  const SizedBox(width: AppConstants.spacingSm),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: Text(
-                      'Student Credential Support',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Student Credential Support',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: isDark
+                                ? AppColors.darkTextPrimary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          'Office of the Academic Registrar',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? AppColors.darkTextSecondary
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -356,11 +483,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 '• Use the email address registered during your student enrollment.\n'
                 '• If you recently received an invitation email, click the link to set your password at auth.iiecm.org first.\n'
                 '• If you require assistance, contact the Registrar Office at registrar@iiecm.org.',
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: TextStyle(
+                  fontSize: 12.5,
+                  height: 1.5,
                   color: isDark
                       ? AppColors.darkTextSecondary
                       : AppColors.textSecondary,
-                  height: 1.5,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingLg),
@@ -385,6 +513,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isLoading = authState.isLoading;
 
     return Scaffold(
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.backgroundWarmOffWhite,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -403,28 +534,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // Institutional Emblem / Brand Header
                     Center(
                       child: Container(
-                        width: 72,
-                        height: 72,
+                        width: 76,
+                        height: 76,
                         decoration: BoxDecoration(
                           color: isDark
-                              ? AppColors.forestDark
+                              ? AppColors.darkSurfaceElevated
                               : AppColors.forestSoft,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isDark
-                                ? AppColors.forestLight
-                                : AppColors.primaryForest.withValues(
-                                    alpha: 0.2,
-                                  ),
+                            color: AppColors.primaryNavy.withValues(
+                              alpha: isDark ? 0.4 : 0.2,
+                            ),
                             width: 2,
                           ),
                         ),
-                        child: Icon(
-                          Icons.school_rounded,
-                          size: 36,
-                          color: isDark
-                              ? AppColors.forestLight
-                              : AppColors.primaryForest,
+                        child: Center(
+                          child: Icon(
+                            Icons.school_rounded,
+                            size: 38,
+                            color: isDark
+                                ? AppColors.accentOrangeLight
+                                : AppColors.primaryNavy,
+                          ),
                         ),
                       ),
                     ),
@@ -434,30 +565,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       AppConstants.appName,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineMedium?.copyWith(
+                      style: TextStyle(
+                        fontSize: 24,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.5,
+                        color: isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingXs),
                     Text(
                       AppConstants.studentPortalTitle,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.titleSmall?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.terracotta,
                         fontWeight: FontWeight.w700,
+                        fontSize: 13,
                         letterSpacing: 0.5,
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingSm),
                     Text(
-                      'Sign in with your registered student email address to access your courses, timetable, and clinical assessments.',
+                      'Sign in with your registered student credentials to access your academic curriculum, examination checkpoints, and institutional records.',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        height: 1.45,
                         color: isDark
                             ? AppColors.darkTextSecondary
                             : AppColors.textSecondary,
-                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(height: AppConstants.spacingLg),
@@ -467,26 +604,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppConstants.spacingMd),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFFBEB),
+                          color: AppColors.warning.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(
                             AppConstants.radiusMd,
                           ),
-                          border: Border.all(color: const Color(0xFFFDE68A)),
+                          border: Border.all(
+                            color: AppColors.warning.withValues(alpha: 0.4),
+                          ),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Icon(
                               Icons.warning_amber_rounded,
-                              color: Color(0xFFD97706),
+                              color: AppColors.warning,
                               size: 20,
                             ),
                             const SizedBox(width: AppConstants.spacingSm),
                             Expanded(
                               child: Text(
                                 'Supabase is not configured. Run the app with: flutter run --dart-define-from-file=.env.json',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: const Color(0xFF92400E),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppColors.darkTextPrimary
+                                      : const Color(0xFF92400E),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -502,11 +644,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppConstants.spacingMd),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFEF2F2),
+                          color: AppColors.error.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(
                             AppConstants.radiusMd,
                           ),
-                          border: Border.all(color: const Color(0xFFFECACA)),
+                          border: Border.all(
+                            color: AppColors.error.withValues(alpha: 0.35),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,8 +666,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 Expanded(
                                   child: Text(
                                     authState.errorMessage ?? 'Network error connecting to student database.',
-                                    style: theme.textTheme.bodySmall?.copyWith(
+                                    style: const TextStyle(
                                       color: AppColors.error,
+                                      fontSize: 12.5,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -549,11 +694,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppConstants.spacingMd),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFEF2F2),
+                          color: AppColors.error.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(
                             AppConstants.radiusMd,
                           ),
-                          border: Border.all(color: const Color(0xFFFECACA)),
+                          border: Border.all(
+                            color: AppColors.error.withValues(alpha: 0.35),
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -566,8 +713,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             Expanded(
                               child: Text(
                                 authState.errorMessage!,
-                                style: theme.textTheme.bodySmall?.copyWith(
+                                style: const TextStyle(
                                   color: AppColors.error,
+                                  fontSize: 12.5,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -581,14 +729,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // Card Form Container
                     AppCard(
                       padding: const EdgeInsets.all(AppConstants.spacingLg),
+                      backgroundColor: isDark
+                          ? AppColors.darkSurface
+                          : AppColors.white,
+                      borderColor: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.borderSubtle,
+                      borderRadius: AppConstants.radiusLg,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Registered Email Field
                           Text(
                             'Registered Email',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
                               color: isDark
                                   ? AppColors.darkTextPrimary
                                   : AppColors.textPrimary,
@@ -599,9 +755,64 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
+                            ),
+                            decoration: InputDecoration(
                               hintText: 'e.g. student@iiecm.org',
-                              prefixIcon: Icon(Icons.email_outlined, size: 20),
+                              hintStyle: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary.withValues(
+                                        alpha: 0.6,
+                                      )
+                                    : AppColors.textMuted,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.email_outlined,
+                                size: 18,
+                                color: AppColors.primaryNavy,
+                              ),
+                              filled: true,
+                              fillColor: isDark
+                                  ? AppColors.darkSurfaceElevated
+                                  : AppColors.warmCreamLight,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusSm,
+                                ),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.borderSubtle,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusSm,
+                                ),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.borderSubtle,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusSm,
+                                ),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primaryNavy,
+                                  width: 1.5,
+                                ),
+                              ),
                             ),
                             validator: (val) {
                               if (val == null || val.trim().isEmpty) {
@@ -620,8 +831,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           // Password Field
                           Text(
                             'Password',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
                               color: isDark
                                   ? AppColors.darkTextPrimary
                                   : AppColors.textPrimary,
@@ -633,24 +845,82 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             obscureText: _obscurePassword,
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _handleSignIn(),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.textPrimary,
+                            ),
                             decoration: InputDecoration(
                               hintText: 'Enter your student portal password',
+                              hintStyle: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary.withValues(
+                                        alpha: 0.6,
+                                      )
+                                    : AppColors.textMuted,
+                              ),
                               prefixIcon: const Icon(
                                 Icons.lock_outline_rounded,
-                                size: 20,
+                                size: 18,
+                                color: AppColors.primaryNavy,
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _obscurePassword
                                       ? Icons.visibility_outlined
                                       : Icons.visibility_off_outlined,
-                                  size: 20,
+                                  size: 18,
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.textSecondary,
                                 ),
+                                tooltip: _obscurePassword
+                                    ? 'Show password'
+                                    : 'Hide password',
                                 onPressed: () {
                                   setState(
                                     () => _obscurePassword = !_obscurePassword,
                                   );
                                 },
+                              ),
+                              filled: true,
+                              fillColor: isDark
+                                  ? AppColors.darkSurfaceElevated
+                                  : AppColors.warmCreamLight,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusSm,
+                                ),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.borderSubtle,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusSm,
+                                ),
+                                borderSide: BorderSide(
+                                  color: isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.borderSubtle,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppConstants.radiusSm,
+                                ),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primaryNavy,
+                                  width: 1.5,
+                                ),
                               ),
                             ),
                             validator: (val) {
@@ -676,7 +946,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     width: 24,
                                     child: Checkbox(
                                       value: _rememberMe,
-                                      activeColor: AppColors.primaryForest,
+                                      activeColor: AppColors.primaryNavy,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(4),
                                       ),
@@ -690,8 +960,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   const SizedBox(width: AppConstants.spacingSm),
                                   Text(
                                     'Remember Me',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      fontWeight: FontWeight.w500,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -704,11 +978,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap,
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'Forgot Password?',
-                                  style: theme.textTheme.bodySmall?.copyWith(
+                                  style: TextStyle(
                                     color: AppColors.terracotta,
                                     fontWeight: FontWeight.w700,
+                                    fontSize: 12,
                                   ),
                                 ),
                               ),
@@ -716,7 +991,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: AppConstants.spacingLg),
 
-                          // Sign In Button
+                          // Sign In Button (Test Contract: 'Sign In to Student Portal')
                           AppButton(
                             label: 'Sign In to Student Portal',
                             icon: Icons.login_rounded,
@@ -759,9 +1034,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             child: Text(
                               'Authorized Student & Candidate Access Only',
                               textAlign: TextAlign.center,
-                              style: theme.textTheme.bodySmall?.copyWith(
+                              style: TextStyle(
                                 fontSize: 11,
-                                color: AppColors.textMuted,
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.textMuted,
                               ),
                             ),
                           ),

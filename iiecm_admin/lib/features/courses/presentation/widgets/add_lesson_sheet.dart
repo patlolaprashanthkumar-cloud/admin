@@ -8,6 +8,11 @@ import '../../../../core/utils/youtube_helper.dart';
 import '../../domain/models/course_lesson.dart';
 import '../providers/courses_provider.dart';
 
+/// Modal bottom sheet for creating and updating curriculum lessons and learning assets
+///
+/// Implements the IIECM Modern Academic design language with structured sections,
+/// real-time media previews (YouTube, PDFs, Clinical Images, File Attachments),
+/// streamlined input decoration, and full keyboard responsiveness.
 class AddLessonSheet extends ConsumerStatefulWidget {
   final String moduleId;
   final CourseLesson? existingLesson;
@@ -252,7 +257,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                 ? '${lesson.typeDisplayLabel} updated'
                 : '${lesson.typeDisplayLabel} added to module',
           ),
-          backgroundColor: AppColors.primaryForest,
+          backgroundColor: AppColors.primaryNavy,
         ),
       );
     } catch (e) {
@@ -293,22 +298,133 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
   Color _getTypeColor(String type) {
     switch (type.toLowerCase()) {
       case 'video':
-        return AppColors.primaryForest;
+        return AppColors.primaryNavy;
       case 'pdf':
         return const Color(0xFFDC2626);
       case 'image':
         return const Color(0xFF7C3AED);
       case 'file':
-        return const Color(0xFF2563EB);
+        return const Color(0xFF0284C7);
       case 'reading':
         return const Color(0xFFD97706);
       case 'quiz':
         return const Color(0xFF0D9488);
       case 'assignment':
-        return AppColors.accentTerracotta;
+        return AppColors.accentOrange;
       default:
-        return AppColors.primaryForest;
+        return AppColors.primaryNavy;
     }
+  }
+
+  InputDecoration _inputDecoration({
+    required String labelText,
+    required String hintText,
+    required IconData prefixIcon,
+    required bool isDark,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      labelText: labelText,
+      labelStyle: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+      ),
+      hintText: hintText,
+      hintStyle: TextStyle(
+        fontSize: 12.5,
+        color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+      ),
+      prefixIcon: Icon(
+        prefixIcon,
+        color: isDark ? AppColors.accentOrangeLight : AppColors.primaryNavy,
+        size: 19,
+      ),
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: isDark
+          ? AppColors.darkSurfaceContainerLow
+          : AppColors.surfaceWarmWhite,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+        ),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(
+          color: isDark ? AppColors.darkBorder : AppColors.borderNeutral,
+        ),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        borderSide: BorderSide(color: AppColors.primaryNavy, width: 1.5),
+      ),
+      errorBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        borderSide: BorderSide(color: AppColors.error, width: 1.2),
+      ),
+      focusedErrorBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        borderSide: BorderSide(color: AppColors.error, width: 1.5),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool isDark,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.darkSurfaceContainerLow
+                  : AppColors.forestSoft,
+              borderRadius: BorderRadius.circular(7),
+              border: Border.all(
+                color: AppColors.primaryNavy.withValues(alpha: 0.12),
+              ),
+            ),
+            child: Icon(icon, size: 15, color: AppColors.primaryNavy),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: isDark ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -335,7 +451,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
           maxSheetHeight > 320.0 ? maxSheetHeight : availableHeight,
         ),
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : AppColors.surface,
+          color: isDark ? AppColors.darkSurface : AppColors.cardWhite,
           borderRadius: const BorderRadius.vertical(
             top: Radius.circular(AppConstants.radiusLarge),
           ),
@@ -353,10 +469,10 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Container(
-                width: 44,
+                width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkBorder : AppColors.divider,
+                  color: isDark ? AppColors.darkBorder : AppColors.dividerColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -364,19 +480,26 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
 
             // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
                       color: typeColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: typeColor.withValues(alpha: 0.25),
+                        width: 1.2,
+                      ),
                     ),
-                    child: Icon(
-                      _getTypeIcon(_type),
-                      color: typeColor,
-                      size: 22,
+                    child: Center(
+                      child: Icon(
+                        _getTypeIcon(_type),
+                        color: typeColor,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -387,18 +510,19 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         Text(
                           isEditing
                               ? 'Edit Curriculum Item'
-                              : 'Add Curriculum Item to Module',
+                              : 'Add Curriculum Item',
                           style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
                             color: isDark
                                 ? AppColors.darkTextPrimary
                                 : AppColors.textPrimary,
                           ),
                         ),
                         Text(
-                          'Accepts videos, PDFs, images & every learning file',
+                          'Videos, clinical slides, PDFs, images & learning assets',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             color: isDark
                                 ? AppColors.darkTextSecondary
                                 : AppColors.textSecondary,
@@ -408,14 +532,18 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded),
+                    icon: const Icon(Icons.close_rounded, size: 20),
                     onPressed: () => Navigator.of(context).pop(),
+                    visualDensity: VisualDensity.compact,
                   ),
                 ],
               ),
             ),
 
-            const Divider(height: 1),
+            Divider(
+              height: 1,
+              color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+            ),
 
             // Form Content
             Expanded(
@@ -426,22 +554,19 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                   key: _formKey,
                   child: ListView(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 16,
+                      horizontal: 20,
+                      vertical: 18,
                     ),
                     children: [
-                      // Quick Type Selector Chips
-                      Text(
-                        'Content Type',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? AppColors.darkTextSecondary
-                              : AppColors.textSecondary,
-                        ),
+                      // SECTION 1: Content Format
+                      _buildSectionHeader(
+                        icon: Icons.category_outlined,
+                        title: 'Content Format',
+                        subtitle: 'Select medical media or activity type',
+                        isDark: isDark,
                       ),
-                      const SizedBox(height: 8),
+
+                      // Quick Type Selector Chips
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
@@ -488,20 +613,6 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Title
-                      TextFormField(
-                        controller: _titleController,
-                        decoration: InputDecoration(
-                          labelText: 'Item Title *',
-                          hintText: _getTitleHintForType(_type),
-                          prefixIcon: const Icon(Icons.title_rounded),
-                        ),
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Please enter title'
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
-
                       // Detailed Type Dropdown & Duration
                       Row(
                         children: [
@@ -509,9 +620,20 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                             flex: 3,
                             child: DropdownButtonFormField<String>(
                               initialValue: _type,
-                              decoration: const InputDecoration(
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark
+                                    ? Colors.white
+                                    : AppColors.textPrimary,
+                              ),
+                              dropdownColor: isDark
+                                  ? AppColors.darkSurface
+                                  : AppColors.cardWhite,
+                              decoration: _inputDecoration(
                                 labelText: 'Activity Type',
-                                prefixIcon: Icon(Icons.category_outlined),
+                                hintText: 'Select type',
+                                prefixIcon: Icons.category_outlined,
+                                isDark: isDark,
                               ),
                               items: const [
                                 DropdownMenuItem(
@@ -557,10 +679,17 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                             child: TextFormField(
                               controller: _durationController,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                color: isDark
+                                    ? Colors.white
+                                    : AppColors.textPrimary,
+                              ),
+                              decoration: _inputDecoration(
                                 labelText: 'Duration (Mins)',
-                                hintText: 'e.g. 15',
-                                prefixIcon: Icon(Icons.timer_outlined),
+                                hintText: '15',
+                                prefixIcon: Icons.timer_outlined,
+                                isDark: isDark,
                               ),
                               validator: (v) {
                                 if (v != null && v.trim().isNotEmpty) {
@@ -574,15 +703,48 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 22),
+
+                      // SECTION 2: Item Metadata
+                      _buildSectionHeader(
+                        icon: Icons.badge_outlined,
+                        title: 'Item Specifications',
+                        subtitle: 'Curriculum title and syllabus ordering',
+                        isDark: isDark,
+                      ),
+
+                      // Title
+                      TextFormField(
+                        controller: _titleController,
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
+                        ),
+                        decoration: _inputDecoration(
+                          labelText: 'Item Title *',
+                          hintText: _getTitleHintForType(_type),
+                          prefixIcon: Icons.title_rounded,
+                          isDark: isDark,
+                        ),
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? 'Please enter title'
+                            : null,
+                      ),
                       const SizedBox(height: 16),
 
                       // Display Order
                       TextFormField(
                         controller: _orderController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
+                        ),
+                        decoration: _inputDecoration(
                           labelText: 'Display Order *',
-                          prefixIcon: Icon(Icons.format_list_numbered_rounded),
+                          hintText: '1',
+                          prefixIcon: Icons.format_list_numbered_rounded,
+                          isDark: isDark,
                         ),
                         validator: (v) {
                           if (v == null || v.trim().isEmpty) {
@@ -594,19 +756,39 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 22),
+
+                      // SECTION 3: Media & Storage Resource Link
+                      _buildSectionHeader(
+                        icon: Icons.link_rounded,
+                        title: 'Media & Resource Link',
+                        subtitle:
+                            'Attached file, direct stream or reference URL',
+                        isDark: isDark,
+                      ),
 
                       // Content URL / File Link
                       TextFormField(
                         controller: _contentUrlController,
                         keyboardType: TextInputType.url,
-                        decoration: InputDecoration(
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? Colors.white : AppColors.textPrimary,
+                        ),
+                        decoration: _inputDecoration(
                           labelText: _getUrlLabelForType(_type),
                           hintText: _getUrlHintForType(_type),
-                          prefixIcon: Icon(_getTypeIcon(_type)),
+                          prefixIcon: _getTypeIcon(_type),
+                          isDark: isDark,
                           suffixIcon: IconButton(
-                            icon: const Icon(Icons.content_paste_rounded),
+                            icon: const Icon(
+                              Icons.content_paste_rounded,
+                              size: 18,
+                            ),
                             tooltip: 'Paste link from clipboard',
+                            color: isDark
+                                ? AppColors.accentOrangeLight
+                                : AppColors.primaryNavy,
                             onPressed: _pasteFromClipboard,
                           ),
                         ),
@@ -637,11 +819,13 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppColors.forestSoft,
+                            color: isDark
+                                ? AppColors.darkSurfaceContainerLow
+                                : AppColors.forestSoft,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: AppColors.primaryForest.withValues(
-                                alpha: 0.3,
+                              color: AppColors.primaryNavy.withValues(
+                                alpha: 0.25,
                               ),
                             ),
                           ),
@@ -653,7 +837,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                   const Icon(
                                     Icons.check_circle_rounded,
                                     size: 16,
-                                    color: AppColors.primaryForest,
+                                    color: AppColors.primaryNavy,
                                   ),
                                   const SizedBox(width: 6),
                                   Expanded(
@@ -662,7 +846,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.primaryForest,
+                                        color: AppColors.primaryNavy,
                                       ),
                                     ),
                                   ),
@@ -677,7 +861,9 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                     _previewThumbnailUrl!,
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, _, _) => Container(
-                                      color: Colors.grey.shade300,
+                                      color: isDark
+                                          ? AppColors.darkBackground
+                                          : Colors.grey.shade300,
                                       child: const Center(
                                         child: Text(
                                           'Thumbnail unavailable',
@@ -699,11 +885,13 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppColors.forestSoft,
+                            color: isDark
+                                ? AppColors.darkSurfaceContainerLow
+                                : AppColors.forestSoft,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: AppColors.primaryForest.withValues(
-                                alpha: 0.3,
+                              color: AppColors.primaryNavy.withValues(
+                                alpha: 0.25,
                               ),
                             ),
                           ),
@@ -713,7 +901,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryForest,
+                                  color: AppColors.primaryNavy,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
@@ -732,7 +920,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.primaryForest,
+                                        color: AppColors.primaryNavy,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -740,9 +928,11 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                       fileName ?? contentUrl,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 11,
-                                        color: AppColors.textSecondary,
+                                        color: isDark
+                                            ? AppColors.darkTextSecondary
+                                            : AppColors.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -762,7 +952,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: const Color(0xFFDC2626)
-                                  .withValues(alpha: 0.3),
+                                  .withValues(alpha: 0.28),
                             ),
                           ),
                           child: Row(
@@ -798,9 +988,11 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                       fileName ?? contentUrl,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 11,
-                                        color: AppColors.textSecondary,
+                                        color: isDark
+                                            ? AppColors.darkTextSecondary
+                                            : AppColors.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -820,7 +1012,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: const Color(0xFF7C3AED)
-                                  .withValues(alpha: 0.3),
+                                  .withValues(alpha: 0.28),
                             ),
                           ),
                           child: Column(
@@ -857,16 +1049,21 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                     loadingBuilder: (ctx, child, progress) {
                                       if (progress == null) return child;
                                       return Container(
-                                        color: Colors.grey.shade200,
+                                        color: isDark
+                                            ? AppColors.darkBackground
+                                            : Colors.grey.shade200,
                                         child: const Center(
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
+                                            color: Color(0xFF7C3AED),
                                           ),
                                         ),
                                       );
                                     },
                                     errorBuilder: (_, _, _) => Container(
-                                      color: Colors.grey.shade200,
+                                      color: isDark
+                                          ? AppColors.darkBackground
+                                          : Colors.grey.shade200,
                                       padding: const EdgeInsets.all(12),
                                       child: const Center(
                                         child: Column(
@@ -902,12 +1099,12 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2563EB)
+                            color: const Color(0xFF0284C7)
                                 .withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: const Color(0xFF2563EB)
-                                  .withValues(alpha: 0.3),
+                              color: const Color(0xFF0284C7)
+                                  .withValues(alpha: 0.28),
                             ),
                           ),
                           child: Row(
@@ -916,7 +1113,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF2563EB),
+                                  color: const Color(0xFF0284C7),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
@@ -935,7 +1132,7 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w700,
-                                        color: Color(0xFF2563EB),
+                                        color: Color(0xFF0284C7),
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -943,9 +1140,11 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                                       fileName ?? contentUrl,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 11,
-                                        color: AppColors.textSecondary,
+                                        color: isDark
+                                            ? AppColors.darkTextSecondary
+                                            : AppColors.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -960,34 +1159,39 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
-                            vertical: 10,
+                            vertical: 12,
                           ),
                           decoration: BoxDecoration(
                             color: isDark
-                                ? AppColors.darkSurface
-                                : AppColors.warmCream,
+                                ? AppColors.darkSurfaceContainerLow
+                                : AppColors.surfaceWarmWhite,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isDark
                                   ? AppColors.darkBorder
-                                  : AppColors.divider,
+                                  : AppColors.borderNeutral,
                             ),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.info_outline_rounded,
                                 size: 16,
-                                color: AppColors.textSecondary,
+                                color: isDark
+                                    ? AppColors.accentOrangeLight
+                                    : AppColors.primaryNavy,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   _getInfoTextForType(_type),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 11.5,
-                                    color: AppColors.textSecondary,
+                                    color: isDark
+                                        ? AppColors.darkTextSecondary
+                                        : AppColors.textSecondary,
+                                    height: 1.4,
                                   ),
                                 ),
                               ),
@@ -1007,12 +1211,17 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
             SafeArea(
               top: false,
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : AppColors.surface,
+                  color: isDark ? AppColors.darkSurface : AppColors.cardWhite,
                   border: Border(
                     top: BorderSide(
-                      color: isDark ? AppColors.darkBorder : AppColors.divider,
+                      color: isDark
+                          ? AppColors.darkBorder
+                          : AppColors.borderSubtle,
                     ),
                   ),
                 ),
@@ -1023,6 +1232,17 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         onPressed: _isSubmitting
                             ? null
                             : () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(
+                            color: isDark
+                                ? AppColors.darkBorder
+                                : AppColors.borderNeutral,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                         child: const Text('Cancel'),
                       ),
                     ),
@@ -1033,11 +1253,16 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: typeColor,
                           foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         child: _isSubmitting
                             ? const SizedBox(
-                                height: 20,
-                                width: 20,
+                                height: 18,
+                                width: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -1047,6 +1272,9 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
                               )
                             : Text(
                                 isEditing ? 'Save Changes' : 'Add to Module',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                       ),
                     ),
@@ -1064,35 +1292,40 @@ class _AddLessonSheetState extends ConsumerState<AddLessonSheet> {
     final isSelected = _type == typeKey;
     final color = _getTypeColor(typeKey);
 
-    return InkWell(
-      onTap: () {
-        setState(() => _type = typeKey);
-        _updatePreview();
-      },
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? color : color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? color : color.withValues(alpha: 0.25),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 15, color: isSelected ? Colors.white : color),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: isSelected ? Colors.white : color,
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() => _type = typeKey);
+          _updatePreview();
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected ? color : color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? color : color.withValues(alpha: 0.25),
+              width: isSelected ? 1.4 : 1.0,
             ),
-          ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 15, color: isSelected ? Colors.white : color),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? Colors.white : color,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

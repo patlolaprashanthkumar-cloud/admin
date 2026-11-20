@@ -12,6 +12,9 @@ import '../providers/courses_state.dart';
 import '../widgets/lesson_tile.dart';
 
 /// Full Course Details and Curriculum Screen displaying modules and ordered lessons
+///
+/// Follows the IIECM Modern Academic design language with institutional branding,
+/// structured tabs, academic metadata metrics, and polished syllabus navigation.
 class CourseDetailScreen extends ConsumerStatefulWidget {
   final String courseId;
 
@@ -47,20 +50,79 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     final course = detailState.course;
 
     return Scaffold(
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.backgroundWarmOffWhite,
       appBar: AppBar(
-        title: Text(
-          course?.title ?? 'Course Curriculum',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+        backgroundColor: isDark
+            ? AppColors.darkSurface
+            : AppColors.backgroundWarmOffWhite,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: Center(
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.white,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                  border: Border.all(
+                    color: isDark ? AppColors.darkBorder : AppColors.border,
+                  ),
+                ),
+                child: Icon(
+                  Icons.arrow_back_rounded,
+                  size: 18,
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
+                ),
+              ),
+            ),
           ),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              course?.title ?? 'Course Curriculum',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+              ),
+            ),
+            Text(
+              course?.categoryName != null
+                  ? '${course!.categoryName} · Academic Curriculum'
+                  : 'Official Medical Training Curriculum',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
             tooltip: 'Refresh Curriculum',
             icon: const Icon(Icons.refresh_rounded),
+            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             onPressed: () => notifier.refresh(),
           ),
           const SizedBox(width: AppConstants.spacingSm),
@@ -68,21 +130,31 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(
-            color: isDark ? AppColors.darkSurface : AppColors.warmCreamLight,
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkSurface : AppColors.white,
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+                ),
+              ),
+            ),
             child: TabBar(
               controller: _tabController,
-              labelColor: AppColors.primaryForest,
+              labelColor: isDark
+                  ? AppColors.accentOrangeLight
+                  : AppColors.primaryNavy,
               unselectedLabelColor: isDark
                   ? AppColors.darkTextSecondary
                   : AppColors.textSecondary,
-              indicatorColor: AppColors.primaryForest,
+              indicatorColor: AppColors.accentOrange,
               indicatorWeight: 3,
+              indicatorSize: TabBarIndicatorSize.tab,
               labelStyle: const TextStyle(
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
                 fontSize: 13,
               ),
               unselectedLabelStyle: const TextStyle(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
               tabs: const [
@@ -138,13 +210,14 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
         children: [
           const CircularProgressIndicator(
             strokeWidth: 2.5,
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryForest),
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryNavy),
           ),
           const SizedBox(height: AppConstants.spacingMd),
           Text(
             'Loading course curriculum...',
             style: TextStyle(
               fontSize: 13,
+              fontWeight: FontWeight.w500,
               color: isDark
                   ? AppColors.darkTextSecondary
                   : AppColors.textSecondary,
@@ -170,16 +243,27 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                color: AppColors.error,
-                size: 44,
+              Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  color: AppColors.errorSoft,
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.error_outline_rounded,
+                    color: AppColors.error,
+                    size: 28,
+                  ),
+                ),
               ),
-              const SizedBox(height: AppConstants.spacingSm),
+              const SizedBox(height: AppConstants.spacingMd),
               Text(
                 'Unable to Load Curriculum',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 6),
@@ -191,6 +275,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                   color: isDark
                       ? AppColors.darkTextSecondary
                       : AppColors.textSecondary,
+                  height: 1.4,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
@@ -216,40 +301,57 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingLg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 48,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
-            ),
-            const SizedBox(height: AppConstants.spacingMd),
-            Text(
-              'Course Not Found',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
+        child: AppCard(
+          padding: const EdgeInsets.all(AppConstants.spacingLg + 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.forestSoft,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.search_off_rounded,
+                  size: 28,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textMuted,
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'This course either does not exist or you do not have an active enrollment assigned.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
+              const SizedBox(height: AppConstants.spacingMd),
+              Text(
+                'Course Not Found',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: AppConstants.spacingLg),
-            AppButton(
-              label: 'Back to Courses',
-              icon: Icons.arrow_back_rounded,
-              isFullWidth: false,
-              height: 38,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
+              const SizedBox(height: 6),
+              Text(
+                'This course either does not exist or you do not have an active enrollment assigned.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingLg),
+              AppButton(
+                label: 'Back to Courses',
+                icon: Icons.arrow_back_rounded,
+                isFullWidth: false,
+                height: 38,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -264,7 +366,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     ThemeData theme,
   ) {
     return RefreshIndicator(
-      color: AppColors.primaryForest,
+      color: AppColors.primaryNavy,
       onRefresh: () => notifier.refresh(),
       child: ListView(
         padding: const EdgeInsets.all(AppConstants.spacingMd),
@@ -276,35 +378,57 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           // Syllabus Section Title
           Row(
             children: [
-              const Icon(
-                Icons.format_list_bulleted_rounded,
-                size: 18,
-                color: AppColors.primaryForest,
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.forestSoft,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.layers_rounded,
+                  size: 16,
+                  color: AppColors.primaryNavy,
+                ),
               ),
               const SizedBox(width: 8),
               Text(
                 'Modules & Lessons',
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w800,
+                  fontSize: 14,
                   color: isDark
                       ? AppColors.darkTextPrimary
                       : AppColors.textPrimary,
                 ),
               ),
               const Spacer(),
-              Text(
-                '${detailState.modules.length} Modules • ${detailState.totalLessonsCount} Lessons',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
                   color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.textSecondary,
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.forestSoft,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.primaryNavy.withValues(alpha: 0.12),
+                  ),
+                ),
+                child: Text(
+                  '${detailState.modules.length} Modules · ${detailState.totalLessonsCount} Lessons',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColors.accentOrangeLight
+                        : AppColors.primaryNavy,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingSm),
+          const SizedBox(height: AppConstants.spacingSm + 2),
 
           // Modules Accordion List
           if (detailState.modules.isEmpty)
@@ -327,81 +451,192 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     ThemeData theme,
   ) {
     final isActive = course.isActive;
+    final hasThumbnail =
+        course.thumbnailUrl != null && course.thumbnailUrl!.trim().isNotEmpty;
 
     return AppCard(
       padding: const EdgeInsets.all(AppConstants.spacingMd),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Tags Row
+          // Optional Thumbnail Header
+          if (hasThumbnail) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+              child: AspectRatio(
+                aspectRatio: 16 / 7.5,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      course.thumbnailUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Container(
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.forestSoft,
+                        child: const Center(
+                          child: Icon(
+                            Icons.school_outlined,
+                            size: 32,
+                            color: AppColors.primaryNavy,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.65),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '${course.durationWeeks} WEEKS CURRICULUM',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingSm + 4),
+          ],
+
+          // Taxonomy Badges Row
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkSurfaceElevated
-                      : AppColors.forestSoft,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusSm),
-                ),
-                child: Text(
-                  course.categoryName.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                    color: AppColors.primaryForest,
-                  ),
+              Expanded(
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    // Category Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.forestSoft,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
+                        border: Border.all(
+                          color: AppColors.primaryNavy.withValues(alpha: 0.15),
+                        ),
+                      ),
+                      child: Text(
+                        course.categoryName.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                          color: AppColors.primaryNavy,
+                        ),
+                      ),
+                    ),
+
+                    // Delivery Format Pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkBackground
+                            : AppColors.warmCreamLight,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.radiusSm,
+                        ),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.border,
+                        ),
+                      ),
+                      child: Text(
+                        course.format.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? AppColors.accentOrangeLight
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
+
+              // Enrollment Status Badge
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkBackground
-                      : AppColors.warmCream,
-                  borderRadius: BorderRadius.circular(AppConstants.radiusSm),
-                  border: Border.all(
-                    color: isDark ? AppColors.darkBorder : AppColors.border,
-                  ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 3.5,
                 ),
-                child: Text(
-                  course.format.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.textSecondary,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: isActive ? AppColors.successSoft : AppColors.infoSoft,
                   borderRadius: BorderRadius.circular(AppConstants.radiusSm),
-                ),
-                child: Text(
-                  course.enrollmentStatus.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: isActive ? AppColors.success : AppColors.info,
+                  border: Border.all(
+                    color: isActive
+                        ? AppColors.success.withValues(alpha: 0.28)
+                        : AppColors.info.withValues(alpha: 0.28),
                   ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isActive
+                          ? Icons.check_circle_rounded
+                          : Icons.verified_rounded,
+                      size: 11,
+                      color: isActive ? AppColors.success : AppColors.info,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      course.enrollmentStatus.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.4,
+                        color: isActive ? AppColors.success : AppColors.info,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppConstants.spacingSm),
+          const SizedBox(height: AppConstants.spacingSm + 2),
 
           // Course Title
           Text(
             course.title,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
+              fontSize: 18,
               color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
               height: 1.25,
             ),
@@ -412,18 +647,27 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(
-                  Icons.person_outline_rounded,
-                  size: 14,
-                  color: AppColors.primaryForest,
+                Container(
+                  padding: const EdgeInsets.all(2.5),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.forestSoft,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.person_outline_rounded,
+                    size: 13,
+                    color: AppColors.primaryNavy,
+                  ),
                 ),
-                const SizedBox(width: 5),
+                const SizedBox(width: 6),
                 Text(
                   'Lead Faculty: ${course.instructorName!}',
                   style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryForest,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryNavy,
                   ),
                 ),
               ],
@@ -431,8 +675,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           ],
 
           const SizedBox(height: AppConstants.spacingMd),
-          const Divider(height: 1),
-          const SizedBox(height: AppConstants.spacingSm),
+          Divider(
+            height: 1,
+            color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
+          ),
+          const SizedBox(height: AppConstants.spacingMd),
 
           // Stat Pills Row
           Row(
@@ -458,6 +705,15 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                 label: 'Duration',
                 isDark: isDark,
               ),
+              if (detailState.totalDurationMinutes > 0) ...[
+                _buildStatDivider(isDark),
+                _buildStatColumn(
+                  icon: Icons.timelapse_rounded,
+                  value: '${detailState.totalDurationMinutes}m',
+                  label: 'Content',
+                  isDark: isDark,
+                ),
+              ],
             ],
           ),
         ],
@@ -473,16 +729,21 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
   }) {
     return Column(
       children: [
-        Icon(icon, size: 18, color: AppColors.primaryForest),
+        Icon(icon, size: 18, color: AppColors.primaryNavy),
         const SizedBox(height: 3),
         Text(
           value,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: isDark ? Colors.white : AppColors.textPrimary,
+          ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 10,
+            fontWeight: FontWeight.w500,
             color: isDark
                 ? AppColors.darkTextSecondary
                 : AppColors.textSecondary,
@@ -496,7 +757,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     return Container(
       height: 24,
       width: 1,
-      color: isDark ? AppColors.darkBorder : AppColors.border,
+      color: isDark ? AppColors.darkBorder : AppColors.borderSubtle,
     );
   }
 
@@ -506,7 +767,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     ThemeData theme,
   ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppConstants.spacingSm),
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingSm + 2),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.white,
         borderRadius: BorderRadius.circular(AppConstants.radiusMd),
@@ -518,22 +779,26 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
         data: theme.copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           initiallyExpanded: module.orderIndex == 1,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
           leading: Container(
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
               color: isDark
                   ? AppColors.darkSurfaceElevated
                   : AppColors.forestSoft,
               borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+              border: Border.all(
+                color: AppColors.primaryNavy.withValues(alpha: 0.15),
+              ),
             ),
             child: Center(
               child: Text(
                 '${module.orderIndex}',
                 style: const TextStyle(
                   fontWeight: FontWeight.w800,
-                  fontSize: 12,
-                  color: AppColors.primaryForest,
+                  fontSize: 13,
+                  color: AppColors.primaryNavy,
                 ),
               ),
             ),
@@ -541,49 +806,104 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           title: Text(
             module.title,
             style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              fontSize: 13.5,
+              color: isDark ? Colors.white : AppColors.textPrimary,
             ),
           ),
           subtitle: Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              '${module.lessons.length} Lessons${module.totalDurationMinutes > 0 ? " • ${module.totalDurationMinutes} min" : ""}',
-              style: TextStyle(
-                fontSize: 11,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-            ),
-          ),
-          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          children: [
-            if (module.description != null && module.description!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  module.description!,
-                  style: theme.textTheme.bodySmall?.copyWith(
+            padding: const EdgeInsets.only(top: 3),
+            child: Row(
+              children: [
+                Text(
+                  '${module.lessons.length} Lessons${module.totalDurationMinutes > 0 ? " · ${module.totalDurationMinutes} min" : ""}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                     color: isDark
                         ? AppColors.darkTextSecondary
                         : AppColors.textSecondary,
-                    height: 1.35,
                   ),
+                ),
+                if (module.videoCount > 0) ...[
+                  const SizedBox(width: 6),
+                  _buildMiniTypePill(
+                    Icons.play_circle_filled_rounded,
+                    '${module.videoCount}',
+                    AppColors.accentOrange,
+                    isDark,
+                  ),
+                ],
+                if (module.pdfCount > 0) ...[
+                  const SizedBox(width: 4),
+                  _buildMiniTypePill(
+                    Icons.picture_as_pdf_rounded,
+                    '${module.pdfCount}',
+                    AppColors.error,
+                    isDark,
+                  ),
+                ],
+              ],
+            ),
+          ),
+          childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+          children: [
+            if (module.description != null && module.description!.isNotEmpty)
+              Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.warmCreamLight,
+                  borderRadius: BorderRadius.circular(AppConstants.radiusSm),
+                  border: Border.all(
+                    color: isDark
+                        ? AppColors.darkBorder
+                        : AppColors.borderSubtle,
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.article_outlined,
+                      size: 14,
+                      color: AppColors.primaryNavy,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        module.description!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.textSecondary,
+                          height: 1.35,
+                          fontSize: 11.5,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
             if (module.lessons.isEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(
-                  'No lessons published for this module yet.',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontStyle: FontStyle.italic,
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.textMuted,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Center(
+                  child: Text(
+                    'No lessons published for this module yet.',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontStyle: FontStyle.italic,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textMuted,
+                    ),
                   ),
                 ),
               )
@@ -598,22 +918,65 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
     );
   }
 
+  Widget _buildMiniTypePill(
+    IconData icon,
+    String count,
+    Color color,
+    bool isDark,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 2.5),
+          Text(
+            count,
+            style: TextStyle(
+              fontSize: 9.5,
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyModulesCard(bool isDark, ThemeData theme) {
     return AppCard(
       padding: const EdgeInsets.all(AppConstants.spacingLg),
       child: Column(
         children: [
-          Icon(
-            Icons.auto_stories_outlined,
-            size: 40,
-            color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.forestSoft,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.auto_stories_outlined,
+              size: 28,
+              color: AppColors.primaryNavy,
+            ),
           ),
-          const SizedBox(height: AppConstants.spacingSm),
-          const Text(
+          const SizedBox(height: AppConstants.spacingMd),
+          Text(
             'Curriculum Under Preparation',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: isDark ? Colors.white : AppColors.textPrimary,
+            ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             'The syllabus modules for this training program are currently being published by the department.',
             textAlign: TextAlign.center,
@@ -621,6 +984,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               color: isDark
                   ? AppColors.darkTextSecondary
                   : AppColors.textSecondary,
+              height: 1.4,
             ),
           ),
         ],
@@ -645,25 +1009,36 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
             children: [
               Row(
                 children: [
-                  const Icon(
-                    Icons.description_outlined,
-                    size: 18,
-                    color: AppColors.primaryForest,
+                  Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? AppColors.darkSurfaceElevated
+                          : AppColors.forestSoft,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.description_outlined,
+                      size: 16,
+                      color: AppColors.primaryNavy,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Program Description',
                     style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppConstants.spacingSm),
+              const SizedBox(height: AppConstants.spacingSm + 2),
               Text(
                 course.description.isNotEmpty ? course.description : 'Comprehensive institutional curriculum tailored for clinical emergency and healthcare management fellows.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  height: 1.45,
+                  height: 1.5,
+                  fontSize: 13,
                   color: isDark
                       ? AppColors.darkTextPrimary
                       : AppColors.textPrimary,
@@ -683,45 +1058,60 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               children: [
                 Row(
                   children: [
-                    const Icon(
-                      Icons.track_changes_rounded,
-                      size: 18,
-                      color: AppColors.primaryForest,
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkSurfaceElevated
+                            : AppColors.forestSoft,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        Icons.track_changes_rounded,
+                        size: 16,
+                        color: AppColors.primaryNavy,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Learning Objectives & Competencies',
                       style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppConstants.spacingSm),
+                const SizedBox(height: AppConstants.spacingMd),
                 ...course.learningObjectives.asMap().entries.map((entry) {
                   final index = entry.key + 1;
                   final objective = entry.value;
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          width: 20,
-                          height: 20,
+                          width: 22,
+                          height: 22,
                           decoration: BoxDecoration(
                             color: isDark
                                 ? AppColors.darkSurfaceElevated
                                 : AppColors.forestSoft,
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: AppColors.primaryNavy.withValues(
+                                alpha: 0.2,
+                              ),
+                            ),
                           ),
                           child: Center(
                             child: Text(
                               '$index',
                               style: const TextStyle(
-                                fontSize: 10,
+                                fontSize: 10.5,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.primaryForest,
+                                color: AppColors.primaryNavy,
                               ),
                             ),
                           ),
@@ -731,7 +1121,8 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                           child: Text(
                             objective,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              height: 1.4,
+                              height: 1.45,
+                              fontSize: 12.5,
                               color: isDark
                                   ? AppColors.darkTextPrimary
                                   : AppColors.textPrimary,
@@ -757,37 +1148,46 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
               children: [
                 Row(
                   children: [
-                    const Icon(
-                      Icons.assignment_turned_in_outlined,
-                      size: 18,
-                      color: AppColors.terracotta,
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentOrangeSoft,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        Icons.assignment_turned_in_outlined,
+                        size: 16,
+                        color: AppColors.accentOrange,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Prerequisites & Eligibility',
                       style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppConstants.spacingSm),
+                const SizedBox(height: AppConstants.spacingSm + 4),
                 ...course.prerequisites.map(
                   (prereq) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Icon(
-                          Icons.check_rounded,
+                          Icons.check_circle_rounded,
                           size: 16,
-                          color: AppColors.terracotta,
+                          color: AppColors.accentOrange,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             prereq,
                             style: theme.textTheme.bodySmall?.copyWith(
+                              fontSize: 12,
                               color: isDark
                                   ? AppColors.darkTextPrimary
                                   : AppColors.textPrimary,
@@ -810,21 +1210,37 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.verified_user_outlined,
-                size: 22,
-                color: AppColors.primaryForest,
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.forestSoft,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.primaryNavy.withValues(alpha: 0.15),
+                  ),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.verified_user_outlined,
+                    size: 20,
+                    color: AppColors.primaryNavy,
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Official Course Enrollment',
                       style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13.5,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -834,7 +1250,8 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
                         color: isDark
                             ? AppColors.darkTextSecondary
                             : AppColors.textSecondary,
-                        height: 1.35,
+                        height: 1.4,
+                        fontSize: 12,
                       ),
                     ),
                   ],

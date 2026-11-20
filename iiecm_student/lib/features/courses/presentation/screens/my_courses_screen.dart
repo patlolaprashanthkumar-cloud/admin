@@ -10,6 +10,9 @@ import '../providers/courses_provider.dart';
 import '../widgets/course_card.dart';
 
 /// My Courses screen displaying all academic modules the student is enrolled in
+///
+/// Follows the IIECM Modern Academic design language with institutional branding,
+/// enrollment summary, curriculum taxonomy search & filtering, and structured course cards.
 class MyCoursesScreen extends ConsumerStatefulWidget {
   const MyCoursesScreen({super.key});
 
@@ -34,26 +37,100 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
     final notifier = ref.read(enrolledCoursesNotifierProvider.notifier);
 
     return Scaffold(
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.backgroundWarmOffWhite,
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        backgroundColor: isDark
+            ? AppColors.darkSurface
+            : AppColors.backgroundWarmOffWhite,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 16,
+        title: Row(
           children: [
-            Text(
-              'My Enrolled Courses',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
                 color: isDark
-                    ? AppColors.darkTextPrimary
-                    : AppColors.textPrimary,
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.forestSoft,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primaryNavy.withValues(alpha: 0.15),
+                  width: 1.2,
+                ),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.school_rounded,
+                  color: AppColors.primaryNavy,
+                  size: 20,
+                ),
               ),
             ),
-            Text(
-              'Academic Curriculum & Clinical Training',
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontSize: 11,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'My Enrolled Courses',
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.white
+                                : AppColors.textPrimary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (!coursesState.isLoading &&
+                          coursesState.courses.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 1.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryNavy.withValues(
+                              alpha: isDark ? 0.3 : 0.08,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${coursesState.courses.length}',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: isDark
+                                  ? AppColors.accentOrangeLight
+                                  : AppColors.primaryNavy,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  Text(
+                    'Academic Curriculum & Clinical Training',
+                    style: TextStyle(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -62,6 +139,7 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
           IconButton(
             tooltip: 'Refresh Courses',
             icon: const Icon(Icons.refresh_rounded),
+            color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
             onPressed: () => notifier.refresh(),
           ),
           const SizedBox(width: AppConstants.spacingSm),
@@ -76,14 +154,70 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
             // Search and Category Filter Section
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(AppConstants.spacingMd),
+                padding: const EdgeInsets.fromLTRB(
+                  AppConstants.spacingMd,
+                  AppConstants.spacingMd,
+                  AppConstants.spacingMd,
+                  AppConstants.spacingSm,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // Institutional Enrollment Overview Strip (when courses loaded)
+                    if (!coursesState.isLoading &&
+                        coursesState.courses.isNotEmpty) ...[
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkSurfaceElevated
+                              : AppColors.forestSoft,
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.radiusMd,
+                          ),
+                          border: Border.all(
+                            color: AppColors.primaryNavy.withValues(
+                              alpha: 0.12,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.verified_user_outlined,
+                              size: 16,
+                              color: AppColors.primaryNavy,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '${coursesState.courses.length} Registered Medical Curricula · Official Training Hub',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.primaryNavy,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
                     // Search Bar
                     TextField(
                       controller: _searchController,
                       onChanged: (val) => notifier.setSearchQuery(val),
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        color: isDark ? Colors.white : AppColors.textPrimary,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Search course title, faculty, category...',
                         hintStyle: TextStyle(
@@ -92,7 +226,11 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
                               ? AppColors.darkTextSecondary
                               : AppColors.textMuted,
                         ),
-                        prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                        prefixIcon: const Icon(
+                          Icons.search_rounded,
+                          size: 20,
+                          color: AppColors.primaryNavy,
+                        ),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(Icons.clear_rounded, size: 18),
@@ -135,13 +273,13 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
                             AppConstants.radiusMd,
                           ),
                           borderSide: const BorderSide(
-                            color: AppColors.primaryForest,
+                            color: AppColors.primaryNavy,
                             width: 1.5,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppConstants.spacingSm),
+                    const SizedBox(height: AppConstants.spacingSm + 2),
 
                     // Category Filter Pills
                     if (coursesState.availableCategories.isNotEmpty)
@@ -232,11 +370,11 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
         label: Text(label),
         selected: isSelected,
         onSelected: (_) => onTap(),
-        selectedColor: AppColors.primaryForest,
-        backgroundColor: isDark ? AppColors.darkSurface : AppColors.warmCream,
+        selectedColor: AppColors.primaryNavy,
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.white,
         labelStyle: TextStyle(
           fontSize: 12,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
           color: isSelected
               ? Colors.white
               : (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary),
@@ -244,8 +382,9 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
         checkmarkColor: Colors.white,
         side: BorderSide(
           color: isSelected
-              ? AppColors.primaryForest
+              ? AppColors.primaryNavy
               : (isDark ? AppColors.darkBorder : AppColors.border),
+          width: isSelected ? 1.4 : 1.0,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppConstants.radiusFull),
@@ -261,13 +400,14 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
         children: [
           const CircularProgressIndicator(
             strokeWidth: 2.5,
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryForest),
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryNavy),
           ),
           const SizedBox(height: AppConstants.spacingMd),
           Text(
             'Loading your academic courses...',
             style: TextStyle(
               fontSize: 13,
+              fontWeight: FontWeight.w500,
               color: isDark
                   ? AppColors.darkTextSecondary
                   : AppColors.textSecondary,
@@ -293,16 +433,27 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                color: AppColors.error,
-                size: 44,
+              Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  color: AppColors.errorSoft,
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.error_outline_rounded,
+                    color: AppColors.error,
+                    size: 28,
+                  ),
+                ),
               ),
-              const SizedBox(height: AppConstants.spacingSm),
+              const SizedBox(height: AppConstants.spacingMd),
               Text(
                 'Unable to Load Courses',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 6),
@@ -314,6 +465,7 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
                   color: isDark
                       ? AppColors.darkTextSecondary
                       : AppColors.textSecondary,
+                  height: 1.4,
                 ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
@@ -341,22 +493,37 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
       padding: const EdgeInsets.all(AppConstants.spacingLg),
       child: Center(
         child: AppCard(
-          padding: const EdgeInsets.all(AppConstants.spacingLg),
+          padding: const EdgeInsets.all(AppConstants.spacingLg + 4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.school_outlined,
-                size: 48,
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textMuted,
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.darkSurfaceElevated
+                      : AppColors.forestSoft,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.primaryNavy.withValues(alpha: 0.15),
+                  ),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.school_outlined,
+                    size: 32,
+                    color: AppColors.primaryNavy,
+                  ),
+                ),
               ),
               const SizedBox(height: AppConstants.spacingMd),
               Text(
                 'No Course Enrollments Found',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  color: isDark ? Colors.white : AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -398,19 +565,32 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 42,
-              color: isDark ? AppColors.darkTextSecondary : AppColors.textMuted,
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppColors.darkSurfaceElevated
+                    : AppColors.forestSoft,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_off_rounded,
+                size: 26,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textMuted,
+              ),
             ),
-            const SizedBox(height: AppConstants.spacingSm),
+            const SizedBox(height: AppConstants.spacingSm + 2),
             Text(
               'No Matching Courses',
               style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               'No enrolled courses match your current search criteria.',
               textAlign: TextAlign.center,
@@ -423,7 +603,13 @@ class _MyCoursesScreenState extends ConsumerState<MyCoursesScreen> {
             const SizedBox(height: AppConstants.spacingMd),
             TextButton.icon(
               icon: const Icon(Icons.clear_all_rounded, size: 16),
-              label: const Text('Clear All Filters'),
+              label: const Text(
+                'Clear All Filters',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primaryNavy,
+              ),
               onPressed: () {
                 _searchController.clear();
                 notifier.setSearchQuery('');

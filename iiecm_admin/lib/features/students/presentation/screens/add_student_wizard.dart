@@ -1109,163 +1109,173 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
         }
         final instructors = snapshot.data ?? [];
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Assign Primary Faculty Advisor',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary,
+        return RadioGroup<String>(
+          groupValue: _selectedInstructorId,
+          onChanged: (val) {
+            setState(() {
+              _selectedInstructorId = val;
+              if (val != null) {
+                for (final ins in instructors) {
+                  if (ins['id']?.toString() == val) {
+                    _selectedInstructorName = ins['full_name']?.toString();
+                    break;
+                  }
+                }
+              } else {
+                _selectedInstructorName = null;
+              }
+            });
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Assign Primary Faculty Advisor',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      color: isDark
+                          ? AppColors.darkTextPrimary
+                          : AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                if (_selectedInstructorId != null)
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.accentOrange,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                  if (_selectedInstructorId != null)
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.accentOrange,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _selectedInstructorId = null;
+                          _selectedInstructorName = null;
+                        });
+                      },
+                      icon: const Icon(Icons.close_rounded, size: 14),
+                      label: const Text(
+                        'Clear Selection',
+                        style: TextStyle(fontSize: 11),
                       ),
                     ),
-                    onPressed: () {
+                ],
+              ),
+              const SizedBox(height: 10),
+              ...instructors.map((ins) {
+                final id = ins['id']?.toString() ?? '';
+                final isSelected = _selectedInstructorId == id;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
                       setState(() {
-                        _selectedInstructorId = null;
-                        _selectedInstructorName = null;
+                        _selectedInstructorId = id;
+                        _selectedInstructorName = ins['full_name']?.toString();
                       });
                     },
-                    icon: const Icon(Icons.close_rounded, size: 14),
-                    label: const Text(
-                      'Clear Selection',
-                      style: TextStyle(fontSize: 11),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            ...instructors.map((ins) {
-              final id = ins['id']?.toString() ?? '';
-              final isSelected = _selectedInstructorId == id;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    setState(() {
-                      _selectedInstructorId = id;
-                      _selectedInstructorName = ins['full_name']?.toString();
-                    });
-                  },
-                  onDoubleTap: () {
-                    if (isSelected) {
-                      setState(() {
-                        _selectedInstructorId = null;
-                        _selectedInstructorName = null;
-                      });
-                    }
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? (isDark
-                                ? AppColors.accentOrange.withValues(alpha: 0.15)
-                                : AppColors.accentOrangeSoft)
-                          : (isDark
-                                ? AppColors.darkSurface
-                                : AppColors.cardWhite),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
+                    onDoubleTap: () {
+                      if (isSelected) {
+                        setState(() {
+                          _selectedInstructorId = null;
+                          _selectedInstructorName = null;
+                        });
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.accentOrange
+                            ? (isDark
+                                  ? AppColors.accentOrange.withValues(alpha: 0.15)
+                                  : AppColors.accentOrangeSoft)
                             : (isDark
-                                  ? AppColors.darkBorder
-                                  : AppColors.borderNeutral),
-                        width: isSelected ? 1.6 : 1.0,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: isDark ? 0.2 : 0.03,
+                                  ? AppColors.darkSurface
+                                  : AppColors.cardWhite),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.accentOrange
+                              : (isDark
+                                    ? AppColors.darkBorder
+                                    : AppColors.borderNeutral),
+                          width: isSelected ? 1.6 : 1.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(
+                              alpha: isDark ? 0.2 : 0.03,
+                            ),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    child: Row(
-                      children: [
-                        Radio<String>(
-                          value: id,
-                          groupValue: _selectedInstructorId,
-                          activeColor: AppColors.accentOrange,
-                          onChanged: (_) {
-                            setState(() {
-                              _selectedInstructorId = id;
-                              _selectedInstructorName = ins['full_name']
-                                  ?.toString();
-                            });
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                ins['full_name']?.toString() ?? 'Faculty',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark
-                                      ? AppColors.darkTextPrimary
-                                      : AppColors.textPrimary,
-                                ),
-                              ),
-                              if (ins['specialization'] != null &&
-                                  ins['specialization'].toString().isNotEmpty)
+                        ],
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      child: Row(
+                        children: [
+                          Radio<String>(
+                            value: id,
+                            activeColor: AppColors.accentOrange,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  ins['specialization'].toString(),
+                                  ins['full_name']?.toString() ?? 'Faculty',
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
                                     color: isDark
-                                        ? AppColors.darkTextSecondary
-                                        : AppColors.textSecondary,
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.textPrimary,
                                   ),
                                 ),
-                            ],
-                          ),
-                        ),
-                        if (isSelected)
-                          IconButton(
-                            tooltip: 'Remove selection (or double-click card)',
-                            icon: const Icon(
-                              Icons.close_rounded,
-                              size: 18,
-                              color: AppColors.accentOrange,
+                                if (ins['specialization'] != null &&
+                                    ins['specialization'].toString().isNotEmpty)
+                                  Text(
+                                    ins['specialization'].toString(),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isDark
+                                          ? AppColors.darkTextSecondary
+                                          : AppColors.textSecondary,
+                                    ),
+                                  ),
+                              ],
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _selectedInstructorId = null;
-                                _selectedInstructorName = null;
-                              });
-                            },
                           ),
-                      ],
+                          if (isSelected)
+                            IconButton(
+                              tooltip: 'Remove selection (or double-click card)',
+                              icon: const Icon(
+                                Icons.close_rounded,
+                                size: 18,
+                                color: AppColors.accentOrange,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _selectedInstructorId = null;
+                                  _selectedInstructorName = null;
+                                });
+                              },
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            }),
-          ],
+                );
+              }),
+            ],
+          ),
         );
       },
     );
