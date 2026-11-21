@@ -34,7 +34,29 @@ abstract class StudentRepository {
     String studentId,
     List<String> categoryIds,
   );
+  Future<void> unenrollStudentCourse(
+    String studentId,
+    String courseId,
+  );
+  Future<void> updateStudentCourses(
+    String studentId,
+    List<String> courseIds,
+  );
+  Future<void> updateStudentStreamsAndCourses(
+    String studentId, {
+    required List<String> categoryIds,
+    required List<String> courseIds,
+  });
   Future<List<StudentCategoryLmsGroup>> getStudentCategoryLmsDetails(
     String studentId,
   );
+
+  /// Performs preflight dependency eligibility check for permanent student deletion.
+  Future<Map<String, dynamic>> checkStudentDeletionEligibility(
+    String studentId,
+  );
+
+  /// Permanently deletes an eligible student and their Supabase Auth credentials
+  /// via the secure administrative Edge Function.
+  Future<StudentDeletionResult> deleteStudent(String studentId);
 }

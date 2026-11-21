@@ -142,6 +142,13 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
 
     final notifier = ref.read(studentsNotifierProvider.notifier);
 
+    final allCourses = ref.read(coursesNotifierProvider).courses;
+    // Guard: Only enroll courses belonging to actively selected categories
+    final validCourseIds = _selectedCourseIds.where((cid) {
+      final match = allCourses.where((c) => c.id == cid).firstOrNull;
+      return match != null && _selectedCategoryIds.contains(match.categoryId);
+    }).toList();
+
     final result = await notifier.registerStudent(
       fullName: _nameController.text.trim(),
       email: _emailController.text.trim(),
@@ -149,7 +156,7 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
       educationLevel: _educationLevel,
       qualification: _qualificationController.text.trim(),
       categoryIds: _selectedCategoryIds.toList(),
-      courseIds: _selectedCourseIds.toList(),
+      courseIds: validCourseIds,
       city: _cityController.text.trim().isNotEmpty
           ? _cityController.text.trim()
           : null,
@@ -890,6 +897,13 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                       setState(() {
                         if (isSelected) {
                           _selectedCategoryIds.remove(cat.id);
+                          final catCourses = ref
+                              .read(coursesNotifierProvider)
+                              .courses
+                              .where((c) => c.categoryId == cat.id)
+                              .map((c) => c.id)
+                              .toSet();
+                          _selectedCourseIds.removeWhere(catCourses.contains);
                         } else {
                           _selectedCategoryIds.add(cat.id);
                         }
@@ -911,6 +925,14 @@ class _AddStudentWizardState extends ConsumerState<AddStudentWizard> {
                                   _selectedCategoryIds.add(cat.id);
                                 } else {
                                   _selectedCategoryIds.remove(cat.id);
+                                  final catCourses = ref
+                                      .read(coursesNotifierProvider)
+                                      .courses
+                                      .where((c) => c.categoryId == cat.id)
+                                      .map((c) => c.id)
+                                      .toSet();
+                                  _selectedCourseIds
+                                      .removeWhere(catCourses.contains);
                                 }
                               });
                             },

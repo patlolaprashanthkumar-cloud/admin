@@ -1,12 +1,20 @@
 // Supabase Edge Function: admin-delete-student
 // Description: Securely performs administrative permanent deletion of an eligible student record
-// and their associated Supabase Auth credentials.
-// Strict Security:
-// 1. Authenticates caller via JWT session.
-// 2. Authoritatively verifies caller has the 'super_admin' role in public.profiles.
-// 3. Executes check_student_deletion_eligibility RPC immediately prior to deletion.
-// 4. Safely sequences database deletion before Auth deletion to guarantee non-atomic dual-store failure recovery.
-// 5. Writes an immutable audit trail entry to public.activity_logs.
+// and their associated Supabase Auth credentials with a durable, idempotent recovery mechanism.
+//
+// Strict Backend Corrections (Phase 1B.2A):
+// 1. Mandatory authenticated JWT verification of caller session.
+// 2. Authoritative Super Admin role check directly against public.profiles in database.
+// 3. Executes public.safe_delete_student RPC with transaction-level advisory locking (pg_advisory_xact_lock)
+//    and row-level FOR UPDATE locking.
+// 4. Disposes of disposable junction records (student_categories) and personal notifications inside the transaction.
+// 5. Enforces physical database foreign key constraints (ON DELETE RESTRICT) preventing race-condition deletion
+//    of payments, course enrollments, assessment results, subscriptions, or career records.
+// 6. Durable pre-deletion recovery tracking via public.student_deletion_records.
+// 7. Supabase Auth deletion with exponential backoff retries.
+// 8. Eliminates dangerous independent public.profiles deletion fallback.
+// 9. Fully idempotent and safely retryable if Auth deletion encounters timeouts or transient errors.
+// 10. Immutable audit logging into public.activity_logs.
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
@@ -21,21 +29,6 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-
 
 interface DeleteStudentPayload {
   studentId: string;
-}
-
-interface EligibilityRpcResult {
-  exists: boolean;
-  student_id?: string;
-  student_code?: string;
-  full_name?: string;
-  email?: string;
-  account_status?: string;
-  profile_id?: string | null;
-  is_eligible: boolean;
-  reasons: string[];
-  counts: Record<string, number>;
-  blocking_dependencies: Record<string, boolean>;
-  recommendation?: string;
 }
 
 serve(async (req: Request) => {
@@ -98,12 +91,12 @@ serve(async (req: Request) => {
       );
     }
 
-    // Create service_role admin client strictly for internal server-side operations
+    // Server-side service_role admin client for internal operations
     const adminClient = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    // Create caller-context client for authenticated RPC invocations
+    // Caller-context client carrying caller's JWT token for SECURITY DEFINER RPC verification
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? serviceRoleKey;
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
@@ -130,7 +123,7 @@ serve(async (req: Request) => {
     // -------------------------------------------------------------------------
     // 3. Authoritative Role Verification (Super Admin Only)
     // -------------------------------------------------------------------------
-    // Query public.profiles directly in the database. Never trust client metadata or JWT claims alone.
+    // Query public.profiles directly. Never trust user_metadata or request body.
     const { data: callerProfile, error: profileError } = await adminClient
       .from('profiles')
       .select('id, role, full_name, email')
@@ -194,8 +187,9 @@ serve(async (req: Request) => {
     const normalizedStudentId = studentId.trim().toLowerCase();
 
     // -------------------------------------------------------------------------
-    // 5. Target Student Inspection & Self-Deletion Protection
+    // 5. Concurrency & Idempotency Check: Determine if Initial Deletion or Recovery Retry
     // -------------------------------------------------------------------------
+    // Check if public.students row exists
     const { data: studentRecord, error: studentFetchError } = await adminClient
       .from('students')
       .select('id, profile_id, student_id, full_name, email, account_status')
@@ -203,7 +197,7 @@ serve(async (req: Request) => {
       .maybeSingle();
 
     if (studentFetchError) {
-      console.error('Database error retrieving student:', studentFetchError);
+      console.error('Database error retrieving student record:', studentFetchError);
       return new Response(
         JSON.stringify({ error: 'Database error fetching student record.' }),
         {
@@ -213,183 +207,201 @@ serve(async (req: Request) => {
       );
     }
 
+    let deletionRecordId: string | null = null;
+    let targetProfileId: string | null = null;
+    let targetStudentCode: string = '';
+    let targetFullName: string = '';
+    let targetEmail: string = '';
+    let isRecoveryRetry = false;
+
     if (!studentRecord) {
-      return new Response(
-        JSON.stringify({
-          error: 'Student record does not exist or has already been removed.',
-          studentId: normalizedStudentId,
-          code: 'STUDENT_NOT_FOUND',
-        }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // Prevent Super Admin from deleting their own account via student deletion
-    if (studentRecord.profile_id && studentRecord.profile_id === callerUser.id) {
-      return new Response(
-        JSON.stringify({
-          error: 'Safety violation: Super Administrators cannot delete their own linked student profile.',
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // -------------------------------------------------------------------------
-    // 6. Pre-Deletion Eligibility RPC Verification
-    // -------------------------------------------------------------------------
-    // Invoke public.check_student_deletion_eligibility(p_student_id UUID) immediately prior to deletion.
-    let eligibility: EligibilityRpcResult | null = null;
-
-    // Caller client carries the authenticated caller's JWT, satisfying public.is_admin_or_super()
-    const { data: callerRpcData, error: callerRpcError } = await callerClient.rpc(
-      'check_student_deletion_eligibility',
-      { p_student_id: normalizedStudentId }
-    );
-
-    if (callerRpcError) {
-      console.warn('Caller-context RPC returned error, attempting adminClient fallback:', callerRpcError.message);
-      const { data: adminRpcData, error: adminRpcError } = await adminClient.rpc(
-        'check_student_deletion_eligibility',
+      // Student row does NOT exist. Check if a durable recovery record exists for this student.
+      const { data: recoveryData, error: recoveryError } = await callerClient.rpc(
+        'get_student_deletion_recovery_record',
         { p_student_id: normalizedStudentId }
       );
 
-      if (adminRpcError) {
-        console.error('All eligibility RPC checks failed:', adminRpcError.message);
+      if (recoveryError) {
+        console.error('Error querying student deletion recovery record:', recoveryError);
+      }
+
+      if (!recoveryData || recoveryData.exists === false) {
         return new Response(
           JSON.stringify({
-            error: `Eligibility evaluation failed: ${adminRpcError.message || callerRpcError.message}`,
+            error: 'Student record does not exist or has already been removed.',
+            studentId: normalizedStudentId,
+            code: 'STUDENT_NOT_FOUND',
           }),
           {
-            status: 500,
+            status: 404,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           }
         );
       }
-      eligibility = adminRpcData as EligibilityRpcResult;
-    } else {
-      eligibility = callerRpcData as EligibilityRpcResult;
-    }
 
-    if (!eligibility || eligibility.exists === false) {
-      return new Response(
-        JSON.stringify({
-          error: 'Student record does not exist or has already been removed.',
-          studentId: normalizedStudentId,
-          code: 'STUDENT_NOT_FOUND',
-        }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    if (eligibility.is_eligible !== true) {
-      console.warn(`Student ${normalizedStudentId} is not eligible for deletion:`, eligibility.reasons);
-      return new Response(
-        JSON.stringify({
-          error: 'Student is not eligible for permanent deletion due to existing dependent records.',
-          code: 'STUDENT_NOT_ELIGIBLE',
-          studentId: normalizedStudentId,
-          studentCode: studentRecord.student_id,
-          fullName: studentRecord.full_name,
-          reasons: eligibility.reasons,
-          counts: eligibility.counts,
-          blockingDependencies: eligibility.blocking_dependencies,
-          recommendation: eligibility.recommendation || 'DEACTIVATE_OR_SUSPEND',
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // -------------------------------------------------------------------------
-    // 7. Safe Dual-Store Deletion Sequencing & Failure Recovery
-    // -------------------------------------------------------------------------
-    // Critical Architecture:
-    // Auth Admin API operations and PostgreSQL table mutations do NOT execute in a single
-    // distributed atomic transaction.
-    //
-    // Ordering Strategy:
-    // 1. Delete public.students FIRST.
-    //    If database deletion fails (e.g. concurrent payment inserted triggering ON DELETE RESTRICT,
-    //    or concurrent enrollment), the operation aborts cleanly.
-    //    The student's Auth user and public.profiles remain 100% UNTOUCHED, allowing the account
-    //    to remain consistent and accessible.
-    // 2. Delete auth.users SECOND (if linked).
-    //    Deleting auth.users automatically triggers ON DELETE CASCADE on public.profiles(id).
-    //    If auth.users deletion encounters a network or transient error after public.students is
-    //    already deleted, we perform explicit fallback profile cleanup and document the partial
-    //    state in the audit log and API response.
-
-    const linkedProfileId = studentRecord.profile_id;
-    const studentSnapshot = {
-      id: studentRecord.id,
-      studentCode: studentRecord.student_id,
-      fullName: studentRecord.full_name,
-      email: studentRecord.email,
-      profileId: linkedProfileId,
-    };
-
-    // Step A: Delete public.students record
-    const { error: studentDeleteError } = await adminClient
-      .from('students')
-      .delete()
-      .eq('id', normalizedStudentId);
-
-    if (studentDeleteError) {
-      console.error('Failed to delete student database record:', studentDeleteError);
-      return new Response(
-        JSON.stringify({
-          error: `Failed to delete student database record: ${studentDeleteError.message}`,
-          code: 'STUDENT_DELETE_FAILED',
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // Step B: Delete Supabase Auth account & associated profile
-    let authDeleted = false;
-    let profileDeleted = false;
-    let authWarning: string | null = null;
-
-    if (linkedProfileId) {
-      const { error: authDeleteError } = await adminClient.auth.admin.deleteUser(linkedProfileId);
-
-      if (authDeleteError) {
-        console.error(`Auth user deletion failed for profile ID ${linkedProfileId}:`, authDeleteError);
-        authWarning = `Student database record was deleted, but Auth account removal failed: ${authDeleteError.message}`;
-
-        // Fallback cleanup: Ensure public.profiles does not remain orphaned if Auth API failed
-        const { error: profileDeleteError } = await adminClient
-          .from('profiles')
-          .delete()
-          .eq('id', linkedProfileId);
-
-        if (!profileDeleteError) {
-          profileDeleted = true;
-        } else {
-          console.warn('Fallback profile deletion also encountered error:', profileDeleteError.message);
-        }
-      } else {
-        authDeleted = true;
-        profileDeleted = true; // Handled by PostgreSQL foreign key CASCADE on auth.users(id)
+      // If recovery record is already marked completed, return success idempotently
+      if (recoveryData.status === 'completed') {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            status: 'completed',
+            message: `Student "${recoveryData.full_name}" (${recoveryData.student_code}) permanent deletion is already fully completed.`,
+            deletedStudent: {
+              id: normalizedStudentId,
+              studentCode: recoveryData.student_code,
+              fullName: recoveryData.full_name,
+              email: recoveryData.email,
+              profileId: recoveryData.profile_id,
+            },
+            deletionRecordId: recoveryData.id,
+            authDeleted: true,
+            idempotent: true,
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
       }
+
+      // Recovery record exists and needs Auth completion ('db_deleted' or 'failed_auth')
+      isRecoveryRetry = true;
+      deletionRecordId = recoveryData.id;
+      targetProfileId = recoveryData.profile_id;
+      targetStudentCode = recoveryData.student_code;
+      targetFullName = recoveryData.full_name;
+      targetEmail = recoveryData.email;
+      console.log(`Resuming incomplete Auth deletion for student ${normalizedStudentId} (Recovery record: ${deletionRecordId})`);
+    } else {
+      // Student row exists. Enforce self-deletion check
+      if (studentRecord.profile_id && studentRecord.profile_id === callerUser.id) {
+        return new Response(
+          JSON.stringify({
+            error: 'Safety violation: Super Administrators cannot delete their own linked student profile.',
+            code: 'SELF_DELETION_PROHIBITED',
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      // -----------------------------------------------------------------------
+      // 6. Atomic Safe Database Deletion via RPC (public.safe_delete_student)
+      // -----------------------------------------------------------------------
+      // Invokes safe_delete_student which:
+      // - Acquires pg_advisory_xact_lock
+      // - Locks student row FOR UPDATE
+      // - Re-verifies all 9 protected dependency classes (rejects if payments/enrollments exist)
+      // - Creates durable entry in public.student_deletion_records
+      // - Safely cleans up student_categories and personal notifications
+      // - Deletes public.students row (guarded by physical ON DELETE RESTRICT on dependent tables)
+      let dbDeleteResult: any = null;
+
+      const { data: callerRpcData, error: callerRpcError } = await callerClient.rpc(
+        'safe_delete_student',
+        { p_student_id: normalizedStudentId }
+      );
+
+      if (callerRpcError) {
+        console.warn('Caller-context safe_delete_student error, attempting adminClient fallback:', callerRpcError.message);
+        const { data: adminRpcData, error: adminRpcError } = await adminClient.rpc(
+          'safe_delete_student',
+          { p_student_id: normalizedStudentId }
+        );
+
+        if (adminRpcError) {
+          console.error('All safe_delete_student RPC attempts failed:', adminRpcError.message);
+          return new Response(
+            JSON.stringify({
+              error: `Database safe deletion RPC failed: ${adminRpcError.message || callerRpcError.message}`,
+              code: 'DATABASE_DELETION_FAILED',
+            }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          );
+        }
+        dbDeleteResult = adminRpcData;
+      } else {
+        dbDeleteResult = callerRpcData;
+      }
+
+      if (!dbDeleteResult || dbDeleteResult.success === false) {
+        console.warn('safe_delete_student rejected deletion:', dbDeleteResult?.message || dbDeleteResult?.error_code);
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: dbDeleteResult?.message || 'Student is not eligible for permanent deletion.',
+            code: dbDeleteResult?.error_code || 'STUDENT_NOT_ELIGIBLE',
+            studentId: normalizedStudentId,
+            counts: dbDeleteResult?.counts || {},
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      deletionRecordId = dbDeleteResult.deletion_record_id;
+      targetProfileId = dbDeleteResult.profile_id;
+      targetStudentCode = dbDeleteResult.student_code;
+      targetFullName = dbDeleteResult.full_name;
+      targetEmail = dbDeleteResult.email;
     }
 
     // -------------------------------------------------------------------------
-    // 8. Immutable Audit Trail Logging
+    // 7. Supabase Auth Deletion with Resilient Retry Loop
+    // -------------------------------------------------------------------------
+    let authDeleted = false;
+    let authErrorMsg: string | null = null;
+
+    if (targetProfileId) {
+      const maxAttempts = 3;
+      const backoffDelays = [250, 750, 1500];
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const { error: authErr } = await adminClient.auth.admin.deleteUser(targetProfileId);
+
+          if (!authErr) {
+            authDeleted = true;
+            console.log(`Auth user ${targetProfileId} successfully deleted on attempt ${attempt}`);
+            break;
+          }
+
+          // If user was already deleted in GoTrue (HTTP 404 or "user not found"), treat as success
+          const errMsg = (authErr.message || '').toLowerCase();
+          if (errMsg.includes('not found') || (authErr as any).status === 404) {
+            console.log(`Auth user ${targetProfileId} already purged or not found in Auth store. Marking as deleted.`);
+            authDeleted = true;
+            break;
+          }
+
+          authErrorMsg = authErr.message;
+          console.warn(`Auth deletion attempt ${attempt} for user ${targetProfileId} failed:`, authErr.message);
+
+          if (attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, backoffDelays[attempt - 1]));
+          }
+        } catch (callEx) {
+          authErrorMsg = callEx instanceof Error ? callEx.message : String(callEx);
+          console.warn(`Auth deletion network exception on attempt ${attempt}:`, authErrorMsg);
+          if (attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, backoffDelays[attempt - 1]));
+          }
+        }
+      }
+    } else {
+      // Student had no linked Auth user (profile_id was NULL)
+      authDeleted = true;
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. Update Durable Deletion Record & Write Immutable Audit Trail
     // -------------------------------------------------------------------------
     const clientIp =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -397,59 +409,126 @@ serve(async (req: Request) => {
       req.headers.get('x-real-ip') ||
       'unknown';
 
-    const auditEntry = {
-      admin_id: callerUser.id,
-      admin_name: callerProfile.full_name || callerUser.email || 'Super Administrator',
-      action: 'PERMANENT_DELETE_STUDENT',
-      target: `Student: ${studentSnapshot.fullName} (${studentSnapshot.studentCode})`,
-      ip_address: clientIp,
-      metadata: {
-        student_uuid: studentSnapshot.id,
-        student_code: studentSnapshot.studentCode,
-        full_name: studentSnapshot.fullName,
-        email: studentSnapshot.email,
-        profile_id: studentSnapshot.profileId,
-        deleted_by_admin_id: callerUser.id,
-        deleted_by_admin_email: callerUser.email,
-        auth_user_deleted: authDeleted,
-        profile_deleted: profileDeleted,
-        warning: authWarning,
-        audit_timestamp: new Date().toISOString(),
-      },
-      timestamp: new Date().toISOString(),
-    };
-
-    const { error: auditError } = await adminClient
-      .from('activity_logs')
-      .insert(auditEntry);
-
-    if (auditError) {
-      // Log failure to server console but do not fail the completed deletion
-      console.error('Notice: Failed to insert audit log for student deletion:', auditError.message);
-    }
-
-    // -------------------------------------------------------------------------
-    // 9. Structured Success Response
-    // -------------------------------------------------------------------------
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: `Student "${studentSnapshot.fullName}" (${studentSnapshot.studentCode}) has been permanently deleted.`,
-        deletedStudent: studentSnapshot,
-        authDeleted,
-        profileDeleted,
-        warning: authWarning,
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    if (authDeleted) {
+      // A. Update durable recovery record status to 'completed'
+      if (deletionRecordId) {
+        await callerClient.rpc('update_student_deletion_status', {
+          p_record_id: deletionRecordId,
+          p_status: 'completed',
+          p_error_message: null,
+        });
       }
-    );
+
+      // B. Write success audit log to public.activity_logs
+      await adminClient.from('activity_logs').insert({
+        admin_id: callerUser.id,
+        admin_name: callerProfile.full_name || callerUser.email || 'Super Administrator',
+        action: isRecoveryRetry ? 'PERMANENT_DELETE_STUDENT_RECOVERED' : 'PERMANENT_DELETE_STUDENT_COMPLETED',
+        target: `Student: ${targetFullName} (${targetStudentCode})`,
+        ip_address: clientIp,
+        metadata: {
+          student_uuid: normalizedStudentId,
+          student_code: targetStudentCode,
+          full_name: targetFullName,
+          email: targetEmail,
+          profile_id: targetProfileId,
+          deletion_record_id: deletionRecordId,
+          deleted_by_admin_id: callerUser.id,
+          deleted_by_admin_email: callerUser.email,
+          auth_user_deleted: true,
+          status: 'completed',
+          is_recovery_retry: isRecoveryRetry,
+          audit_timestamp: new Date().toISOString(),
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      // C. Return structured complete success
+      return new Response(
+        JSON.stringify({
+          success: true,
+          status: 'completed',
+          message: `Student "${targetFullName}" (${targetStudentCode}) database records and Auth credentials have been permanently deleted.`,
+          deletedStudent: {
+            id: normalizedStudentId,
+            studentCode: targetStudentCode,
+            fullName: targetFullName,
+            email: targetEmail,
+            profileId: targetProfileId,
+          },
+          deletionRecordId,
+          authDeleted: true,
+          isRecoveryRetry,
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    } else {
+      // Auth deletion failed after all retries
+      // DO NOT delete public.profiles independently (strictly prohibited)
+
+      // A. Update durable recovery record status to 'failed_auth'
+      if (deletionRecordId) {
+        await callerClient.rpc('update_student_deletion_status', {
+          p_record_id: deletionRecordId,
+          p_status: 'failed_auth',
+          p_error_message: authErrorMsg,
+        });
+      }
+
+      // B. Write partial failure audit log to public.activity_logs
+      await adminClient.from('activity_logs').insert({
+        admin_id: callerUser.id,
+        admin_name: callerProfile.full_name || callerUser.email || 'Super Administrator',
+        action: 'PERMANENT_DELETE_STUDENT_PARTIAL_FAILURE',
+        target: `Student: ${targetFullName} (${targetStudentCode})`,
+        ip_address: clientIp,
+        metadata: {
+          student_uuid: normalizedStudentId,
+          student_code: targetStudentCode,
+          full_name: targetFullName,
+          email: targetEmail,
+          profile_id: targetProfileId,
+          deletion_record_id: deletionRecordId,
+          deleted_by_admin_id: callerUser.id,
+          deleted_by_admin_email: callerUser.email,
+          auth_user_deleted: false,
+          auth_error: authErrorMsg,
+          status: 'failed_auth',
+          is_recovery_retry: isRecoveryRetry,
+          audit_timestamp: new Date().toISOString(),
+        },
+        timestamp: new Date().toISOString(),
+      });
+
+      // C. Return structured partial failure response with recovery diagnostics
+      return new Response(
+        JSON.stringify({
+          success: false,
+          partialFailure: true,
+          status: 'failed_auth',
+          error: `Student database records were permanently deleted, but Supabase Auth account removal failed: ${authErrorMsg}. A durable deletion recovery record has been created.`,
+          code: 'AUTH_DELETION_FAILED',
+          studentId: normalizedStudentId,
+          studentCode: targetStudentCode,
+          profileId: targetProfileId,
+          email: targetEmail,
+          deletionRecordId,
+          recoveryInstruction: 'Re-invoking deletion with this studentId will automatically verify the recovery record and complete Auth cleanup.',
+        }),
+        {
+          status: 502,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown server error occurred.';
     console.error('Unhandled exception in admin-delete-student:', errorMessage);
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: errorMessage, code: 'INTERNAL_SERVER_ERROR' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

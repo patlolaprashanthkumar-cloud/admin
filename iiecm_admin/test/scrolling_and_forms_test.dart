@@ -241,9 +241,122 @@ class MockTestStudentRepo implements StudentRepository {
     List<String> categoryIds,
   ) async {}
   @override
+  Future<void> unenrollStudentCourse(
+    String studentId,
+    String courseId,
+  ) async {
+    final idx = list.indexWhere((s) => s.id == studentId);
+    if (idx != -1) {
+      final current = list[idx];
+      final newCourseIds =
+          current.enrolledCourseIds.where((id) => id != courseId).toList();
+      list[idx] = Student(
+        id: current.id,
+        profileId: current.profileId,
+        studentId: current.studentId,
+        fullName: current.fullName,
+        email: current.email,
+        phone: current.phone,
+        educationLevel: current.educationLevel,
+        qualification: current.qualification,
+        preferredCategory: current.preferredCategory,
+        city: current.city,
+        country: current.country,
+        subscriptionPlan: current.subscriptionPlan,
+        subscriptionStatus: current.subscriptionStatus,
+        accountStatus: current.accountStatus,
+        learningFormat: current.learningFormat,
+        preferredSlot: current.preferredSlot,
+        createdAt: current.createdAt,
+        assignedCategories: current.assignedCategories,
+        enrolledCourseIds: newCourseIds,
+      );
+    }
+  }
+
+  @override
+  Future<void> updateStudentCourses(
+    String studentId,
+    List<String> courseIds,
+  ) async {
+    final idx = list.indexWhere((s) => s.id == studentId);
+    if (idx != -1) {
+      final current = list[idx];
+      list[idx] = Student(
+        id: current.id,
+        profileId: current.profileId,
+        studentId: current.studentId,
+        fullName: current.fullName,
+        email: current.email,
+        phone: current.phone,
+        educationLevel: current.educationLevel,
+        qualification: current.qualification,
+        preferredCategory: current.preferredCategory,
+        city: current.city,
+        country: current.country,
+        subscriptionPlan: current.subscriptionPlan,
+        subscriptionStatus: current.subscriptionStatus,
+        accountStatus: current.accountStatus,
+        learningFormat: current.learningFormat,
+        preferredSlot: current.preferredSlot,
+        createdAt: current.createdAt,
+        assignedCategories: current.assignedCategories,
+        enrolledCourseIds: courseIds,
+      );
+    }
+  }
+
+  @override
+  Future<void> updateStudentStreamsAndCourses(
+    String studentId, {
+    required List<String> categoryIds,
+    required List<String> courseIds,
+  }) async {
+    await updateStudentCategories(studentId, categoryIds);
+    await updateStudentCourses(studentId, courseIds);
+  }
+  @override
   Future<List<StudentCategoryLmsGroup>> getStudentCategoryLmsDetails(
     String studentId,
   ) async => [];
+
+  @override
+  Future<Map<String, dynamic>> checkStudentDeletionEligibility(
+    String studentId,
+  ) async {
+    final studentExists = list.any((s) => s.id == studentId);
+    return {
+      'exists': studentExists,
+      'is_eligible': studentExists,
+      'student_id': studentId,
+      'reasons': studentExists
+          ? ['Student is eligible for deletion in mock tests.']
+          : ['Student record does not exist.'],
+      'counts': {},
+    };
+  }
+
+  @override
+  Future<StudentDeletionResult> deleteStudent(String studentId) async {
+    final idx = list.indexWhere((s) => s.id == studentId);
+    if (idx != -1) {
+      final s = list.removeAt(idx);
+      return StudentDeletionResult.completed(
+        studentId: s.id,
+        studentCode: s.studentId,
+        fullName: s.fullName,
+        email: s.email,
+        deletionRecordId: 'mock-del-rec-${s.id}',
+        message: 'Student ${s.fullName} permanently deleted in test.',
+      );
+    }
+    throw StudentDeletionException(
+      message: 'Student not found in test repository.',
+      statusCode: 404,
+      code: 'STUDENT_NOT_FOUND',
+      studentId: studentId,
+    );
+  }
 }
 
 void main() {

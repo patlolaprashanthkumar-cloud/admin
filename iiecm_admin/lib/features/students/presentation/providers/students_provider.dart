@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import '../../data/repositories/supabase_student_repository.dart';
 import '../../domain/models/student.dart';
 import '../../domain/repositories/student_repository.dart';
@@ -62,8 +63,11 @@ class StudentsState {
 
 class StudentsNotifier extends StateNotifier<StudentsState> {
   final StudentRepository _repository;
+  final Ref? _ref;
+  final Set<String> _pendingDeletionIds = {};
 
-  StudentsNotifier(this._repository) : super(const StudentsState()) {
+  StudentsNotifier(this._repository, [this._ref])
+    : super(const StudentsState()) {
     loadStudents();
   }
 
@@ -168,9 +172,93 @@ class StudentsNotifier extends StateNotifier<StudentsState> {
   ) async {
     try {
       await _repository.updateStudentCategories(studentId, categoryIds);
+      if (_ref != null) {
+        _ref.invalidate(studentDetailFamily(studentId));
+        _ref.invalidate(studentLmsDetailsFamily(studentId));
+      }
       await loadStudents();
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> unenrollCourse(String studentId, String courseId) async {
+    try {
+      await _repository.unenrollStudentCourse(studentId, courseId);
+      if (_ref != null) {
+        _ref.invalidate(studentDetailFamily(studentId));
+        _ref.invalidate(studentLmsDetailsFamily(studentId));
+      }
+      await loadStudents();
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> updateStudentStreamsAndCourses(
+    String studentId,
+    List<String> categoryIds,
+    List<String> courseIds,
+  ) async {
+    try {
+      await _repository.updateStudentStreamsAndCourses(
+        studentId,
+        categoryIds: categoryIds,
+        courseIds: courseIds,
+      );
+      if (_ref != null) {
+        _ref.invalidate(studentDetailFamily(studentId));
+        _ref.invalidate(studentLmsDetailsFamily(studentId));
+      }
+      await loadStudents();
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      rethrow;
+    }
+  }
+
+  /// Permanently deletes an eligible student via the Super Admin Edge Function.
+  /// Enforces concurrency prevention, removes the record locally upon DB deletion,
+  /// and invalidates related metrics and family caches.
+  Future<StudentDeletionResult> deleteStudent(String studentId) async {
+    final normalizedId = studentId.trim();
+    if (_pendingDeletionIds.contains(normalizedId)) {
+      throw StudentDeletionException(
+        message: 'A deletion request is already in progress for this student.',
+        statusCode: 409,
+        code: 'CONCURRENT_REQUEST',
+        studentId: studentId,
+      );
+    }
+
+    _pendingDeletionIds.add(normalizedId);
+
+    try {
+      final result = await _repository.deleteStudent(normalizedId);
+
+      // Both 'completed' and 'failed_auth' signify that public.students was permanently
+      // deleted in PostgreSQL.
+      if (result.isCompleted || result.isFailedAuth) {
+        state = state.copyWith(
+          students: state.students.where((s) => s.id != normalizedId).toList(),
+        );
+
+        // Invalidate detail families and dashboard metrics
+        if (_ref != null) {
+          _ref.invalidate(studentDetailFamily(normalizedId));
+          _ref.invalidate(studentLmsDetailsFamily(normalizedId));
+          _ref.invalidate(dashboardStatsProvider);
+        }
+      }
+
+      return result;
+    } catch (e) {
+      // On error, do not modify state; rethrow for UI handling
+      rethrow;
+    } finally {
+      _pendingDeletionIds.remove(normalizedId);
     }
   }
 }
@@ -178,7 +266,7 @@ class StudentsNotifier extends StateNotifier<StudentsState> {
 final studentsNotifierProvider =
     StateNotifierProvider<StudentsNotifier, StudentsState>((ref) {
       final repo = ref.watch(studentRepositoryProvider);
-      return StudentsNotifier(repo);
+      return StudentsNotifier(repo, ref);
     });
 
 final studentLmsDetailsFamily =

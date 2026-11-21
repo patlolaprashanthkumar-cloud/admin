@@ -603,7 +603,7 @@ class SupabasePaymentRepository implements PaymentRepository {
           final paidForCourse = studentCoursePaid[sId]?[cId] ?? 0.0;
           final balance = math.max(0.0, fee - paidForCourse);
 
-          return {
+          return <String, dynamic>{
             'id': cId,
             'title': c['title']?.toString() ?? 'Course',
             'fee': fee,
@@ -620,7 +620,7 @@ class SupabasePaymentRepository implements PaymentRepository {
         final totalPaid = studentTotalPaid[sId] ?? 0.0;
         final outstandingBalance = math.max(0.0, totalFee - totalPaid);
 
-        return {
+        return <String, dynamic>{
           'id': sId,
           'student_id': s['student_id']?.toString() ?? 'N/A',
           'full_name': s['full_name']?.toString() ?? '',

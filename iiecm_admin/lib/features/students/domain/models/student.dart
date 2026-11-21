@@ -1,4 +1,5 @@
 import '../../../categories/domain/models/course_category.dart';
+export 'student_deletion_result.dart';
 
 class Student {
   final String id;

@@ -589,10 +589,12 @@ class _RecordPaymentSheetState extends ConsumerState<RecordPaymentSheet> {
                   if (_selectedStudent == null &&
                       _selectedStudentId != null &&
                       allStudents.isNotEmpty) {
-                    final match = allStudents.firstWhere(
+                    final matchingStudents = allStudents.where(
                       (s) => s['id'] == _selectedStudentId,
-                      orElse: () => allStudents.first,
                     );
+                    final match = matchingStudents.isNotEmpty
+                        ? matchingStudents.first
+                        : allStudents.first;
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       _onStudentSelected(match, allStudents);
                     });
@@ -683,10 +685,15 @@ class _RecordPaymentSheetState extends ConsumerState<RecordPaymentSheet> {
                             }).toList(),
                             onChanged: (val) {
                               if (val != null) {
-                                final s = allStudents.firstWhere(
+                                final matchingStudents = allStudents.where(
                                   (st) => st['id'] == val,
                                 );
-                                _onStudentSelected(s, allStudents);
+                                if (matchingStudents.isNotEmpty) {
+                                  _onStudentSelected(
+                                    matchingStudents.first,
+                                    allStudents,
+                                  );
+                                }
                               }
                             },
                             validator: (v) => v == null
@@ -792,10 +799,13 @@ class _RecordPaymentSheetState extends ConsumerState<RecordPaymentSheet> {
                                       (_selectedStudent?['courses']
                                           as List<dynamic>?) ??
                                       [];
-                                  _selectedCourse = courses.firstWhere(
-                                    (c) => c['id'] == val,
-                                    orElse: () => null,
-                                  ) as Map<String, dynamic>?;
+                                  final matchingCourses = courses.where(
+                                    (c) => c is Map && c['id'] == val,
+                                  );
+                                  _selectedCourse = matchingCourses.isNotEmpty
+                                      ? matchingCourses.first
+                                            as Map<String, dynamic>
+                                      : null;
                                   final bal =
                                       (_selectedCourse?['balance'] as num?)
                                           ?.toDouble() ??
